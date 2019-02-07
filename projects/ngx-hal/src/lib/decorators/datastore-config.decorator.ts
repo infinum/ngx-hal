@@ -8,6 +8,6 @@ export function DatastoreConfig(config: DatastoreOptions) {
         super(...args);
         this.network = Object.assign(this.network, config.network);
       }
-    };
+    } as any;
   };
 }

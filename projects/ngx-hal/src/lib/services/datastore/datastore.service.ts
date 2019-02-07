@@ -6,11 +6,11 @@ import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-
 export class DatastoreService {
   public network: NetworkConfig = DEFAULT_NETWORK_CONFIG;
 
-  constructor(protected http: HttpClient) {
+  constructor(public http: HttpClient) {
     console.log('v4');
   }
 
-  private buildUrl(): string {
+  public buildUrl(): string {
     return this.network.baseUrl;
   }
 }
