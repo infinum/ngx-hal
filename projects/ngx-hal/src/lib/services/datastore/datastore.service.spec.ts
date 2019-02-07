@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { NgxHalService } from './ngx-hal.service';
+import { DatastoreService } from './datastore.service';
 
-describe('NgxHalService', () => {
+describe('DatastoreService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: NgxHalService = TestBed.get(NgxHalService);
+    const service: DatastoreService = TestBed.get(DatastoreService);
     expect(service).toBeTruthy();
   });
 });
