@@ -8,7 +8,7 @@ export class DatastoreService {
   public network: NetworkConfig = DEFAULT_NETWORK_CONFIG;
 
   constructor(public http: HttpClient) {
-    console.log('v5');
+    console.log('v6');
   }
 
   public buildUrl(model?: HalModel): string {
