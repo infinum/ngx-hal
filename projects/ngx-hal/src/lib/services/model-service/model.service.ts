@@ -1,17 +1,28 @@
+import { Observable } from 'rxjs';
 import { HalModel } from '../../models/hal.model';
 import { DatastoreService } from '../datastore/datastore.service';
-import { Observable } from 'rxjs';
+
+type TodoType = any;
 
 export class ModelService<Model extends HalModel> {
   constructor(private datastore: DatastoreService, private modelClass: { new(): Model } ) {}
 
-  public get(modelId, options): Observable<any> {
-    const model: Model = new this.modelClass();
+  public findOne(modelId: string, options: TodoType): Observable<TodoType> {
+    const url: string = this.buildModelUrl(modelId);
+    return this.datastore.http.get<Model>(url, options);
+  }
 
-    const url = `${this.datastore.buildUrl()}/${model.endpoint}`;
+  public find(options: TodoType): Observable<TodoType> {
+    const url: string = this.buildModelUrl();
+    return this.datastore.http.get<Model>(url, options);
+  }
 
-    return this.datastore.http.get<Model>(url, options).pipe((x) => {
-      return x;
-    });
+  private buildModelUrl(modelId?: string): string {
+    const modelUrl: string = this.datastore.buildUrl(this.representableModel);
+    return modelId ? `${modelUrl}/${modelId}` : modelUrl;
+  }
+
+  private get representableModel(): Model {
+    return new this.modelClass();
   }
 }
