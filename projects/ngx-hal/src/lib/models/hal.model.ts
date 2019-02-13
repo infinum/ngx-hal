@@ -1,7 +1,8 @@
 import { HttpResponse } from '@angular/common/http';
 import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
-import { METADATA_ATTRIBUTE_PROPERTY_NAMES } from '../constants/metadata.constant';
+import { ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
+import { ModelProperty } from '../interfaces/model-property.interface';
 
 export abstract class HalModel {
   private config: ModelOptions = DEFAULT_MODEL_OPTIONS;
@@ -14,13 +15,16 @@ export abstract class HalModel {
     return this.config.endpoint || this.constructor.name;
   }
 
-  private get attributePropertyNames(): Array<string> {
-    return Reflect.getMetadata(METADATA_ATTRIBUTE_PROPERTY_NAMES, this) || [];
+  private get attributePropertyNames(): Array<ModelProperty> {
+    return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
   }
 
   private parseAttributes(resource: RawHalResource): void {
-    this.attributePropertyNames.forEach((attributeName: string) => {
-      this[attributeName] = resource[attributeName];
+    this.attributePropertyNames.forEach((attributeProperty: ModelProperty) => {
+      const rawPropertyValue: any = resource[attributeProperty.name];
+
+      // tslint:disable-next-line:max-line-length
+      this[attributeProperty.name] = attributeProperty.propertyClass ? new attributeProperty.propertyClass(rawPropertyValue) : rawPropertyValue;
     });
   }
 }

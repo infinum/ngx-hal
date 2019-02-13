@@ -1,1 +1,1 @@
-export const METADATA_ATTRIBUTE_PROPERTY_NAMES = 'attributePropertyNames';
+export const ATTRIBUTE_PROPERTIES_METADATA_KEY = 'attributeProperties';

@@ -24,7 +24,8 @@ export class ModelService<Model extends HalModel> {
     );
   }
 
-  public find(options: TodoType): Observable<TodoType> {
+  // TODO if meta is included, returning type should be Observable<SmethingWithMeta>
+  public find(options: TodoType): Observable<Array<Model>> {
     const url: string = this.buildModelUrl();
 
     options.observe = 'response'; // TODO handle options

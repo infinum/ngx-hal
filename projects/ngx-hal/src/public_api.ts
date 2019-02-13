@@ -8,6 +8,7 @@ export * from './lib/models/hal.model';
 
 export * from './lib/interfaces/network-config.interface';
 export * from './lib/interfaces/datastore-options.interface';
+export * from './lib/interfaces/attribute-options.interface';
 
 export * from './lib/services/datastore/datastore.service';
 export * from './lib/services/model-service/model.service';
