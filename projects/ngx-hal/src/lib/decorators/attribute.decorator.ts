@@ -1,10 +1,10 @@
 import { HalModel } from '../models/hal.model';
-import { metadataConstants } from '../constants/metadata.constants';
+import { METADATA_ATTRIBUTE_PROPERTY_NAMES } from '../constants/metadata.constant';
 
 export function Attribute() {
   return (model: HalModel, propertyName: string) => {
-    const attributePropertyNames: Array<string> = Reflect.getOwnMetadata(metadataConstants.attributePropertyNames, model) || [];
+    const attributePropertyNames: Array<string> = Reflect.getOwnMetadata(METADATA_ATTRIBUTE_PROPERTY_NAMES, model) || [];
     attributePropertyNames.push(propertyName);
-    Reflect.defineMetadata(metadataConstants.attributePropertyNames, attributePropertyNames, model);
+    Reflect.defineMetadata(METADATA_ATTRIBUTE_PROPERTY_NAMES, attributePropertyNames, model);
   };
 }

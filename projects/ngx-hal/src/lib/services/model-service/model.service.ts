@@ -4,13 +4,15 @@ import { map } from 'rxjs/operators';
 import { HalModel } from '../../models/hal.model';
 import { DatastoreService } from '../datastore/datastore.service';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
+import { EMBEDDED_PROPERTY_NAME, LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
+import { isArray } from '../../utils/isArray/is-array.util';
 
 type TodoType = any;
 
 export class ModelService<Model extends HalModel> {
   constructor(private datastore: DatastoreService, private modelClass: { new(...args): Model } ) {}
 
-  public findOne(modelId: string, options: TodoType): Observable<TodoType> {
+  public findOne(modelId: string, options: TodoType): Observable<Model> {
     const url: string = this.buildModelUrl(modelId);
 
     options.observe = 'response'; // TODO handle options
@@ -24,7 +26,25 @@ export class ModelService<Model extends HalModel> {
 
   public find(options: TodoType): Observable<TodoType> {
     const url: string = this.buildModelUrl();
-    return this.datastore.http.get<Model>(url, options);
+
+    options.observe = 'response'; // TODO handle options
+
+    return this.datastore.http.get<Model>(url, options).pipe(
+      map((response: HttpResponse<Model>) => {
+        const resources: RawHalResource = this.extractResourceFromResponse(response);
+        const listPropertyName: string = this.getListPropertyName(resources);
+
+        const items = resources[EMBEDDED_PROPERTY_NAME][listPropertyName];
+
+        if (items) {
+          return items.map((resource: RawHalResource) => {
+            return new this.modelClass(resource, resource);
+          });
+        }
+
+        return [];
+      })
+    );
   }
 
   private buildModelUrl(modelId?: string): string {
@@ -38,5 +58,13 @@ export class ModelService<Model extends HalModel> {
 
   private extractResourceFromResponse(response: HttpResponse<object>): RawHalResource {
     return response.body;
+  }
+
+  private getListPropertyName(listResponse: RawHalResource): string {
+    const links = listResponse[LINKS_PROPERTY_NAME];
+
+    return Object.keys(links).find((propertyName: string) => {
+      return isArray(links[propertyName]);
+    });
   }
 }

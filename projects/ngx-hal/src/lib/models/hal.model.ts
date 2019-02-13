@@ -1,7 +1,7 @@
 import { HttpResponse } from '@angular/common/http';
 import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
-import { metadataConstants } from '../constants/metadata.constants';
+import { METADATA_ATTRIBUTE_PROPERTY_NAMES } from '../constants/metadata.constant';
 
 export abstract class HalModel {
   private config: ModelOptions = DEFAULT_MODEL_OPTIONS;
@@ -15,7 +15,7 @@ export abstract class HalModel {
   }
 
   private get attributePropertyNames(): Array<string> {
-    return Reflect.getMetadata(metadataConstants.attributePropertyNames, this) || [];
+    return Reflect.getMetadata(METADATA_ATTRIBUTE_PROPERTY_NAMES, this) || [];
   }
 
   private parseAttributes(resource: RawHalResource): void {
