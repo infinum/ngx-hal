@@ -10,7 +10,7 @@ import { isArray } from '../../utils/isArray/is-array.util';
 type TodoType = any;
 
 export class ModelService<Model extends HalModel> {
-  constructor(private datastore: DatastoreService, private modelClass: { new(...args): Model } ) {}
+  constructor(private datastore: DatastoreService, private modelClass: {new(...args): Model }) {}
 
   public findOne(modelId: string, options: TodoType): Observable<Model> {
     const url: string = this.buildModelUrl(modelId);

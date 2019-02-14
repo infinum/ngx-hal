@@ -1,8 +1,7 @@
 import { ModelOptions } from '../interfaces/model-options.interface';
 
 export function ModelConfig(config: ModelOptions) {
-  // tslint:disable-next-line:only-arrow-functions
-  return function(target: any) {
+  return function (target: any) {
     return class extends target {
       constructor(...args) {
         super(...args);

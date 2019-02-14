@@ -3,5 +3,5 @@ export interface AttributeOptions {
 }
 
 export const DEFAULT_ATTRIBUTE_OPTIONS = {
-  useClass: false,
-}
+  useClass: false
+};

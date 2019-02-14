@@ -4,15 +4,15 @@ import { AttributeOptions, DEFAULT_ATTRIBUTE_OPTIONS } from '../interfaces/attri
 import { ModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 
-export function Attribute(attributeOptions: AttributeOptions = {}) {
+export function Attribute(options: AttributeOptions = {}) {
   return (model: HalModel, propertyName: string) => {
-    const options = Object.assign(DEFAULT_ATTRIBUTE_OPTIONS, attributeOptions);
+    const attributeOptions = Object.assign(DEFAULT_ATTRIBUTE_OPTIONS, options);
 
     const attributeProperties: Array<ModelProperty> = Reflect.getOwnMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
 
     const attributeProperty: ModelProperty = {
       type: ModelPropertyEnum.Attribute,
-      name: propertyName,
+      name: propertyName
     };
 
     if (attributeOptions.useClass) {

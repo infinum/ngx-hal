@@ -14,7 +14,7 @@ export class DatastoreService {
   public buildUrl(model?: HalModel): string {
     const urlParts: Array<string> = [
       this.network.baseUrl,
-      model ? model.endpoint : null,
+      model ? model.endpoint : null
     ];
 
     return urlParts.filter((urlPart) => urlPart).join('/');

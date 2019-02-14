@@ -1,14 +1,15 @@
 {
-  "extends": "tslint:recommended",
+  "extends": "tslint-config-airbnb",
   "rulesDirectory": [
     "codelyzer"
   ],
   "rules": {
     "array-type": false,
-    "arrow-parens": false,
+    "arrow-parens": true,
     "deprecation": {
       "severity": "warn"
     },
+    "function-name": false,
     "import-blacklist": [
       true,
       "rxjs/Rx"
@@ -56,11 +57,24 @@
     ],
     "object-literal-sort-keys": false,
     "ordered-imports": false,
+    "prefer-array-literal": false,
     "quotemark": [
       true,
       "single"
     ],
-    "trailing-comma": false,
+    "ter-arrow-parens": true,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": {
+          "objects": "never",
+          "arrays": "never",
+          "functions": "never",
+          "typeLiterals": "never"
+        },
+        "esSpecCompliant": true
+      }
+    ],
     "no-output-on-prefix": true,
     "use-input-property-decorator": true,
     "use-output-property-decorator": true,

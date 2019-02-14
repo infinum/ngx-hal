@@ -1,3 +1,3 @@
 export enum ModelProperty {
-  Attribute = 'Attribute',
+  Attribute = 'Attribute'
 }
