@@ -1,5 +1,5 @@
 export interface NetworkConfig {
-  baseUrl: string;
+  baseUrl?: string;
   endpoint?: string;
 }
 
