@@ -14,6 +14,7 @@ export class DatastoreService {
   public buildUrl(model?: HalModel): string {
     const urlParts: Array<string> = [
       this.network.baseUrl,
+      this.network.endpoint,
       model ? model.endpoint : null
     ];
 
