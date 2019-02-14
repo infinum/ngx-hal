@@ -6,13 +6,12 @@ import { DatastoreService } from '../datastore/datastore.service';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
 import { EMBEDDED_PROPERTY_NAME, LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
 import { isArray } from '../../utils/isArray/is-array.util';
-
-type TodoType = any;
+import { RequestOptions } from '../../types/request-options.type';
 
 export class ModelService<Model extends HalModel> {
   constructor(private datastore: DatastoreService, private modelClass: {new(...args): Model }) {}
 
-  public findOne(modelId: string, options: TodoType): Observable<Model> {
+  public findOne(modelId: string, options: RequestOptions): Observable<Model> {
     const url: string = this.buildModelUrl(modelId);
 
     options.observe = 'response'; // TODO handle options
@@ -25,7 +24,7 @@ export class ModelService<Model extends HalModel> {
   }
 
   // TODO if meta is included, returning type should be Observable<SmethingWithMeta>
-  public find(options: TodoType): Observable<Array<Model>> {
+  public find(options: RequestOptions): Observable<Array<Model>> {
     const url: string = this.buildModelUrl();
 
     options.observe = 'response'; // TODO handle options
