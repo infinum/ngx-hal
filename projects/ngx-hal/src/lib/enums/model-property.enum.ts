@@ -1,4 +1,5 @@
 export enum ModelProperty {
   Attribute = 'Attribute',
-  HasMany = 'HasMany'
+  HasMany = 'HasMany',
+  HasOne = 'HasOne'
 }
