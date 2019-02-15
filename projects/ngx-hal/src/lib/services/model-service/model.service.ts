@@ -7,14 +7,16 @@ import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
 import { EMBEDDED_PROPERTY_NAME, LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
 import { isArray } from '../../utils/isArray/is-array.util';
 import { RequestOptions } from '../../types/request-options.type';
+import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
+import { HalDocument } from '../../classes/hal-document';
 
 export class ModelService<Model extends HalModel> {
   constructor(private datastore: DatastoreService, private modelClass: {new(...args): Model }) {}
 
-  public findOne(modelId: string, options: RequestOptions): Observable<Model> {
+  public findOne(modelId: string, requestOptions: RequestOptions = {}): Observable<Model> {
     const url: string = this.buildModelUrl(modelId);
 
-    options.observe = 'response'; // TODO handle options
+    const options = Object.assign(DEFAULT_REQUEST_OPTIONS, requestOptions);
 
     return this.datastore.http.get<Model>(url, options).pipe(
       map((response: HttpResponse<Model>) => {
@@ -23,26 +25,26 @@ export class ModelService<Model extends HalModel> {
     );
   }
 
-  // TODO if meta is included, returning type should be Observable<SmethingWithMeta>
-  public find(options: RequestOptions): Observable<Array<Model>> {
+  public find(requestOptions: RequestOptions): Observable<Array<Model>>;
+  public find(requestOptions: RequestOptions, includeMeta?: boolean): Observable<HalDocument<Model>>;
+  public find(requestOptions: RequestOptions, includeMeta?: boolean): Observable<HalDocument<Model>> | Observable<Array<Model>> {
     const url: string = this.buildModelUrl();
 
-    options.observe = 'response'; // TODO handle options
+    const options = Object.assign(DEFAULT_REQUEST_OPTIONS, requestOptions);
+
+    if (includeMeta) {
+      return this.datastore.http.get<Model>(url, options).pipe(
+        map((response: HttpResponse<Model>) => {
+          const halDocument: HalDocument<Model> = new HalDocument<Model>(response, this.modelClass);
+          return halDocument;
+        })
+      );
+    }
 
     return this.datastore.http.get<Model>(url, options).pipe(
       map((response: HttpResponse<Model>) => {
-        const resources: RawHalResource = this.extractResourceFromResponse(response);
-        const listPropertyName: string = this.getListPropertyName(resources);
-
-        const items = resources[EMBEDDED_PROPERTY_NAME][listPropertyName];
-
-        if (items) {
-          return items.map((resource: RawHalResource) => {
-            return new this.modelClass(resource, resource);
-          });
-        }
-
-        return [];
+        const halDocument: HalDocument<Model> = new HalDocument<Model>(response, this.modelClass);
+        return halDocument.models;
       })
     );
   }
@@ -58,13 +60,5 @@ export class ModelService<Model extends HalModel> {
 
   private extractResourceFromResponse(response: HttpResponse<object>): RawHalResource {
     return response.body;
-  }
-
-  private getListPropertyName(listResponse: RawHalResource): string {
-    const links = listResponse[LINKS_PROPERTY_NAME];
-
-    return Object.keys(links).find((propertyName: string) => {
-      return isArray(links[propertyName]);
-    });
   }
 }
