@@ -4,14 +4,12 @@ import { map } from 'rxjs/operators';
 import { HalModel } from '../../models/hal.model';
 import { DatastoreService } from '../datastore/datastore.service';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
-import { EMBEDDED_PROPERTY_NAME, LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
-import { isArray } from '../../utils/isArray/is-array.util';
 import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { HalDocument } from '../../classes/hal-document';
 
 export class ModelService<Model extends HalModel> {
-  constructor(private datastore: DatastoreService, private modelClass: {new(...args): Model }) {}
+  constructor(protected datastore: DatastoreService, private modelClass: {new(...args): Model }) {}
 
   public findOne(modelId: string, requestOptions: RequestOptions = {}): Observable<Model> {
     const url: string = this.buildModelUrl(modelId);
@@ -47,6 +45,10 @@ export class ModelService<Model extends HalModel> {
         return halDocument.models;
       })
     );
+  }
+
+  public createNewModel(recordData: object = {}): Model {
+    return new this.modelClass(recordData);
   }
 
   private buildModelUrl(modelId?: string): string {
