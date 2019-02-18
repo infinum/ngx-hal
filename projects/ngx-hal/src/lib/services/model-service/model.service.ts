@@ -18,7 +18,7 @@ export class ModelService<Model extends HalModel> {
 
     return this.datastore.http.get<Model>(url, options).pipe(
       map((response: HttpResponse<Model>) => {
-        return new this.modelClass(this.extractResourceFromResponse(response), response);
+        return this.createModel(this.extractResourceFromResponse(response), response);
       })
     );
   }
@@ -48,7 +48,11 @@ export class ModelService<Model extends HalModel> {
   }
 
   public createNewModel(recordData: object = {}): Model {
-    return new this.modelClass(recordData);
+    return this.createModel(recordData);
+  }
+
+  private createModel(recordData: object = {}, response?: HttpResponse<object>): Model {
+    return new this.modelClass(recordData, response);
   }
 
   private buildModelUrl(modelId?: string): string {
