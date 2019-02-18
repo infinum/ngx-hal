@@ -23,17 +23,23 @@ export class ModelService<Model extends HalModel> {
     );
   }
 
-  public find(requestOptions: RequestOptions): Observable<Array<Model>>;
-  public find(requestOptions: RequestOptions, includeMeta?: boolean): Observable<HalDocument<Model>>;
-  public find(requestOptions: RequestOptions, includeMeta?: boolean): Observable<HalDocument<Model>> | Observable<Array<Model>> {
+  public find(params: object): Observable<Array<Model>>;
+  public find(params: object, includeMeta: boolean): Observable<Array<Model>>;
+  public find(params: object, includeMeta: boolean, requestOptions: RequestOptions): Observable<HalDocument<Model>>;
+  public find(
+    params: object = {},
+    includeMeta: boolean = false,
+    requestOptions: RequestOptions = {}
+  ): Observable<HalDocument<Model>> | Observable<Array<Model>> {
     const url: string = this.buildModelUrl();
 
-    const options = Object.assign(DEFAULT_REQUEST_OPTIONS, requestOptions);
+    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, requestOptions);
+    Object.assign(options.params, params);
 
     if (includeMeta) {
       return this.datastore.http.get<Model>(url, options).pipe(
         map((response: HttpResponse<Model>) => {
-          const halDocument: HalDocument<Model> = new HalDocument<Model>(response, this.modelClass);
+          const halDocument: HalDocument<Model> = this.createHalDocument(response);
           return halDocument;
         })
       );
@@ -41,7 +47,7 @@ export class ModelService<Model extends HalModel> {
 
     return this.datastore.http.get<Model>(url, options).pipe(
       map((response: HttpResponse<Model>) => {
-        const halDocument: HalDocument<Model> = new HalDocument<Model>(response, this.modelClass);
+        const halDocument: HalDocument<Model> = this.createHalDocument(response);
         return halDocument.models;
       })
     );
@@ -53,6 +59,10 @@ export class ModelService<Model extends HalModel> {
 
   private createModel(recordData: object = {}, response?: HttpResponse<object>): Model {
     return new this.modelClass(recordData, response);
+  }
+
+  private createHalDocument(response: HttpResponse<Model>): HalDocument<Model> {
+    return new HalDocument<Model>(response, this.modelClass);
   }
 
   private buildModelUrl(modelId?: string): string {

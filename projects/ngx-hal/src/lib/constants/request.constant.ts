@@ -1,3 +1,4 @@
 export const DEFAULT_REQUEST_OPTIONS = {
-  observe: 'response'
+  observe: 'response',
+  params: {}
 };
