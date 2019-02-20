@@ -1,24 +1,83 @@
 # NgxHal
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.2.0.
+ngx-hal is a data store with a support for handling [HAL formatted](http://stateless.co/hal_specification.html) HTTP requests.
 
-## Code scaffolding
+## Features
 
-Run `ng generate component component-name --project ngx-hal` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project ngx-hal`.
-> Note: Don't forget to add `--project ngx-hal` or else it will be added to the default project in your `angular.json` file. 
+* GET single resource
+* GET list of resources
+
+## Installation
+
+```bash
+npm install --save ngx-hal
+```
+
+## Basic usage
+
+After the initial ngx-hal setup (see [Getting started section](https://github.com/infinum/ngx-hal/wiki/Getting-started)) you have to create a resource model which extends `HalModel` from the `ngx-hal` and a resource service which extends `ModelService` from `ngx-hal`.
+The following example uses `User` resource as an example.
+
+`user.model.ts`
+```js
+class User extends HalModel {
+  @Attribute()
+  public name: string;
+}
+```
+
+`user.service.ts`
+```js
+class UserService extends ModelService<User> {
+  constructor(datastore: DatastoreService) {
+    super(datastore, User);
+  }
+}
+```
+
+And then a few methods are available on an instance of `UserService`:
+
+#### Fetching a user
+
+```js
+this.userService.find('1').subscribe((user: User) => {
+  console.log('Fetched user', user);
+});
+```
+
+#### Fetching a list of users
+
+```js
+this.userService.find().subscribe((users: Array<User>) => {
+  console.log('Fetched users', users);
+});
+```
+
+#### Fetching a list of users with pagination information
+
+```js
+this.userService.find({}, true).subscribe((halDocument: HalDocument<User>) => {
+  console.log('Fetched users', halDocument.models);
+  console.log('Pagination information', halDocument.pagination);
+});
+```
+
+## API reference
+
+* [DatastoreService](https://github.com/infinum/ngx-hal/wiki/DatastoreService)
+* [HalModel](https://github.com/infinum/ngx-hal/wiki/HalModel)
+* [ModelService](https://github.com/infinum/ngx-hal/wiki/ModelService)
+* [HalDocument](https://github.com/infinum/ngx-hal/wiki/HalDocument)
 
 ## Build
 
-Run `ng build ngx-hal` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Publishing
-
-After building your library with `ng build ngx-hal`, go to the dist folder `cd dist/ngx-hal` and run `npm publish`.
+```bash
+ng build
+```
 
 ## Running unit tests
 
-Run `ng test ngx-hal` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```bash
+ng test
+```
 
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
