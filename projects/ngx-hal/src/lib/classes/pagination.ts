@@ -1,5 +1,11 @@
+import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
+
 export class Pagination {
-  constructor(private rawPagination: any = {}) {}
+  private rawPagination: any;
+
+  constructor(rawResource: RawHalResource = {}) {
+    this.rawPagination = rawResource.page;
+  }
 
   public get currentPage(): number {
     return this.rawPagination.number;

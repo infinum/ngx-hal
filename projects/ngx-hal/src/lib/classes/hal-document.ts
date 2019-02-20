@@ -17,7 +17,7 @@ export class HalDocument<Model extends HalModel> {
   private parseRawResources(resources: RawHalResource): void {
     const items: Array<RawHalResource> = this.getRawResourcesFromResponse(resources);
     this.models = this.generateModels(items);
-    this.pagination = this.generatePagination(resources.page);
+    this.pagination = this.generatePagination(resources);
   }
 
   private extractResponseBody(response: HttpResponse<object>): RawHalResource {
@@ -30,7 +30,7 @@ export class HalDocument<Model extends HalModel> {
     });
   }
 
-  private generatePagination(pagination: any = {}): Pagination {
+  private generatePagination(pagination: RawHalResource): Pagination {
     return new Pagination(pagination);
   }
 
