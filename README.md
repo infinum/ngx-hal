@@ -20,11 +20,10 @@ TBD
 
 ## API reference
 
-TBD
-
-* DatastoreService
-* HalModel
-* ModelService
+* [DatastoreService](https://github.com/infinum/ngx-hal/wiki/DatastoreService)
+* [HalModel](https://github.com/infinum/ngx-hal/wiki/HalModel)
+* [ModelService](https://github.com/infinum/ngx-hal/wiki/ModelService)
+* [HalDocument](https://github.com/infinum/ngx-hal/wiki/HalDocument)
 
 ## Build
 
