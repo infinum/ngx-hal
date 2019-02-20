@@ -1,15 +1,40 @@
 # NgxHal
 
-### Under development
+ngx-hal is a data store with a support for handling [HAL formatted](http://stateless.co/hal_specification.html) HTTP requests.
+
+## Features
+
+* GET single resource
+* GET list of resources
+* TODO
+
+## Installation
+
+```bash
+npm install --save ngx-hal
+```
+
+## Basic usage
+
+TBD
+
+## API reference
+
+TBD
+
+* DatastoreService
+* HalModel
+* ModelService
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+```bash
+ng build
+```
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```bash
+ng test
+```
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
