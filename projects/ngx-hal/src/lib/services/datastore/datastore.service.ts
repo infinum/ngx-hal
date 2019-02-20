@@ -5,7 +5,7 @@ import { HalModel } from '../../models/hal.model';
 
 @Injectable()
 export class DatastoreService {
-  public network: NetworkConfig = DEFAULT_NETWORK_CONFIG;
+  public networkConfig: NetworkConfig = DEFAULT_NETWORK_CONFIG;
 
   constructor(public http: HttpClient) {
     console.log('v6');
@@ -13,8 +13,8 @@ export class DatastoreService {
 
   public buildUrl(model?: HalModel): string {
     const urlParts: Array<string> = [
-      this.network.baseUrl,
-      this.network.endpoint,
+      this.networkConfig.baseUrl,
+      this.networkConfig.endpoint,
       model ? model.endpoint : null
     ];
 
