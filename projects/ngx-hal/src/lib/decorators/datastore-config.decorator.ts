@@ -5,7 +5,7 @@ export function DatastoreConfig(config: DatastoreOptions) {
     return class extends target {
       constructor(...args) {
         super(...args);
-        this.network = Object.assign(this.network, config.network);
+        this.networkConfig = Object.assign(this.networkConfig, config.network);
       }
     } as any;
   };

@@ -4,12 +4,13 @@ import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.constant';
 import { HalModel } from '../models/hal.model';
 import { Pagination } from './pagination';
+import { ModelConstructor } from '../types/model-constructor.type';
 
 export class HalDocument<Model extends HalModel> {
   public models: Array<Model>;
   public pagination: Pagination;
 
-  constructor(rawResponse: HttpResponse<any>, private modelClass: {new(...args): Model }) {
+  constructor(rawResponse: HttpResponse<any>, private modelClass: ModelConstructor<Model>) {
     const resources: RawHalResource = this.extractResponseBody(rawResponse);
     this.parseRawResources(resources);
   }

@@ -7,9 +7,10 @@ import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
 import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { HalDocument } from '../../classes/hal-document';
+import { ModelConstructor } from '../../types/model-constructor.type';
 
 export class ModelService<Model extends HalModel> {
-  constructor(protected datastore: DatastoreService, private modelClass: {new(...args): Model }) {}
+  constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
 
   public findOne(modelId: string, requestOptions: RequestOptions = {}): Observable<Model> {
     const url: string = this.buildModelUrl(modelId);
@@ -62,7 +63,7 @@ export class ModelService<Model extends HalModel> {
   }
 
   private createHalDocument(response: HttpResponse<Model>): HalDocument<Model> {
-    return new HalDocument<Model>(response, this.modelClass);
+    return this.datastore.createHalDocument<Model>(response, this.modelClass);
   }
 
   private buildModelUrl(modelId?: string): string {
