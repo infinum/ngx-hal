@@ -4,6 +4,8 @@ import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
+import { HAL_DOCUMENT_CLASS_METADATA_KEY } from '../../constants/metadata.constant';
+import { HalDocumentConstructor } from '../../types/hal-document-construtor.type';
 
 @Injectable()
 export class DatastoreService {
@@ -24,6 +26,11 @@ export class DatastoreService {
   }
 
   public createHalDocument<T extends HalModel>(response: HttpResponse<T>, modelClass: ModelConstructor<T>): HalDocument<T> {
-    return new HalDocument<T>(response, modelClass);
+    const halDocumentClass = this.getHalDocumentClass<T>();
+    return new halDocumentClass(response, modelClass);
+  }
+
+  private getHalDocumentClass<T extends HalModel>(): HalDocumentConstructor<T> {
+    return Reflect.getMetadata(HAL_DOCUMENT_CLASS_METADATA_KEY, this) || HalDocument;
   }
 }

@@ -8,6 +8,8 @@ export * from './lib/decorators/has-one.decorator';
 
 export * from './lib/models/hal.model';
 
+export * from './lib/classes/hal-document';
+
 export * from './lib/interfaces/network-config.interface';
 export * from './lib/interfaces/datastore-options.interface';
 export * from './lib/interfaces/attribute-options.interface';
