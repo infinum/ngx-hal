@@ -27,6 +27,6 @@ export class DatastoreService {
   }
 
   private getHalDocumentClass<T extends HalModel>(): HalDocumentConstructor<T> {
-    return Reflect.getMetadata(HAL_DOCUMENT_CLASS_METADATA_KEY, this) || HalDocument;
+    return Reflect.getMetadata(HAL_DOCUMENT_CLASS_METADATA_KEY, this.constructor) || HalDocument;
   }
 }

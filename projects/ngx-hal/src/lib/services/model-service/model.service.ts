@@ -11,7 +11,7 @@ import { ModelConstructor } from '../../types/model-constructor.type';
 import { HAL_DOCUMENT_CLASS_METADATA_KEY } from '../../constants/metadata.constant';
 import { HalDocumentConstructor } from '../../types/hal-document-construtor.type';
 
-export class ModelService<Model extends HalModel> {
+export abstract class ModelService<Model extends HalModel> {
   constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
 
   public findOne(modelId: string, requestOptions: RequestOptions = {}): Observable<Model> {
@@ -88,6 +88,6 @@ export class ModelService<Model extends HalModel> {
   }
 
   private getHalDocumentClass<T extends HalModel>(): HalDocumentConstructor<T> {
-    return Reflect.getMetadata(HAL_DOCUMENT_CLASS_METADATA_KEY, this);
+    return Reflect.getMetadata(HAL_DOCUMENT_CLASS_METADATA_KEY, this.constructor);
   }
 }

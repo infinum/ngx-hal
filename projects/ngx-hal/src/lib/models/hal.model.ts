@@ -16,7 +16,7 @@ export abstract class HalModel {
   }
 
   private get attributePropertyNames(): Array<ModelProperty> {
-    return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
+    return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this.constructor) || [];
   }
 
   private parseAttributes(resource: RawHalResource): void {
