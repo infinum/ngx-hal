@@ -40,7 +40,7 @@ And then a few methods are available on an instance of `UserService`:
 #### Fetching a user
 
 ```js
-this.userService.find('1').subscribe((user: User) => {
+this.userService.findOne('1').subscribe((user: User) => {
   console.log('Fetched user', user);
 });
 ```

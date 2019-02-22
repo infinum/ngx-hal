@@ -8,6 +8,8 @@ import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
+import { HAL_DOCUMENT_CLASS_METADATA_KEY } from '../../constants/metadata.constant';
+import { HalDocumentConstructor } from '../../types/hal-document-construtor.type';
 
 export class ModelService<Model extends HalModel> {
   constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
@@ -63,6 +65,12 @@ export class ModelService<Model extends HalModel> {
   }
 
   private createHalDocument(response: HttpResponse<Model>): HalDocument<Model> {
+    const halDocumentClass = this.getHalDocumentClass<Model>();
+
+    if (halDocumentClass) {
+      return new halDocumentClass(response, this.modelClass);
+    }
+
     return this.datastore.createHalDocument<Model>(response, this.modelClass);
   }
 
@@ -77,5 +85,9 @@ export class ModelService<Model extends HalModel> {
 
   private extractResourceFromResponse(response: HttpResponse<object>): RawHalResource {
     return response.body;
+  }
+
+  private getHalDocumentClass<T extends HalModel>(): HalDocumentConstructor<T> {
+    return Reflect.getMetadata(HAL_DOCUMENT_CLASS_METADATA_KEY, this);
   }
 }

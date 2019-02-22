@@ -1,14 +1,12 @@
 import { DatastoreOptions } from '../interfaces/datastore-options.interface';
 import { HAL_DOCUMENT_CLASS_METADATA_KEY } from '../constants/metadata.constant';
+import { DEFAULT_NETWORK_CONFIG } from '../interfaces/network-config.interface';
 
 export function DatastoreConfig(config: DatastoreOptions) {
   return function (target: any) {
-    return class extends target {
-      constructor(...args) {
-        super(...args);
-        this.networkConfig = Object.assign(this.networkConfig, config.network);
-        Reflect.defineMetadata(HAL_DOCUMENT_CLASS_METADATA_KEY, config.halDocumentClass, this);
-      }
-    } as any;
+    const networkConfig = Object.assign(DEFAULT_NETWORK_CONFIG, config.network || {});
+    Object.defineProperty(target.prototype, 'networkConfig', { value: networkConfig });
+    Reflect.defineMetadata(HAL_DOCUMENT_CLASS_METADATA_KEY, config.halDocumentClass, target);
+    return target;
   };
 }
