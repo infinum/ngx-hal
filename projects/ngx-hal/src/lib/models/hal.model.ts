@@ -6,7 +6,7 @@ import { ModelProperty } from '../interfaces/model-property.interface';
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
 
 export abstract class HalModel {
-  private config: ModelOptions = DEFAULT_MODEL_OPTIONS;
+  private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
 
   constructor(resource: RawHalResource = {}, private rawResponse?: HttpResponse<object>) {
     this.parseAttributes(resource);
@@ -16,7 +16,7 @@ export abstract class HalModel {
     return this.config.endpoint || this.constructor.name;
   }
 
-  public get halDocumentClass(): HalDocumentConstructor<HalModel> {
+  public getHalDocumentClass<T extends this>(): HalDocumentConstructor<T> {
     return Reflect.getMetadata(HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, this.constructor);
   }
 

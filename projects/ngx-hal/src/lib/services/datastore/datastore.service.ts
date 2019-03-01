@@ -1,7 +1,7 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { NetworkConfig } from '../../interfaces/network-config.interface';
+import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
@@ -12,7 +12,7 @@ import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
 
 export class DatastoreService {
-  public networkConfig: NetworkConfig;
+  public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
 
   constructor(public http: HttpClient) {}
 
@@ -32,12 +32,7 @@ export class DatastoreService {
 
   public createHalDocument<T extends HalModel>(response: HttpResponse<T>, modelClass: ModelConstructor<T>): HalDocument<T> {
     const representantiveModel = new modelClass();
-
-    if (representantiveModel.halDocumentClass) {
-
-    }
-
-    const halDocumentClass = this.getHalDocumentClass<T>();
+    const halDocumentClass = representantiveModel.getHalDocumentClass() || this.getHalDocumentClass<T>();
     return new halDocumentClass(response, modelClass);
   }
 
