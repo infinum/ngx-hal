@@ -10,9 +10,11 @@ import { HalDocumentConstructor } from '../../types/hal-document-construtor.type
 import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
+import { HalStorage } from '../../classes/hal-storage';
 
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
+  private storage: HalStorage = new HalStorage();
 
   constructor(public http: HttpClient) {}
 
@@ -47,7 +49,9 @@ export class DatastoreService {
 
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
-        return new modelClass(this.extractResourceFromResponse(response), response);
+        const model = new modelClass(this.extractResourceFromResponse(response), response);
+        this.storage.save(model);
+        return model;
       })
     );
   }
@@ -74,6 +78,7 @@ export class DatastoreService {
       return this.http.get<T>(url, options).pipe(
         map((response: HttpResponse<T>) => {
           const halDocument: HalDocument<T> = this.createHalDocument(response, modelClass);
+          this.storage.saveAll(halDocument.models);
           return halDocument;
         })
       );
@@ -82,6 +87,7 @@ export class DatastoreService {
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
         const halDocument: HalDocument<T> = this.createHalDocument(response, modelClass);
+        this.storage.saveAll(halDocument.models);
         return halDocument.models;
       })
     );
