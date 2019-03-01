@@ -1,8 +1,9 @@
 import { HttpResponse } from '@angular/common/http';
 import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
-import { ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
+import { ATTRIBUTE_PROPERTIES_METADATA_KEY, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY } from '../constants/metadata.constant';
 import { ModelProperty } from '../interfaces/model-property.interface';
+import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
 
 export abstract class HalModel {
   private config: ModelOptions = DEFAULT_MODEL_OPTIONS;
@@ -13,6 +14,10 @@ export abstract class HalModel {
 
   public get endpoint(): string {
     return this.config.endpoint || this.constructor.name;
+  }
+
+  public get halDocumentClass(): HalDocumentConstructor<HalModel> {
+    return Reflect.getMetadata(HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, this.constructor);
   }
 
   private get attributePropertyNames(): Array<ModelProperty> {
