@@ -14,7 +14,7 @@ import { HalStorage } from '../../classes/hal-storage';
 
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
-  private storage: HalStorage = new HalStorage();
+  private internalStorage: HalStorage = new HalStorage();
 
   constructor(public http: HttpClient) {}
 
@@ -35,7 +35,7 @@ export class DatastoreService {
   public createHalDocument<T extends HalModel>(response: HttpResponse<T>, modelClass: ModelConstructor<T>): HalDocument<T> {
     const representantiveModel = new modelClass();
     const halDocumentClass = representantiveModel.getHalDocumentClass() || this.getHalDocumentClass<T>();
-    return new halDocumentClass(response, modelClass);
+    return new halDocumentClass(response, modelClass, this);
   }
 
   public findOne<T extends HalModel>(
@@ -91,6 +91,10 @@ export class DatastoreService {
         return halDocument.models;
       })
     );
+  }
+
+  public get storage(): HalStorage {
+    return this.internalStorage;
   }
 
   private buildModelUrl(modelClass: ModelConstructor<HalModel>, modelId?: string): string {

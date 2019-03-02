@@ -29,6 +29,6 @@ export abstract class ModelService<Model extends HalModel> {
   }
 
   private createModel(recordData: object = {}, response?: HttpResponse<object>): Model {
-    return new this.modelClass(recordData, response);
+    return new this.modelClass(recordData, this.datastore, response);
   }
 }
