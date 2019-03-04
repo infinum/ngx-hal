@@ -9,8 +9,8 @@ import { ModelConstructor } from '../../types/model-constructor.type';
 export abstract class ModelService<Model extends HalModel> {
   constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
 
-  public findOne(modelId: string, requestOptions: RequestOptions = {}): Observable<Model> {
-    return this.datastore.findOne<Model>(this.modelClass, modelId, requestOptions);
+  public findOne(modelId: string, includeRelationships: Array<string> = [], requestOptions: RequestOptions = {}): Observable<Model> {
+    return this.datastore.findOne<Model>(this.modelClass, modelId, includeRelationships, requestOptions);
   }
 
   public find(params: object): Observable<Array<Model>>;

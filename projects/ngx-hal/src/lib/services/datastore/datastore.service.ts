@@ -1,6 +1,6 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, combineLatest, of } from 'rxjs';
+import { map, flatMap, filter } from 'rxjs/operators';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
@@ -11,6 +11,8 @@ import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
 import { HalStorage } from '../../classes/hal-storage';
+import { ModelProperty } from '../../interfaces/model-property.interface';
+import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
@@ -41,13 +43,63 @@ export class DatastoreService {
   public findOne<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     modelId: string,
+    includeRelationships: Array<string> = [],
     requestOptions: RequestOptions = {}
   ): Observable<T> {
     const url: string = this.buildModelUrl(modelClass, modelId);
 
-    return this.makeGetRequest(url, requestOptions, modelClass, true).pipe(
-      map((model: T) => {
-        return model;
+    return this.handleGetRequestWithRelationships(url, requestOptions, modelClass, true, includeRelationships);
+  }
+
+  private fetchRelationships<T extends HalModel>(model: T, relationships: Array<string>): Array<Observable<any>> {
+    const relationshipCalls: Array<Observable<any>> = [];
+
+    const filteredRelationships: Array<string> = this.filterUnnecessaryIncludes(relationships);
+
+    filteredRelationships.forEach((relationshipName: string) => {
+      const relationshipNameParts: Array<string> = relationshipName.split('.');
+      const currentLevelRelationship: string = relationshipNameParts.shift();
+
+      const url: string = model.getRelationshipUrl(currentLevelRelationship);
+      const property: ModelProperty = model.getPropertyData(currentLevelRelationship);
+      const modelClass = property.propertyClass;
+      const isSingleResource: boolean = property.type === ModelPropertyEnum.Attribute || property.type === ModelPropertyEnum.HasOne;
+
+      const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
+        url,
+        {},
+        modelClass,
+        isSingleResource,
+        [relationshipNameParts.join('.')]
+      );
+
+      relationshipCalls.push(relationshipCall$);
+    });
+
+    return relationshipCalls;
+  }
+
+  private handleGetRequestWithRelationships<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean,
+    includeRelationships: Array<string> = []
+  ): Observable<T> {
+    // TODO handle case when isSingleResource=false
+    return this.makeGetRequest(url, requestOptions, modelClass, isSingleResource).pipe(
+      flatMap((model: T) => {
+        if (includeRelationships.length) {
+          const relationshipCalls = this.fetchRelationships(model, includeRelationships);
+
+          return combineLatest(...relationshipCalls).pipe(
+            map(() => {
+              return model;
+            })
+          );
+        }
+
+        return of(model);
       })
     );
   }
@@ -101,7 +153,7 @@ export class DatastoreService {
     if (singleResource) {
       return this.http.get<T>(url, options).pipe(
         map((response: HttpResponse<T>) => {
-          const model: T = new modelClass(this.extractResourceFromResponse(response), response);
+          const model: T = new modelClass(this.extractResourceFromResponse(response), this, response);
           this.storage.save(model);
           return model;
         })
@@ -124,5 +176,20 @@ export class DatastoreService {
 
   private extractResourceFromResponse(response: HttpResponse<object>): RawHalResource {
     return response.body;
+  }
+
+  private filterUnnecessaryIncludes(includes: Array<string>): Array<string> {
+    const sortedIncludes: Array<string> = includes.sort((a, b) => a.length - b.length);
+    const filteredIncludes: Array<string> = [];
+
+    let currentItem: string;
+    while (currentItem = sortedIncludes.shift()) {
+      const alreadyIncluded: boolean = sortedIncludes.some((item) => item.startsWith(currentItem));
+      if (!alreadyIncluded) {
+        filteredIncludes.push(currentItem);
+      }
+    }
+
+    return filteredIncludes;
   }
 }
