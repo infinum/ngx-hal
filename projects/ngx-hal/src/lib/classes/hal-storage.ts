@@ -13,7 +13,7 @@ export class HalStorage {
     });
   }
 
-  public get<T>(uniqueModelIdentificator: string): void {
+  public get(uniqueModelIdentificator: string): void {
     return this.internalStorage[uniqueModelIdentificator];
   }
 }

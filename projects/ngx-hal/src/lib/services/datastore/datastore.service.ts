@@ -45,12 +45,8 @@ export class DatastoreService {
   ): Observable<T> {
     const url: string = this.buildModelUrl(modelClass, modelId);
 
-    const options = Object.assign(DEFAULT_REQUEST_OPTIONS, requestOptions);
-
-    return this.http.get<T>(url, options).pipe(
-      map((response: HttpResponse<T>) => {
-        const model = new modelClass(this.extractResourceFromResponse(response), response);
-        this.storage.save(model);
+    return this.makeGetRequest(url, requestOptions, modelClass, true).pipe(
+      map((model: T) => {
         return model;
       })
     );
@@ -60,7 +56,8 @@ export class DatastoreService {
   public find<T extends HalModel>(modelClass: ModelConstructor<T>, params: object, includeMeta: boolean): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object, includeMeta: boolean,
+    params: object,
+    includeMeta: boolean,
     requestOptions: RequestOptions
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
@@ -75,11 +72,38 @@ export class DatastoreService {
     Object.assign(options.params, params);
 
     if (includeMeta) {
+      return this.makeGetRequest(url, options, modelClass, false).pipe(
+        map((halDocument: HalDocument<T>) => {
+          return halDocument;
+        })
+      );
+    }
+
+    return this.makeGetRequest(url, options, modelClass, false).pipe(
+      map((halDocument: HalDocument<T>) => {
+        return halDocument.models;
+      })
+    );
+  }
+
+  public get storage(): HalStorage {
+    return this.internalStorage;
+  }
+
+  private makeGetRequest<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: boolean
+  ): Observable<HalDocument<T> | T> {
+    const options = Object.assign(DEFAULT_REQUEST_OPTIONS, requestOptions);
+
+    if (singleResource) {
       return this.http.get<T>(url, options).pipe(
         map((response: HttpResponse<T>) => {
-          const halDocument: HalDocument<T> = this.createHalDocument(response, modelClass);
-          this.storage.saveAll(halDocument.models);
-          return halDocument;
+          const model: T = new modelClass(this.extractResourceFromResponse(response), response);
+          this.storage.save(model);
+          return model;
         })
       );
     }
@@ -88,13 +112,9 @@ export class DatastoreService {
       map((response: HttpResponse<T>) => {
         const halDocument: HalDocument<T> = this.createHalDocument(response, modelClass);
         this.storage.saveAll(halDocument.models);
-        return halDocument.models;
+        return halDocument;
       })
     );
-  }
-
-  public get storage(): HalStorage {
-    return this.internalStorage;
   }
 
   private buildModelUrl(modelClass: ModelConstructor<HalModel>, modelId?: string): string {
