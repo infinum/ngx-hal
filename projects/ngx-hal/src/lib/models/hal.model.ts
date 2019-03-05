@@ -4,7 +4,8 @@ import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import {
   ATTRIBUTE_PROPERTIES_METADATA_KEY,
   HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY,
-  HAS_ONE_PROPERTIES_METADATA_KEY
+  HAS_ONE_PROPERTIES_METADATA_KEY,
+  HAS_MANY_PROPERTIES_METADATA_KEY
 } from '../constants/metadata.constant';
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
 import { ModelProperty } from '../interfaces/model-property.interface';
@@ -24,6 +25,7 @@ export abstract class HalModel {
   ) {
     this.parseAttributes(resource);
     this.createHasOneGetters();
+    this.createHasManyGetters();
   }
 
   public get uniqueModelIdentificator(): string {
@@ -56,6 +58,10 @@ export abstract class HalModel {
     return Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, this) || [];
   }
 
+  private get haManyProperties(): Array<ModelProperty> {
+    return Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, this) || [];
+  }
+
   private createHasOneGetters(): void {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
@@ -68,6 +74,16 @@ export abstract class HalModel {
 
           const modelIdentificator: string = relationshipLinks.href;
           return this.datastore.storage.get(modelIdentificator);
+        }
+      });
+    });
+  }
+
+  private createHasManyGetters(): void {
+    this.haManyProperties.forEach((property: ModelProperty) => {
+      Object.defineProperty(HalModel.prototype, property.name, {
+        get: () => {
+          return 'Method not implemented';
         }
       });
     });
