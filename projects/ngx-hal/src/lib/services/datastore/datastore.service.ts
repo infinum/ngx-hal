@@ -1,6 +1,6 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, combineLatest, of } from 'rxjs';
-import { map, flatMap, filter } from 'rxjs/operators';
+import { map, flatMap } from 'rxjs/operators';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
@@ -151,19 +151,28 @@ export class DatastoreService {
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
+    includeMeta: false,
+    includeRelationships: Array<string>
+  ): Observable<Array<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object,
     includeMeta: true,
+    includeRelationships: Array<string>,
     requestOptions: RequestOptions
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: boolean,
+    includeRelationships: Array<string>,
     requestOptions: RequestOptions
   ): Observable<HalDocument<T> | Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object = {},
     includeMeta: boolean = false,
+    includeRelationships: Array<string> = [],
     requestOptions: RequestOptions = {}
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = this.buildModelUrl(modelClass);
@@ -171,7 +180,7 @@ export class DatastoreService {
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, requestOptions);
     Object.assign(options.params, params);
 
-    return this.makeGetRequest(url, options, modelClass, false).pipe(
+    return this.handleGetRequestWithRelationships(url, options, modelClass, false, includeRelationships).pipe(
       map((halDocument: HalDocument<T>) => includeMeta ? halDocument : halDocument.models)
     );
   }
@@ -179,7 +188,6 @@ export class DatastoreService {
   public get storage(): HalStorage {
     return this.internalStorage;
   }
-
 
   private makeGetRequest<T extends HalModel>(
     url: string,
@@ -232,7 +240,7 @@ export class DatastoreService {
   }
 
   private filterUnnecessaryIncludes(includes: Array<string>): Array<string> {
-    const sortedIncludes: Array<string> = includes.sort((a, b) => a.length - b.length);
+    const sortedIncludes: Array<string> = [].concat(includes).sort((a, b) => a.length - b.length);
     const filteredIncludes: Array<string> = [];
 
     let currentItem: string;

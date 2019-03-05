@@ -14,14 +14,21 @@ export abstract class ModelService<Model extends HalModel> {
   }
 
   public find(params: object): Observable<Array<Model>>;
-  public find(params: object, includeMeta: boolean): Observable<Array<Model>>;
-  public find(params: object, includeMeta: boolean, requestOptions: RequestOptions): Observable<HalDocument<Model>>;
+  public find(params: object, includeMeta: false): Observable<Array<Model>>;
+  public find(params: object, includeMeta: true): Observable<HalDocument<Model>>;
+  public find(
+    params: object,
+    includeMeta: boolean,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions
+  ): Observable<HalDocument<Model>>;
   public find(
     params: object = {},
     includeMeta: boolean = false,
+    includeRelationships: Array<string> = [],
     requestOptions: RequestOptions = {}
   ): Observable<HalDocument<Model> | Array<Model>> {
-    return this.datastore.find(this.modelClass, params, includeMeta, requestOptions);
+    return this.datastore.find(this.modelClass, params, includeMeta, includeRelationships, requestOptions);
   }
 
   public createNewModel(recordData: object = {}): Model {
