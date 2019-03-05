@@ -83,23 +83,66 @@ export class DatastoreService {
     url: string,
     requestOptions: RequestOptions,
     modelClass: ModelConstructor<T>,
+    isSingleResource: true,
+    includeRelationships: Array<string>
+  ): Observable<T>;
+  private handleGetRequestWithRelationships<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: false,
+    includeRelationships: Array<string>
+  ): Observable<HalDocument<T>>;
+  private handleGetRequestWithRelationships<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean,
+    includeRelationships: Array<string>
+    ): Observable<T | HalDocument<T>>;
+  private handleGetRequestWithRelationships<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     includeRelationships: Array<string> = []
-  ): Observable<T> {
-    // TODO handle case when isSingleResource=false
-    return this.makeGetRequest(url, requestOptions, modelClass, isSingleResource).pipe(
-      flatMap((model: T) => {
-        if (includeRelationships.length) {
-          const relationshipCalls = this.fetchRelationships(model, includeRelationships);
+  ): Observable<T | HalDocument<T>> {
+    // TODO simplify if branching
+    if (isSingleResource) {
+      return this.makeGetRequest(url, requestOptions, modelClass, isSingleResource).pipe(
+        flatMap((model: T) => {
+          if (includeRelationships.length) {
+            const relationshipCalls = this.fetchRelationships(model, includeRelationships);
 
-          return combineLatest(...relationshipCalls).pipe(
+            return combineLatest(...relationshipCalls).pipe(
+              map(() => {
+                return model;
+              })
+            );
+          }
+
+          return of(model);
+        })
+      );
+    }
+
+    return this.makeGetRequest(url, requestOptions, modelClass, isSingleResource).pipe(
+      flatMap((halDocument: HalDocument<T>) => {
+        if (includeRelationships.length) {
+          const relCalls = [];
+          halDocument.models.forEach((model: T) => {
+            const relationshipCalls = this.fetchRelationships(model, includeRelationships);
+            relCalls.push(...relationshipCalls);
+          });
+
+          return combineLatest(...relCalls).pipe(
             map(() => {
-              return model;
+              return halDocument;
             })
           );
         }
 
-        return of(model);
+        return of(halDocument);
       })
     );
   }
