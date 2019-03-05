@@ -5,12 +5,17 @@ import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.co
 import { HalModel } from '../models/hal.model';
 import { Pagination } from './pagination';
 import { ModelConstructor } from '../types/model-constructor.type';
+import { DatastoreService } from '../services/datastore/datastore.service';
 
 export class HalDocument<Model extends HalModel> {
   public models: Array<Model>;
   public pagination: Pagination;
 
-  constructor(rawResponse: HttpResponse<any>, private modelClass: ModelConstructor<Model>) {
+  constructor(
+    rawResponse: HttpResponse<any>,
+    private modelClass: ModelConstructor<Model>,
+    private datastore: DatastoreService
+  ) {
     const resources: RawHalResource = this.extractResponseBody(rawResponse);
     this.parseRawResources(resources);
   }
@@ -27,7 +32,7 @@ export class HalDocument<Model extends HalModel> {
 
   private generateModels(resources: Array<RawHalResource>): Array<Model> {
     return resources.map((resource: RawHalResource) => {
-      return new this.modelClass(resource, resource);
+      return new this.modelClass(resource, this.datastore, resource);
     });
   }
 

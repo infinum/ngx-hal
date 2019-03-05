@@ -11,8 +11,9 @@ export function HasOne(options: HasOneOptions = {}) {
     const hasOneProperties: Array<ModelProperty> = Reflect.getOwnMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, model) || [];
 
     const hasOneProperty: ModelProperty = {
-      type: ModelPropertyEnum.HasOne,
-      name: propertyName
+      name: propertyName,
+      propertyClass: Reflect.getMetadata('design:type', model, propertyName),
+      type: ModelPropertyEnum.HasOne
     };
 
     hasOneProperties.push(hasOneProperty);
