@@ -47,7 +47,6 @@ export class DatastoreService {
     requestOptions: RequestOptions = {}
   ): Observable<T> {
     const url: string = this.buildModelUrl(modelClass, modelId);
-
     return this.handleGetRequestWithRelationships(url, requestOptions, modelClass, true, includeRelationships);
   }
 
@@ -70,7 +69,7 @@ export class DatastoreService {
         {},
         modelClass,
         isSingleResource,
-        [relationshipNameParts.join('.')]
+        relationshipNameParts.length ? [relationshipNameParts.join('.')] : []
       );
 
       relationshipCalls.push(relationshipCall$);
@@ -148,36 +147,32 @@ export class DatastoreService {
   }
 
   public find<T extends HalModel>(modelClass: ModelConstructor<T>, params: object): Observable<Array<T>>;
-  public find<T extends HalModel>(modelClass: ModelConstructor<T>, params: object, includeMeta: boolean): Observable<Array<T>>;
+  public find<T extends HalModel>(modelClass: ModelConstructor<T>, params: object, includeMeta: false): Observable<Array<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object,
+    includeMeta: true,
+    requestOptions: RequestOptions
+  ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: boolean,
     requestOptions: RequestOptions
-  ): Observable<HalDocument<T>>;
+  ): Observable<HalDocument<T> | Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object = {},
     includeMeta: boolean = false,
     requestOptions: RequestOptions = {}
-  ): Observable<HalDocument<T>> | Observable<Array<T>> {
+  ): Observable<HalDocument<T> | Array<T>> {
     const url: string = this.buildModelUrl(modelClass);
 
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, requestOptions);
     Object.assign(options.params, params);
 
-    if (includeMeta) {
-      return this.makeGetRequest(url, options, modelClass, false).pipe(
-        map((halDocument: HalDocument<T>) => {
-          return halDocument;
-        })
-      );
-    }
-
     return this.makeGetRequest(url, options, modelClass, false).pipe(
-      map((halDocument: HalDocument<T>) => {
-        return halDocument.models;
-      })
+      map((halDocument: HalDocument<T>) => includeMeta ? halDocument : halDocument.models)
     );
   }
 
@@ -185,6 +180,25 @@ export class DatastoreService {
     return this.internalStorage;
   }
 
+
+  private makeGetRequest<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: false
+  ): Observable<HalDocument<T>>;
+  private makeGetRequest<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: true
+  ): Observable<T>;
+  private makeGetRequest<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: boolean
+  ): Observable<HalDocument<T> | T>;
   private makeGetRequest<T extends HalModel>(
     url: string,
     requestOptions: RequestOptions,
@@ -193,18 +207,14 @@ export class DatastoreService {
   ): Observable<HalDocument<T> | T> {
     const options = Object.assign(DEFAULT_REQUEST_OPTIONS, requestOptions);
 
-    if (singleResource) {
-      return this.http.get<T>(url, options).pipe(
-        map((response: HttpResponse<T>) => {
+    return this.http.get<T>(url, options).pipe(
+      map((response: HttpResponse<T>) => {
+        if (singleResource) {
           const model: T = new modelClass(this.extractResourceFromResponse(response), this, response);
           this.storage.save(model);
           return model;
-        })
-      );
-    }
+        }
 
-    return this.http.get<T>(url, options).pipe(
-      map((response: HttpResponse<T>) => {
         const halDocument: HalDocument<T> = this.createHalDocument(response, modelClass);
         this.storage.saveAll(halDocument.models);
         return halDocument;

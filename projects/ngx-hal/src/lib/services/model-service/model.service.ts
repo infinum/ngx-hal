@@ -20,7 +20,7 @@ export abstract class ModelService<Model extends HalModel> {
     params: object = {},
     includeMeta: boolean = false,
     requestOptions: RequestOptions = {}
-  ): Observable<HalDocument<Model>> | Observable<Array<Model>> {
+  ): Observable<HalDocument<Model> | Array<Model>> {
     return this.datastore.find(this.modelClass, params, includeMeta, requestOptions);
   }
 
