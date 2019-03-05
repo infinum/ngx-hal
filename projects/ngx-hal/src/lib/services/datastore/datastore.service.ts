@@ -106,44 +106,33 @@ export class DatastoreService {
     isSingleResource: boolean,
     includeRelationships: Array<string> = []
   ): Observable<T | HalDocument<T>> {
-    // TODO simplify if branching
-    if (isSingleResource) {
-      return this.makeGetRequest(url, requestOptions, modelClass, isSingleResource).pipe(
-        flatMap((model: T) => {
-          if (includeRelationships.length) {
-            const relationshipCalls = this.fetchRelationships(model, includeRelationships);
+    const httpRequest$ = this.makeGetRequest(url, requestOptions, modelClass, isSingleResource);
 
-            return combineLatest(...relationshipCalls).pipe(
-              map(() => {
-                return model;
-              })
-            );
-          }
+    if (includeRelationships.length) {
+      return httpRequest$.pipe(
+        flatMap((model: T | HalDocument<T>) => {
+          const models: Array<T> = isSingleResource ? ([model] as Array<T>) : (model as HalDocument<T>).models;
+          const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships);
 
-          return of(model);
+          return combineLatest(...relationshipCalls).pipe(
+            map(() => model)
+          );
         })
       );
     }
 
-    return this.makeGetRequest(url, requestOptions, modelClass, isSingleResource).pipe(
-      flatMap((halDocument: HalDocument<T>) => {
-        if (includeRelationships.length) {
-          const relCalls = [];
-          halDocument.models.forEach((model: T) => {
-            const relationshipCalls = this.fetchRelationships(model, includeRelationships);
-            relCalls.push(...relationshipCalls);
-          });
+    return httpRequest$;
+  }
 
-          return combineLatest(...relCalls).pipe(
-            map(() => {
-              return halDocument;
-            })
-          );
-        }
+  private triggerFetchingModelRelationships<T extends HalModel>(models: Array<T>, includeRelationships: Array<string>) {
+    const modelRelationshipCalls: Array<Observable<any>> = [];
 
-        return of(halDocument);
-      })
-    );
+    models.forEach((model: T) => {
+      const relationshipCalls = this.fetchRelationships(model, includeRelationships);
+      modelRelationshipCalls.push(...relationshipCalls);
+    });
+
+    return modelRelationshipCalls;
   }
 
   public find<T extends HalModel>(modelClass: ModelConstructor<T>, params: object): Observable<Array<T>>;
