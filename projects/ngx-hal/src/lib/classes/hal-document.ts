@@ -5,17 +5,30 @@ import { Pagination } from './pagination';
 import { ModelConstructor } from '../types/model-constructor.type';
 import { DatastoreService } from '../services/datastore/datastore.service';
 import { isArray } from '../utils/isArray/is-array.util';
+import { RawHalLink } from '../interfaces/raw-hal-link.interface';
+import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
 
 export class HalDocument<Model extends HalModel> {
   public models: Array<Model>;
   public pagination: Pagination;
 
   constructor(
-    rawResponse: RawHalResource,
+    private rawResponse: RawHalResource,
     private modelClass: ModelConstructor<Model>,
     private datastore: DatastoreService
   ) {
     this.parseRawResources(rawResponse);
+  }
+
+  public get hasEmbeddedItems(): boolean {
+    const listPropertyName: string = this.getListPropertyName(this.rawResponse);
+    return this.rawResponse[EMBEDDED_PROPERTY_NAME] && this.rawResponse[EMBEDDED_PROPERTY_NAME][listPropertyName];
+  }
+
+  public get links(): Array<RawHalLink> {
+    const listPropertyName: string = this.getListPropertyName(this.rawResponse);
+    const rawLinks: RawHalLinks = this.rawResponse[LINKS_PROPERTY_NAME];
+    return rawLinks[listPropertyName] as any;
   }
 
   private parseRawResources(resources: RawHalResource): void {
@@ -36,6 +49,11 @@ export class HalDocument<Model extends HalModel> {
 
   private getRawResourcesFromResponse(resources: RawHalResource): Array<RawHalResource> {
     const listPropertyName: string = this.getListPropertyName(resources);
+
+    if (!resources[EMBEDDED_PROPERTY_NAME]) {
+      return [];
+    }
+
     return resources[EMBEDDED_PROPERTY_NAME][listPropertyName] || [];
   }
 
