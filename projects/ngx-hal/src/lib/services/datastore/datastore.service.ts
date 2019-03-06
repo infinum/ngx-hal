@@ -34,10 +34,10 @@ export class DatastoreService {
     return urlParts.filter((urlPart) => urlPart).join('/');
   }
 
-  public createHalDocument<T extends HalModel>(response: HttpResponse<T>, modelClass: ModelConstructor<T>): HalDocument<T> {
+  public createHalDocument<T extends HalModel>(rawResource: RawHalResource, modelClass: ModelConstructor<T>): HalDocument<T> {
     const representantiveModel = new modelClass();
     const halDocumentClass = representantiveModel.getHalDocumentClass() || this.getHalDocumentClass<T>();
-    return new halDocumentClass(response, modelClass, this);
+    return new halDocumentClass(rawResource, modelClass, this);
   }
 
   public findOne<T extends HalModel>(
@@ -64,12 +64,22 @@ export class DatastoreService {
       const modelClass = property.propertyClass;
       const isSingleResource: boolean = property.type === ModelPropertyEnum.Attribute || property.type === ModelPropertyEnum.HasOne;
 
+      // Checks if the relationship is already embdedded inside the emdedded property, or
+      // as a part of attribute properties
+      const embeddedRelationship: RawHalResource = model.getEmbeddedResource(currentLevelRelationship);
+      let fetchedModels: T | HalDocument<T>;
+
+      if (embeddedRelationship) {
+        fetchedModels = this.processRawResource(embeddedRelationship, modelClass, isSingleResource);
+      }
+
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
         url,
         {},
         modelClass,
         isSingleResource,
-        relationshipNameParts.length ? [relationshipNameParts.join('.')] : []
+        relationshipNameParts.length ? [relationshipNameParts.join('.')] : [],
+        fetchedModels
       );
 
       relationshipCalls.push(relationshipCall$);
@@ -104,9 +114,18 @@ export class DatastoreService {
     requestOptions: RequestOptions,
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
-    includeRelationships: Array<string> = []
+    includeRelationships: Array<string>,
+    fetchedModels: T | HalDocument<T>
+    ): Observable<T | HalDocument<T>>;
+  private handleGetRequestWithRelationships<T extends HalModel>(
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean,
+    includeRelationships: Array<string> = [],
+    fetchedModels: T | HalDocument<T> = null
   ): Observable<T | HalDocument<T>> {
-    const httpRequest$ = this.makeGetRequest(url, requestOptions, modelClass, isSingleResource);
+    const httpRequest$ = fetchedModels ? of(fetchedModels) : this.makeGetRequest(url, requestOptions, modelClass, isSingleResource);
 
     if (includeRelationships.length) {
       return httpRequest$.pipe(
@@ -206,17 +225,26 @@ export class DatastoreService {
 
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
-        if (singleResource) {
-          const model: T = new modelClass(this.extractResourceFromResponse(response), this, response);
-          this.storage.save(model);
-          return model;
-        }
-
-        const halDocument: HalDocument<T> = this.createHalDocument(response, modelClass);
-        this.storage.saveAll(halDocument.models);
-        return halDocument;
+        const rawResource: RawHalResource = this.extractResourceFromResponse(response);
+        return this.processRawResource(rawResource, modelClass, singleResource);
       })
     );
+  }
+
+  private processRawResource<T extends HalModel>(
+    rawResource: RawHalResource,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean
+  ): T | HalDocument<T> {
+    if (isSingleResource) {
+      const model: T = new modelClass(rawResource, this);
+      this.storage.save(model);
+      return model;
+    }
+
+    const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass);
+    this.storage.saveAll(halDocument.models);
+    return halDocument;
   }
 
   private buildModelUrl(modelClass: ModelConstructor<HalModel>, modelId?: string): string {

@@ -9,7 +9,7 @@ import {
 } from '../constants/metadata.constant';
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
 import { ModelProperty } from '../interfaces/model-property.interface';
-import { LINKS_PROPERTY_NAME, SELF_PROPERTY_NAME } from '../constants/hal.constant';
+import { LINKS_PROPERTY_NAME, SELF_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.constant';
 import { DatastoreService } from '../services/datastore/datastore.service';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
@@ -20,8 +20,7 @@ export abstract class HalModel {
 
   constructor(
     private resource: RawHalResource = {},
-    private datastore: DatastoreService,
-    private rawResponse?: HttpResponse<object>
+    private datastore: DatastoreService
   ) {
     this.parseAttributes(resource);
     this.createHasOneGetters();
@@ -50,6 +49,18 @@ export abstract class HalModel {
     return attributeProperty || hasOneProperty;
   }
 
+  public getEmbeddedResource(resourceName: string): RawHalResource | undefined {
+    if (this.resource[resourceName]) {
+      return this.resource[resourceName];
+    }
+
+    if (!this.resource[EMBEDDED_PROPERTY_NAME]) {
+      return;
+    }
+
+    return this.resource[EMBEDDED_PROPERTY_NAME][resourceName];
+  }
+
   private get attributeProperties(): Array<ModelProperty> {
     return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
   }
@@ -58,7 +69,7 @@ export abstract class HalModel {
     return Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, this) || [];
   }
 
-  private get haManyProperties(): Array<ModelProperty> {
+  private get hasManyProperties(): Array<ModelProperty> {
     return Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, this) || [];
   }
 
@@ -80,7 +91,7 @@ export abstract class HalModel {
   }
 
   private createHasManyGetters(): void {
-    this.haManyProperties.forEach((property: ModelProperty) => {
+    this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get: () => {
           return 'Method not implemented';
@@ -97,6 +108,17 @@ export abstract class HalModel {
       this[attributeProperty.name] = attributeProperty.propertyClass ? new attributeProperty.propertyClass(rawPropertyValue) : rawPropertyValue;
     });
   }
+
+  // private parseEmbeddedRelationships(resource: RawHalResource): void {
+  //   if (!resource[EMBEDDED_PROPERTY_NAME]) {
+  //     return;
+  //   }
+
+  //   this.hasOneProperties.forEach((property: ModelProperty) => {
+  //     const rawPropertyValue: any = resource[EMBEDDED_PROPERTY_NAME][property.name];
+  //     const new property.propertyClass(rawPropertyValue);
+  //   });
+  // }
 
   private get links(): RawHalLinks {
     return this.resource[LINKS_PROPERTY_NAME];

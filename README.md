@@ -64,10 +64,7 @@ this.userService.find({}, true).subscribe((halDocument: HalDocument<User>) => {
 
 ## API reference
 
-* [DatastoreService](https://github.com/infinum/ngx-hal/wiki/DatastoreService)
-* [HalModel](https://github.com/infinum/ngx-hal/wiki/HalModel)
-* [ModelService](https://github.com/infinum/ngx-hal/wiki/ModelService)
-* [HalDocument](https://github.com/infinum/ngx-hal/wiki/HalDocument)
+  * see [wiki](https://github.com/infinum/ngx-hal/wiki)
 
 ## Build
 

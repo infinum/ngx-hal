@@ -16,6 +16,7 @@ export abstract class ModelService<Model extends HalModel> {
   public find(params: object): Observable<Array<Model>>;
   public find(params: object, includeMeta: false): Observable<Array<Model>>;
   public find(params: object, includeMeta: true): Observable<HalDocument<Model>>;
+  public find(params: object, includeMeta: boolean, includeRelationships: Array<string>): Observable<HalDocument<Model>>;
   public find(
     params: object,
     includeMeta: boolean,
