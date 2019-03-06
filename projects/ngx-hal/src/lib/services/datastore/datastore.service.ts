@@ -13,6 +13,7 @@ import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
 import { HalStorage } from '../../classes/hal-storage';
 import { ModelProperty } from '../../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
+import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
 
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
@@ -133,6 +134,10 @@ export class DatastoreService {
           const models: Array<T> = isSingleResource ? ([model] as Array<T>) : (model as HalDocument<T>).models;
           const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships);
 
+          if (!relationshipCalls.length) {
+            return of(model);
+          }
+
           return combineLatest(...relationshipCalls).pipe(
             map(() => model)
           );
@@ -189,6 +194,18 @@ export class DatastoreService {
     Object.assign(options.params, params);
 
     return this.handleGetRequestWithRelationships(url, options, modelClass, false, includeRelationships).pipe(
+      flatMap((halDocument: HalDocument<T>) => {
+        if (halDocument.hasEmbeddedItems) {
+          return of(halDocument);
+        }
+
+        return this.fetchEmbeddedListItems(halDocument, modelClass, includeRelationships).pipe(
+          map((models: Array<T>) => {
+            halDocument.models = models;
+            return halDocument;
+          })
+        );
+      }),
       map((halDocument: HalDocument<T>) => includeMeta ? halDocument : halDocument.models)
     );
   }
@@ -269,5 +286,20 @@ export class DatastoreService {
     }
 
     return filteredIncludes;
+  }
+
+  private fetchEmbeddedListItems<T extends HalModel>(
+    halDocument: HalDocument<T>,
+    modelClass: ModelConstructor<T>,
+    includeRelationships: Array<string> = []
+  ): Observable<Array<T>> {
+    const modelCalls: Array<Observable<T>> = [];
+
+    halDocument.links.forEach((link: RawHalLink) => {
+      const call$ = this.handleGetRequestWithRelationships(link.href, {}, modelClass, true, includeRelationships);
+      modelCalls.push(call$);
+    });
+
+    return combineLatest(...modelCalls);
   }
 }
