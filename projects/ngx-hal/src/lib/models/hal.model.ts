@@ -109,17 +109,6 @@ export abstract class HalModel {
     });
   }
 
-  // private parseEmbeddedRelationships(resource: RawHalResource): void {
-  //   if (!resource[EMBEDDED_PROPERTY_NAME]) {
-  //     return;
-  //   }
-
-  //   this.hasOneProperties.forEach((property: ModelProperty) => {
-  //     const rawPropertyValue: any = resource[EMBEDDED_PROPERTY_NAME][property.name];
-  //     const new property.propertyClass(rawPropertyValue);
-  //   });
-  // }
-
   private get links(): RawHalLinks {
     return this.resource[LINKS_PROPERTY_NAME];
   }
