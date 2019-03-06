@@ -202,7 +202,7 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     singleResource: boolean
   ): Observable<HalDocument<T> | T> {
-    const options = Object.assign(DEFAULT_REQUEST_OPTIONS, requestOptions);
+    const options = Object.assign(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
 
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
