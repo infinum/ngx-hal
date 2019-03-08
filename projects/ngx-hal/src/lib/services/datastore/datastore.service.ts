@@ -14,10 +14,12 @@ import { HalStorage } from '../../classes/hal-storage';
 import { ModelProperty } from '../../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
+import { PaginationConstructor } from '../../types/pagination.type';
 
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
   private internalStorage: HalStorage = new HalStorage();
+  public paginationClass: PaginationConstructor;
 
   constructor(public http: HttpClient) {}
 

@@ -10,6 +10,7 @@ export * from './lib/decorators/has-one.decorator';
 export * from './lib/models/hal.model';
 
 export * from './lib/classes/hal-document';
+export * from './lib/classes/pagination';
 
 export * from './lib/interfaces/network-config.interface';
 export * from './lib/interfaces/datastore-options.interface';

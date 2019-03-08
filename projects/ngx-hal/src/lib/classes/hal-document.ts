@@ -44,7 +44,11 @@ export class HalDocument<Model extends HalModel> {
   }
 
   private generatePagination(pagination: RawHalResource): Pagination {
-    return new Pagination(pagination);
+    if (!this.datastore.paginationClass) {
+      return null;
+    }
+
+    return new this.datastore.paginationClass(pagination);
   }
 
   private getRawResourcesFromResponse(resources: RawHalResource): Array<RawHalResource> {
