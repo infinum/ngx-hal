@@ -1,5 +1,5 @@
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
-import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.constant';
+import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME, SELF_PROPERTY_NAME } from '../constants/hal.constant';
 import { HalModel } from '../models/hal.model';
 import { Pagination } from './pagination';
 import { ModelConstructor } from '../types/model-constructor.type';
@@ -7,6 +7,7 @@ import { DatastoreService } from '../services/datastore/datastore.service';
 import { isArray } from '../utils/isArray/is-array.util';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
+import { removeQueryParams } from '../utils/removeQueryParams/remove-query-params.util';
 
 export class HalDocument<Model extends HalModel> {
   public models: Array<Model>;
@@ -20,15 +21,19 @@ export class HalDocument<Model extends HalModel> {
     this.parseRawResources(rawResponse);
   }
 
+  public get uniqueModelIdentificator(): string {
+    // TODO check if it is safe to remove query params
+    return removeQueryParams(this.links[SELF_PROPERTY_NAME].href);
+  }
+
   public get hasEmbeddedItems(): boolean {
     const listPropertyName: string = this.getListPropertyName(this.rawResponse);
     return this.rawResponse[EMBEDDED_PROPERTY_NAME] && this.rawResponse[EMBEDDED_PROPERTY_NAME][listPropertyName];
   }
 
-  public get links(): Array<RawHalLink> {
+  public get itemLinks(): Array<RawHalLink> {
     const listPropertyName: string = this.getListPropertyName(this.rawResponse);
-    const rawLinks: RawHalLinks = this.rawResponse[LINKS_PROPERTY_NAME];
-    return rawLinks[listPropertyName] as any;
+    return this.links[listPropertyName] as any;
   }
 
   private parseRawResources(resources: RawHalResource): void {
@@ -66,6 +71,10 @@ export class HalDocument<Model extends HalModel> {
 
     return Object.keys(links).find((propertyName: string) => {
       return isArray(links[propertyName]);
-    });
+    }) || 'item'; // TODO defaults to the `item`, check if this should be defaulted
+  }
+
+  private get links(): RawHalLinks {
+    return this.rawResponse[LINKS_PROPERTY_NAME];
   }
 }

@@ -13,6 +13,8 @@ import { LINKS_PROPERTY_NAME, SELF_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from 
 import { DatastoreService } from '../services/datastore/datastore.service';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
+import { isArray } from '../utils/isArray/is-array.util';
+import { HalDocument } from '../classes/hal-document';
 
 
 export abstract class HalModel {
@@ -77,7 +79,7 @@ export abstract class HalModel {
   private createHasOneGetters(): void {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
-        get: () => {
+        get() {
           const relationshipLinks: RawHalLink = this.resource[LINKS_PROPERTY_NAME][property.name];
 
           if (!relationshipLinks) {
@@ -94,8 +96,17 @@ export abstract class HalModel {
   private createHasManyGetters(): void {
     this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
-        get: () => {
-          return 'Method not implemented';
+        get() {
+          const relationshipLink: RawHalLink = this.resource[LINKS_PROPERTY_NAME][property.name];
+
+          if (!relationshipLink) {
+            return;
+          }
+
+          const modelIdentificator: string = relationshipLink.href;
+          const halDocument: HalDocument<HalModel> = this.datastore.storage.get(modelIdentificator) as HalDocument<HalModel>;
+
+          return halDocument.models;
         }
       });
     });

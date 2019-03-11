@@ -206,20 +206,6 @@ export class DatastoreService {
     return this.handleGetRequestWithRelationships(url, options, modelClass, false, includeRelationships).pipe(
       flatMap((halDocument: HalDocument<T>) => {
         if (halDocument.hasEmbeddedItems) {
-          if (includeRelationships && includeRelationships.length) {
-            const includeCalls: Array<Observable<any>> = halDocument.models.map((model: T) => {
-              return this.handleGetRequestWithRelationships('', {}, modelClass, true, includeRelationships, model);
-            });
-
-            if (!includeCalls.length) {
-              return of(halDocument);
-            }
-
-            return combineLatest(...includeCalls).pipe(
-              map(() => halDocument)
-            );
-          }
-
           return of(halDocument);
         }
 
@@ -285,6 +271,7 @@ export class DatastoreService {
 
     const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass);
     this.storage.saveAll(halDocument.models);
+    this.storage.saveHalDocument(halDocument);
     return halDocument;
   }
 
@@ -319,7 +306,7 @@ export class DatastoreService {
   ): Observable<Array<T>> {
     const modelCalls: Array<Observable<T>> = [];
 
-    halDocument.links.forEach((link: RawHalLink) => {
+    halDocument.itemLinks.forEach((link: RawHalLink) => {
       const call$ = this.handleGetRequestWithRelationships(link.href, {}, modelClass, true, includeRelationships);
       modelCalls.push(call$);
     });
