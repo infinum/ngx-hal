@@ -40,13 +40,14 @@ export abstract class HalModel {
   }
 
   public getRelationshipUrl(relationshipName: string): string {
-    return this.links[relationshipName].href;
+    return this.links[relationshipName] ? this.links[relationshipName].href : '';
   }
 
   public getPropertyData(propertyName: string): ModelProperty {
     const attributeProperty = this.attributeProperties.find((property: ModelProperty) => property.name === propertyName);
     const hasOneProperty = this.hasOneProperties.find((property: ModelProperty) => property.name === propertyName);
-    return attributeProperty || hasOneProperty;
+    const hasManyProperty = this.hasManyProperties.find((property: ModelProperty) => property.name === propertyName);
+    return attributeProperty || hasOneProperty || hasManyProperty;
   }
 
   public getEmbeddedResource(resourceName: string): RawHalResource | undefined {
