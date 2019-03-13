@@ -1,6 +1,6 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, combineLatest, of } from 'rxjs';
-import { map, flatMap } from 'rxjs/operators';
+import { map, flatMap, filter } from 'rxjs/operators';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
@@ -14,10 +14,12 @@ import { HalStorage } from '../../classes/hal-storage';
 import { ModelProperty } from '../../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
+import { PaginationConstructor } from '../../types/pagination.type';
 
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
   private internalStorage: HalStorage = new HalStorage();
+  public paginationClass: PaginationConstructor;
 
   constructor(public http: HttpClient) {}
 
@@ -56,12 +58,19 @@ export class DatastoreService {
 
     const filteredRelationships: Array<string> = this.filterUnnecessaryIncludes(relationships);
 
-    filteredRelationships.forEach((relationshipName: string) => {
+    for (let i = 0; i < filteredRelationships.length; i += 1) {
+      const relationshipName: string = filteredRelationships[i];
+
       const relationshipNameParts: Array<string> = relationshipName.split('.');
       const currentLevelRelationship: string = relationshipNameParts.shift();
 
       const url: string = model.getRelationshipUrl(currentLevelRelationship);
       const property: ModelProperty = model.getPropertyData(currentLevelRelationship);
+
+      if (!property) {
+        break;
+      }
+
       const modelClass = property.propertyClass;
       const isSingleResource: boolean = property.type === ModelPropertyEnum.Attribute || property.type === ModelPropertyEnum.HasOne;
 
@@ -84,7 +93,7 @@ export class DatastoreService {
       );
 
       relationshipCalls.push(relationshipCall$);
-    });
+    }
 
     return relationshipCalls;
   }
@@ -132,6 +141,7 @@ export class DatastoreService {
       return httpRequest$.pipe(
         flatMap((model: T | HalDocument<T>) => {
           const models: Array<T> = isSingleResource ? ([model] as Array<T>) : (model as HalDocument<T>).models;
+
           const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships);
 
           if (!relationshipCalls.length) {
@@ -196,6 +206,20 @@ export class DatastoreService {
     return this.handleGetRequestWithRelationships(url, options, modelClass, false, includeRelationships).pipe(
       flatMap((halDocument: HalDocument<T>) => {
         if (halDocument.hasEmbeddedItems) {
+          if (includeRelationships && includeRelationships.length) {
+            const includeCalls: Array<Observable<any>> = halDocument.models.map((model: T) => {
+              return this.handleGetRequestWithRelationships('', {}, modelClass, true, includeRelationships, model);
+            });
+
+            if (!includeCalls.length) {
+              return of(halDocument);
+            }
+
+            return combineLatest(...includeCalls).pipe(
+              map(() => halDocument)
+            );
+          }
+
           return of(halDocument);
         }
 
