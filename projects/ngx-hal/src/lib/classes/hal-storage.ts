@@ -1,4 +1,5 @@
 import { HalModel } from '../models/hal.model';
+import { HalDocument } from './hal-document';
 
 export class HalStorage {
   private internalStorage: { [K: string]: any } = {};
@@ -13,7 +14,11 @@ export class HalStorage {
     });
   }
 
-  public get(uniqueModelIdentificator: string): void {
+  public saveHalDocument<T extends HalModel>(halDocument: HalDocument<T>): void {
+    this.internalStorage[halDocument.uniqueModelIdentificator] = halDocument;
+  }
+
+  public get(uniqueModelIdentificator: string): HalModel | HalDocument<HalModel> {
     return this.internalStorage[uniqueModelIdentificator];
   }
 }
