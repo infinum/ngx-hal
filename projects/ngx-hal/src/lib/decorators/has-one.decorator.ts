@@ -6,7 +6,7 @@ import { HasOneOptions, DEFAULT_HAS_ONE_OPTIONS } from '../interfaces/has-one-op
 
 export function HasOne(options: HasOneOptions = {}) {
   return (model: HalModel, propertyName: string) => {
-    const hasOneOptions = Object.assign(DEFAULT_HAS_ONE_OPTIONS, options);
+    const hasOneOptions = Object.assign({}, DEFAULT_HAS_ONE_OPTIONS, options);
 
     const hasOneProperties: Array<ModelProperty> = Reflect.getOwnMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, model) || [];
 

@@ -6,7 +6,7 @@ import { HasManyOptions, DEFAULT_HAS_MANY_OPTIONS } from '../interfaces/has-many
 
 export function HasMany(options: HasManyOptions) {
   return (model: HalModel, propertyName: string) => {
-    const hasManyOptions = Object.assign(DEFAULT_HAS_MANY_OPTIONS, options);
+    const hasManyOptions = Object.assign({}, DEFAULT_HAS_MANY_OPTIONS, options);
 
     const hasManyProperties: Array<ModelProperty> = Reflect.getOwnMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, model) || [];
 

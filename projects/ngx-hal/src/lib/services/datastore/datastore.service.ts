@@ -199,9 +199,8 @@ export class DatastoreService {
     requestOptions: RequestOptions = {}
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = this.buildModelUrl(modelClass);
-
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, requestOptions);
-    Object.assign(options.params, params);
+    options.params = Object.assign({}, options.params, params);
 
     return this.handleGetRequestWithRelationships(url, options, modelClass, false, includeRelationships).pipe(
       flatMap((halDocument: HalDocument<T>) => {
@@ -248,7 +247,7 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     singleResource: boolean
   ): Observable<HalDocument<T> | T> {
-    const options = Object.assign(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
 
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
