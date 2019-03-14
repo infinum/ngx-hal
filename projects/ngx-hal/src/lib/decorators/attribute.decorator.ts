@@ -1,17 +1,19 @@
 import { HalModel } from '../models/hal.model';
 import { ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { AttributeOptions, DEFAULT_ATTRIBUTE_OPTIONS } from '../interfaces/attribute-options.interface';
-import { ModelProperty } from '../interfaces/model-property.interface';
+import { AttributeModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 
 export function Attribute(options: AttributeOptions = {}) {
   return (model: HalModel, propertyName: string) => {
-    const attributeOptions = Object.assign(DEFAULT_ATTRIBUTE_OPTIONS, options);
+    const attributeOptions = Object.assign({}, DEFAULT_ATTRIBUTE_OPTIONS, options);
 
-    const attributeProperties: Array<ModelProperty> = Reflect.getOwnMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
+    const attributeProperties: Array<AttributeModelProperty> = Reflect.getOwnMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
 
-    const attributeProperty: ModelProperty = {
+    const attributeProperty: AttributeModelProperty = {
       type: ModelPropertyEnum.Attribute,
+      tranformResponseValue: attributeOptions.transformResponseValue,
+      transformBeforeSave: attributeOptions.transformBeforeSave,
       name: propertyName
     };
 

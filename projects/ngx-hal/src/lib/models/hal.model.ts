@@ -8,7 +8,7 @@ import {
   HAS_MANY_PROPERTIES_METADATA_KEY
 } from '../constants/metadata.constant';
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
-import { ModelProperty } from '../interfaces/model-property.interface';
+import { ModelProperty, AttributeModelProperty } from '../interfaces/model-property.interface';
 import { LINKS_PROPERTY_NAME, SELF_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.constant';
 import { DatastoreService } from '../services/datastore/datastore.service';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
@@ -113,11 +113,16 @@ export abstract class HalModel {
   }
 
   private parseAttributes(resource: RawHalResource): void {
-    this.attributeProperties.forEach((attributeProperty: ModelProperty) => {
+    this.attributeProperties.forEach((attributeProperty: AttributeModelProperty) => {
       const rawPropertyValue: any = resource[attributeProperty.name];
 
-      // tslint:disable-next-line:max-line-length
-      this[attributeProperty.name] = attributeProperty.propertyClass ? new attributeProperty.propertyClass(rawPropertyValue) : rawPropertyValue;
+      if (attributeProperty.propertyClass) {
+        this[attributeProperty.name] = new attributeProperty.propertyClass(rawPropertyValue);
+      } else if (attributeProperty.tranformResponseValue) {
+        this[attributeProperty.name] = attributeProperty.tranformResponseValue(rawPropertyValue);
+      } else {
+        this[attributeProperty.name] = rawPropertyValue;
+      }
     });
   }
 
