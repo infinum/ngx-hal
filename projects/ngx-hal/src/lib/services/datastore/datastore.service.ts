@@ -28,11 +28,20 @@ export class DatastoreService {
   }
 
   public buildUrl(model?: HalModel): string {
+    // tslint:disable-next-line:max-line-length
+    const baseUrl: string = model && model.networkConfig && model.networkConfig.baseUrl ? model.networkConfig.baseUrl : this.networkConfig.baseUrl;
+    // tslint:disable-next-line:max-line-length
+    const networkEndpoint: string = model && model.networkConfig && model.networkConfig.endpoint ? model.networkConfig.endpoint : this.networkConfig.endpoint;
+
     const urlParts: Array<string> = [
-      this.networkConfig.baseUrl,
-      this.networkConfig.endpoint,
+      baseUrl,
+      networkEndpoint,
       model ? model.endpoint : null
     ];
+
+    if (model && model.id) {
+      urlParts.push(model.id);
+    }
 
     return urlParts.filter((urlPart) => urlPart).join('/');
   }
@@ -219,6 +228,17 @@ export class DatastoreService {
     );
   }
 
+  public save<T extends HalModel>(model: T, requestOptions?: RequestOptions): Observable<T> {
+    const url: string = this.buildUrl(model);
+    const payload: object = model.generatePayload();
+    return this.makePostRequest(url, payload, requestOptions).pipe(
+      map(() => {
+        // TODO maybe take the response value in consideration
+        return model;
+      })
+    );
+  }
+
   public get storage(): HalStorage {
     return this.internalStorage;
   }
@@ -257,6 +277,26 @@ export class DatastoreService {
     );
   }
 
+  private makePostRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
+    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    return this.http.post<T>(url, payload, options);
+  }
+
+  private processRawResource<T extends HalModel>(
+    rawResource: RawHalResource,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: false
+  ): HalDocument<T>;
+  private processRawResource<T extends HalModel>(
+    rawResource: RawHalResource,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: true
+  ): T;
+  private processRawResource<T extends HalModel>(
+    rawResource: RawHalResource,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean
+  ): T | HalDocument<T>;
   private processRawResource<T extends HalModel>(
     rawResource: RawHalResource,
     modelClass: ModelConstructor<T>,

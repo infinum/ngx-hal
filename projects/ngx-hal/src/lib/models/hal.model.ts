@@ -1,4 +1,4 @@
-import { HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import {
@@ -13,9 +13,8 @@ import { LINKS_PROPERTY_NAME, SELF_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from 
 import { DatastoreService } from '../services/datastore/datastore.service';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
-import { isArray } from '../utils/isArray/is-array.util';
 import { HalDocument } from '../classes/hal-document';
-
+import { NetworkConfig } from '../interfaces/network-config.interface';
 
 export abstract class HalModel {
   private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
@@ -33,8 +32,22 @@ export abstract class HalModel {
     return this.links[SELF_PROPERTY_NAME].href;
   }
 
+  public get id(): string {
+    const selfLink: string = this.links && this.links[SELF_PROPERTY_NAME] ? this.links[SELF_PROPERTY_NAME].href : null;
+
+    if (!selfLink) {
+      return null;
+    }
+
+    return selfLink.split('/').pop();
+  }
+
   public get endpoint(): string {
     return this.config.endpoint || this.constructor.name;
+  }
+
+  public get networkConfig(): NetworkConfig {
+    return this.config.networkConfig;
   }
 
   public getHalDocumentClass<T extends this>(): HalDocumentConstructor<T> {
@@ -62,6 +75,18 @@ export abstract class HalModel {
     }
 
     return this.resource[EMBEDDED_PROPERTY_NAME][resourceName];
+  }
+
+  public save(): Observable<this> {
+    return this.datastore.save(this);
+  }
+
+  public generatePayload(): object {
+    return this.attributeProperties.reduce((payload: object, property: ModelProperty) => {
+      const propertyName: string = property.name;
+      payload[propertyName] = this[propertyName];
+      return payload;
+    }, {});
   }
 
   private get attributeProperties(): Array<ModelProperty> {
