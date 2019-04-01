@@ -231,7 +231,16 @@ export class DatastoreService {
   public save<T extends HalModel>(model: T, requestOptions?: RequestOptions): Observable<T> {
     const url: string = this.buildUrl(model);
     const payload: object = model.generatePayload();
-    return this.makePostRequest(url, payload, requestOptions).pipe(
+
+    let request$;
+
+    if (model.isSaved) {
+      request$ = this.makePutRequest(url, payload, requestOptions);
+    } else {
+      request$ = this.makePostRequest(url, payload, requestOptions);
+    }
+
+    return request$.pipe(
       map(() => {
         // TODO maybe take the response value in consideration
         return model;
@@ -280,6 +289,11 @@ export class DatastoreService {
   private makePostRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
     return this.http.post<T>(url, payload, options);
+  }
+
+  private makePutRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
+    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    return this.http.put<T>(url, payload, options);
   }
 
   private processRawResource<T extends HalModel>(
