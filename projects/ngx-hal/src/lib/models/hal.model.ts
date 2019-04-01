@@ -89,6 +89,10 @@ export abstract class HalModel {
     }, {});
   }
 
+  public isSaved(): boolean {
+    return Boolean(this.id);
+  }
+
   private get attributeProperties(): Array<ModelProperty> {
     return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
   }
