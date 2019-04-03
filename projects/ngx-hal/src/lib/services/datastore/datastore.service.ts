@@ -228,7 +228,7 @@ export class DatastoreService {
     );
   }
 
-  public save<T extends HalModel>(model: T, requestOptions?: RequestOptions): Observable<T> {
+  public save<T extends HalModel>(model: T, modelClass: ModelConstructor<T>, requestOptions?: RequestOptions): Observable<T> {
     const url: string = this.buildUrl(model);
     const payload: object = model.generatePayload();
 
@@ -241,8 +241,15 @@ export class DatastoreService {
     }
 
     return request$.pipe(
-      map(() => {
-        // TODO maybe take the response value in consideration
+      map((response: HttpResponse<T>) => {
+        const rawResource: RawHalResource = this.extractResourceFromResponse(response);
+
+        if (rawResource) {
+          return this.processRawResource(rawResource, modelClass, true);
+        }
+
+        model.selfLink = response.headers.get('Location');
+
         return model;
       })
     );
