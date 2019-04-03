@@ -18,6 +18,7 @@ import { NetworkConfig } from '../interfaces/network-config.interface';
 
 export abstract class HalModel {
   private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
+  private temporarySelfLink: string = null;
 
   constructor(
     private resource: RawHalResource = {},
@@ -33,13 +34,11 @@ export abstract class HalModel {
   }
 
   public get id(): string {
-    const selfLink: string = this.links && this.links[SELF_PROPERTY_NAME] ? this.links[SELF_PROPERTY_NAME].href : null;
-
-    if (!selfLink) {
+    if (!this.selfLink) {
       return null;
     }
 
-    return selfLink.split('/').pop();
+    return this.selfLink.split('/').pop();
   }
 
   public get endpoint(): string {
@@ -78,7 +77,7 @@ export abstract class HalModel {
   }
 
   public save(): Observable<this> {
-    return this.datastore.save(this);
+    return this.datastore.save(this, Object.getPrototypeOf(this));
   }
 
   public generatePayload(): object {
@@ -157,5 +156,13 @@ export abstract class HalModel {
 
   private get links(): RawHalLinks {
     return this.resource[LINKS_PROPERTY_NAME];
+  }
+
+  public get selfLink(): string {
+    return this.links && this.links[SELF_PROPERTY_NAME] ? this.links[SELF_PROPERTY_NAME].href : this.temporarySelfLink;
+  }
+
+  public set selfLink(link: string) {
+    this.temporarySelfLink = link;
   }
 }
