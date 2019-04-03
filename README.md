@@ -2,11 +2,6 @@
 
 ngx-hal is a data store with a support for handling [HAL formatted](http://stateless.co/hal_specification.html) HTTP requests.
 
-## Features
-
-* GET single resource
-* GET list of resources
-
 ## Installation
 
 ```bash
