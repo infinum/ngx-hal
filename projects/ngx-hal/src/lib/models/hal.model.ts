@@ -8,7 +8,7 @@ import {
   HAS_MANY_PROPERTIES_METADATA_KEY
 } from '../constants/metadata.constant';
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
-import { ModelProperty, AttributeModelProperty } from '../interfaces/model-property.interface';
+import { ModelProperty, AttributeModelProperty, HasOneModelProperty, HasManyModelProperty } from '../interfaces/model-property.interface';
 import { LINKS_PROPERTY_NAME, SELF_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.constant';
 import { DatastoreService } from '../services/datastore/datastore.service';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
@@ -81,11 +81,58 @@ export abstract class HalModel {
   }
 
   public generatePayload(): object {
-    return this.attributeProperties.reduce((payload: object, property: ModelProperty) => {
+    const attributePropertiesPayload: object = this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
       const propertyName: string = property.name;
       payload[propertyName] = this[propertyName];
       return payload;
     }, {});
+
+    const hasOnePropertiesPayload: object = this.hasOneProperties
+      .filter((property: HasOneModelProperty) => property.includeInPaylaod)
+      .reduce((payload: object, property: HasOneModelProperty) => {
+        const propertyName: string = property.name;
+
+        if (!this[propertyName]) {
+          return payload;
+        }
+
+        payload[propertyName] = {
+          href: this[propertyName].selfLink
+        };
+
+        return payload;
+      }, {});
+
+    const hasManyPropertiesPayload: object = this.hasManyProperties
+      .filter((property: HasManyModelProperty) => property.includeInPaylaod)
+      .reduce((payload: object, property: HasManyModelProperty) => {
+        const propertyName: string = property.name;
+        payload[propertyName] = [];
+
+        // TODO check if this[propertyName] is an array of models or just a HalDocument
+        this[propertyName].forEach((model: HalModel) => {
+          if (!model) {
+            return payload;
+          }
+
+          payload[propertyName].push({
+            href: model.selfLink
+          });
+        });
+
+        return payload;
+      }, {});
+
+    const relationshipLinks: object = { ...hasOnePropertiesPayload, ...hasManyPropertiesPayload };
+    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
+
+    const payload = { ...attributePropertiesPayload };
+
+    if (hasRelationshipLinks) {
+      payload[LINKS_PROPERTY_NAME] = { ...hasOnePropertiesPayload, ...hasManyPropertiesPayload };
+    }
+
+    return payload;
   }
 
   public get isSaved(): boolean {
@@ -108,7 +155,7 @@ export abstract class HalModel {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
-          const relationshipLinks: RawHalLink = this.resource[LINKS_PROPERTY_NAME][property.name];
+          const relationshipLinks: RawHalLink = this.links[property.name];
 
           if (!relationshipLinks) {
             return;
@@ -125,7 +172,7 @@ export abstract class HalModel {
     this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
-          const relationshipLink: RawHalLink = this.resource[LINKS_PROPERTY_NAME][property.name];
+          const relationshipLink: RawHalLink = this.links[property.name];
 
           if (!relationshipLink) {
             return;
@@ -154,8 +201,8 @@ export abstract class HalModel {
     });
   }
 
-  private get links(): RawHalLinks {
-    return this.resource[LINKS_PROPERTY_NAME];
+  private get links(): RawHalLinks | {} {
+    return this.resource[LINKS_PROPERTY_NAME] || {};
   }
 
   public get selfLink(): string {
