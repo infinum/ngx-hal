@@ -28,14 +28,10 @@ export class DatastoreService {
   }
 
   public buildUrl(model?: HalModel): string {
-    // tslint:disable-next-line:max-line-length
-    const baseUrl: string = model && model.networkConfig && model.networkConfig.baseUrl ? model.networkConfig.baseUrl : this.networkConfig.baseUrl;
-    // tslint:disable-next-line:max-line-length
-    const networkEndpoint: string = model && model.networkConfig && model.networkConfig.endpoint ? model.networkConfig.endpoint : this.networkConfig.endpoint;
+    const hostUrl: string = this.buildHostUrl(model);
 
     const urlParts: Array<string> = [
-      baseUrl,
-      networkEndpoint,
+      hostUrl,
       model ? model.endpoint : null
     ];
 
@@ -285,11 +281,14 @@ export class DatastoreService {
     url: string,
     requestOptions: RequestOptions,
     modelClass: ModelConstructor<T>,
-    singleResource: boolean
+    singleResource: boolean,
+    includeNetworkConfig: boolean = true
   ): Observable<HalDocument<T> | T> {
+    const customUrl: string = includeNetworkConfig ? `${this.buildHostUrl(new modelClass())}/${url}` : url;
+
     switch (method.toLocaleLowerCase()) {
       case 'get':
-        return this.makeGetRequest(url, requestOptions, modelClass, singleResource);
+        return this.makeGetRequest(customUrl, requestOptions, modelClass, singleResource);
       default:
         throw new Error(`Method ${method} is not supported.`);
     }
@@ -408,5 +407,14 @@ export class DatastoreService {
     });
 
     return combineLatest(...modelCalls);
+  }
+
+  private buildHostUrl(model?: HalModel): string {
+    // tslint:disable-next-line:max-line-length
+    const baseUrl: string = model && model.networkConfig && model.networkConfig.baseUrl ? model.networkConfig.baseUrl : this.networkConfig.baseUrl;
+    // tslint:disable-next-line:max-line-length
+    const networkEndpoint: string = model && model.networkConfig && model.networkConfig.endpoint ? model.networkConfig.endpoint : this.networkConfig.endpoint;
+
+    return [baseUrl, networkEndpoint].join('/');
   }
 }

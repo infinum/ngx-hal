@@ -10,3 +10,11 @@ export interface AttributeModelProperty extends ModelProperty {
   tranformResponseValue?: (rawAttribute: any) => any;
   transformBeforeSave?: (rawAttribute: any) => void;
 }
+
+export interface HasOneModelProperty extends ModelProperty {
+  includeInPaylaod?: boolean;
+}
+
+export interface HasManyModelProperty extends ModelProperty {
+  includeInPaylaod?: boolean;
+}
