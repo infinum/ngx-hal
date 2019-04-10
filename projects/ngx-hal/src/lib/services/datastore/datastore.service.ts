@@ -259,6 +259,42 @@ export class DatastoreService {
     return this.internalStorage;
   }
 
+  public request<T extends HalModel>(
+    method: string,
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: false
+  ): Observable<HalDocument<T>>;
+  public request<T extends HalModel>(
+    method: string,
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: true
+  ): Observable<T>;
+  public request<T extends HalModel>(
+    method: string,
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: boolean
+  ): Observable<HalDocument<T> | T>;
+  public request<T extends HalModel>(
+    method: string,
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: boolean
+  ): Observable<HalDocument<T> | T> {
+    switch (method.toLocaleLowerCase()) {
+      case 'get':
+        return this.makeGetRequest(url, requestOptions, modelClass, singleResource);
+      default:
+        throw new Error(`Method ${method} is not supported.`);
+    }
+  }
+
   private makeGetRequest<T extends HalModel>(
     url: string,
     requestOptions: RequestOptions,
