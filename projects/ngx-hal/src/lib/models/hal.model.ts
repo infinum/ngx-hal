@@ -163,6 +163,9 @@ export abstract class HalModel {
 
           const modelIdentificator: string = relationshipLinks.href;
           return this.datastore.storage.get(modelIdentificator);
+        },
+        set<T extends HalModel>(value: T) {
+          this.replaceRelationshipModel(property.name, value);
         }
       });
     });
@@ -211,5 +214,17 @@ export abstract class HalModel {
 
   public set selfLink(link: string) {
     this.temporarySelfLink = link;
+  }
+
+  private replaceRelationshipModel<T extends HalModel>(relationshipName: string, relationshipModel: T): void {
+    if (!relationshipModel.selfLink) {
+      throw new Error(`You are trying to save unsaved model to hasOne propery: ${relationshipName}`);
+    }
+
+    this.resource[LINKS_PROPERTY_NAME] = this.resource[LINKS_PROPERTY_NAME] || { self: null };
+
+    this.resource[LINKS_PROPERTY_NAME][relationshipName] = {
+      href: relationshipModel.selfLink
+    };
   }
 }
