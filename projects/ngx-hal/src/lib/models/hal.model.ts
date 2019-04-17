@@ -184,6 +184,11 @@ export abstract class HalModel {
           const modelIdentificator: string = relationshipLink.href;
           const halDocument: HalDocument<HalModel> = this.datastore.storage.get(modelIdentificator) as HalDocument<HalModel>;
 
+          if (!halDocument) {
+            console.warn(`Has many relationship ${property.name} is not fetched.`);
+            return;
+          }
+
           return halDocument.models;
         }
       });
