@@ -1,5 +1,5 @@
 export interface AttributeOptions {
-  useClass?: boolean;
+  useClass?: boolean | { new(...args): any };
   transformResponseValue?: (rawAttribute: any) => any;
   transformBeforeSave?: (rawAttribute: any) => void; // TODO implement
 }
