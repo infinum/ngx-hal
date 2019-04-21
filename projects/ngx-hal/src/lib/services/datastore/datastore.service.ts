@@ -52,9 +52,10 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     modelId: string,
     includeRelationships: Array<string> = [],
-    requestOptions: RequestOptions = {}
+    requestOptions: RequestOptions = {},
+    customUrl?: string
   ): Observable<T> {
-    const url: string = this.buildModelUrl(modelClass, modelId);
+    const url: string = customUrl || this.buildModelUrl(modelClass, modelId);
     return this.handleGetRequestWithRelationships(url, requestOptions, modelClass, true, includeRelationships);
   }
 
@@ -201,9 +202,10 @@ export class DatastoreService {
     params: object = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string> = [],
-    requestOptions: RequestOptions = {}
+    requestOptions: RequestOptions = {},
+    customUrl?: string
   ): Observable<HalDocument<T> | Array<T>> {
-    const url: string = this.buildModelUrl(modelClass);
+    const url: string = customUrl || this.buildModelUrl(modelClass);
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, requestOptions);
     options.params = Object.assign({}, options.params, params);
 
