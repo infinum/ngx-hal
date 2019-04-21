@@ -18,8 +18,12 @@ export function Attribute(options: AttributeOptions = {}) {
     };
 
     if (attributeOptions.useClass) {
-      const propertyClass = Reflect.getMetadata('design:type', model, propertyName);
-      attributeProperty.propertyClass = propertyClass;
+      if (attributeOptions.useClass === true) {
+        const propertyClass = Reflect.getMetadata('design:type', model, propertyName);
+        attributeProperty.propertyClass = propertyClass;
+      } else {
+        attributeProperty.propertyClass = attributeOptions.useClass;
+      }
     }
 
     attributeProperties.push(attributeProperty);
