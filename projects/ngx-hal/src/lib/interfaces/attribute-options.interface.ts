@@ -1,7 +1,7 @@
 export interface AttributeOptions {
   useClass?: boolean | { new(...args): any };
   transformResponseValue?: (rawAttribute: any) => any;
-  transformBeforeSave?: (rawAttribute: any) => void; // TODO implement
+  transformBeforeSave?: (raw: any) => any;
 }
 
 export const DEFAULT_ATTRIBUTE_OPTIONS = {
