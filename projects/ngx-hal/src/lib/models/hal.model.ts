@@ -83,7 +83,7 @@ export abstract class HalModel {
   public generatePayload(): object {
     const attributePropertiesPayload: object = this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
       const propertyName: string = property.name;
-      payload[propertyName] = this[propertyName];
+      payload[propertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
       return payload;
     }, {});
 

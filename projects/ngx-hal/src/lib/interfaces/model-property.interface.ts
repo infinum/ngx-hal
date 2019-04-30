@@ -8,7 +8,7 @@ export interface ModelProperty {
 
 export interface AttributeModelProperty extends ModelProperty {
   tranformResponseValue?: (rawAttribute: any) => any;
-  transformBeforeSave?: (rawAttribute: any) => void;
+  transformBeforeSave?: (raw: any) => any;
 }
 
 export interface HasOneModelProperty extends ModelProperty {
