@@ -241,11 +241,9 @@ export class DatastoreService {
     return request$.pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
-
         if (rawResource) {
           return this.processRawResource(rawResource, modelClass, true);
         }
-
         model.selfLink = response.headers.get('Location');
 
         return model;
@@ -387,7 +385,7 @@ export class DatastoreService {
 
     let currentItem: string;
     while (currentItem = sortedIncludes.shift()) {
-      const alreadyIncluded: boolean = sortedIncludes.some((item) => item.startsWith(currentItem));
+      const alreadyIncluded: boolean = sortedIncludes.some((item) => item.startsWith(`${currentItem}.`));
       if (!alreadyIncluded) {
         filteredIncludes.push(currentItem);
       }
