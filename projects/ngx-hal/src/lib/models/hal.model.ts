@@ -229,14 +229,10 @@ export abstract class HalModel {
   }
 
   private replaceRelationshipModel<T extends HalModel>(relationshipName: string, relationshipModel: T): void {
-    if (!relationshipModel.selfLink) {
-      throw new Error(`You are trying to connect a model which is not in the local store to hasOne propery: ${relationshipName}`);
-    }
-
     this.resource[LINKS_PROPERTY_NAME] = this.resource[LINKS_PROPERTY_NAME] || { self: null };
 
     this.resource[LINKS_PROPERTY_NAME][relationshipName] = {
-      href: relationshipModel.selfLink
+      href: relationshipModel.selfLink || relationshipModel.uniqueModelIdentificator
     };
   }
 
