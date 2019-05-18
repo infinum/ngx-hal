@@ -15,6 +15,7 @@ import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
 import { HalDocument } from '../classes/hal-document';
 import { NetworkConfig } from '../interfaces/network-config.interface';
+import { generateUUID } from '../helpers/uuid/uuid.helper';
 
 export abstract class HalModel {
   private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
@@ -222,14 +223,10 @@ export abstract class HalModel {
   }
 
   private replaceRelationshipModel<T extends HalModel>(relationshipName: string, relationshipModel: T): void {
-    if (!relationshipModel.selfLink) {
-      throw new Error(`You are trying to save unsaved model to hasOne propery: ${relationshipName}`);
-    }
-
     this.resource[LINKS_PROPERTY_NAME] = this.resource[LINKS_PROPERTY_NAME] || { self: null };
 
     this.resource[LINKS_PROPERTY_NAME][relationshipName] = {
-      href: relationshipModel.selfLink
+      href: relationshipModel.selfLink || `unsaved-model-${generateUUID()}`
     };
   }
 }
