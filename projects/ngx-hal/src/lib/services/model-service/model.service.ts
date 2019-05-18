@@ -33,7 +33,9 @@ export abstract class ModelService<Model extends HalModel> {
   }
 
   public createNewModel(recordData: object = {}): Model {
-    return this.createModel(recordData);
+    const model: Model = this.createModel(recordData);
+    this.datastore.storage.save(model);
+    return model;
   }
 
   private createModel(recordData: object = {}, response?: HttpResponse<object>): Model {

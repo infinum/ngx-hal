@@ -20,18 +20,20 @@ import { generateUUID } from '../helpers/uuid/uuid.helper';
 export abstract class HalModel {
   private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
   private temporarySelfLink: string = null;
+  private localModelIdentificator: string;
 
   constructor(
     private resource: RawHalResource = {},
     private datastore: DatastoreService
   ) {
+    this.setLocalModelIdentificator();
     this.parseAttributes(resource);
     this.createHasOneGetters();
     this.createHasManyGetters();
   }
 
   public get uniqueModelIdentificator(): string {
-    return this.links[SELF_PROPERTY_NAME].href;
+    return this.links[SELF_PROPERTY_NAME].href || this.localModelIdentificator;
   }
 
   public get id(): string {
@@ -223,10 +225,18 @@ export abstract class HalModel {
   }
 
   private replaceRelationshipModel<T extends HalModel>(relationshipName: string, relationshipModel: T): void {
+    if (!relationshipModel.selfLink) {
+      throw new Error(`You are trying to connect a model which is not in the local store to hasOne propery: ${relationshipName}`);
+    }
+
     this.resource[LINKS_PROPERTY_NAME] = this.resource[LINKS_PROPERTY_NAME] || { self: null };
 
     this.resource[LINKS_PROPERTY_NAME][relationshipName] = {
-      href: relationshipModel.selfLink || `unsaved-model-${generateUUID()}`
+      href: relationshipModel.selfLink
     };
+  }
+
+  private setLocalModelIdentificator(): void {
+    this.localModelIdentificator = `local-model-identificator-${generateUUID()}`;
   }
 }
