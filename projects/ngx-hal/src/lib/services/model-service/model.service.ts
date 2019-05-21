@@ -16,10 +16,17 @@ export abstract class ModelService<Model extends HalModel> {
   public find(params: object): Observable<Array<Model>>;
   public find(params: object, includeMeta: false): Observable<Array<Model>>;
   public find(params: object, includeMeta: true): Observable<HalDocument<Model>>;
-  public find(params: object, includeMeta: boolean, includeRelationships: Array<string>): Observable<HalDocument<Model>>;
+  public find(params: object, includeMeta: false, includeRelationships: Array<string>): Observable<Array<Model>>;
+  public find(params: object, includeMeta: true, includeRelationships: Array<string>): Observable<HalDocument<Model>>;
   public find(
     params: object,
-    includeMeta: boolean,
+    includeMeta: false,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions
+  ): Observable<Array<Model>>;
+  public find(
+    params: object,
+    includeMeta: true,
     includeRelationships: Array<string>,
     requestOptions: RequestOptions
   ): Observable<HalDocument<Model>>;
