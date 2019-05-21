@@ -95,7 +95,7 @@ export abstract class HalModel {
     }, {});
 
     const hasOnePropertiesPayload: object = this.hasOneProperties
-      .filter((property: HasOneModelProperty) => property.includeInPaylaod)
+      .filter((property: HasOneModelProperty) => property.includeInPayload)
       .reduce((payload: object, property: HasOneModelProperty) => {
         const propertyName: string = property.name;
 
@@ -111,7 +111,7 @@ export abstract class HalModel {
       }, {});
 
     const hasManyPropertiesPayload: object = this.hasManyProperties
-      .filter((property: HasManyModelProperty) => property.includeInPaylaod)
+      .filter((property: HasManyModelProperty) => property.includeInPayload)
       .reduce((payload: object, property: HasManyModelProperty) => {
         const propertyName: string = property.name;
         payload[propertyName] = [];

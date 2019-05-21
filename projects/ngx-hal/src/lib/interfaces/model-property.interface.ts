@@ -12,9 +12,9 @@ export interface AttributeModelProperty extends ModelProperty {
 }
 
 export interface HasOneModelProperty extends ModelProperty {
-  includeInPaylaod?: boolean;
+  includeInPayload?: boolean;
 }
 
 export interface HasManyModelProperty extends ModelProperty {
-  includeInPaylaod?: boolean;
+  includeInPayload?: boolean;
 }

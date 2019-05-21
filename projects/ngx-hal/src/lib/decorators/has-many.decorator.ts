@@ -11,7 +11,7 @@ export function HasMany(options: HasManyOptions) {
     const hasManyProperties: Array<HasManyModelProperty> = Reflect.getOwnMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, model) || [];
 
     const hasManyProperty: HasManyModelProperty = {
-      includeInPaylaod: hasManyOptions.includeInPayload,
+      includeInPayload: hasManyOptions.includeInPayload,
       name: propertyName,
       propertyClass: hasManyOptions.itemsType,
       type: ModelProperty.HasMany

@@ -11,7 +11,7 @@ export function HasOne(options: HasOneOptions = {}) {
     const hasOneProperties: Array<HasOneModelProperty> = Reflect.getOwnMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, model) || [];
 
     const hasOneProperty: HasOneModelProperty = {
-      includeInPaylaod: hasOneOptions.includeInPayload,
+      includeInPayload: hasOneOptions.includeInPayload,
       name: propertyName,
       propertyClass: Reflect.getMetadata('design:type', model, propertyName),
       type: ModelProperty.HasOne
