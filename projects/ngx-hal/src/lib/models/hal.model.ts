@@ -116,6 +116,10 @@ export abstract class HalModel {
         const propertyName: string = property.name;
         payload[propertyName] = [];
 
+        if (!this[propertyName]) {
+          return payload;
+        }
+
         // TODO check if this[propertyName] is an array of models or just a HalDocument
         this[propertyName].forEach((model: HalModel) => {
           if (!model) {
