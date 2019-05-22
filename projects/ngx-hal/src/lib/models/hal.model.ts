@@ -201,6 +201,11 @@ export abstract class HalModel {
           }
 
           return halDocument.models;
+        },
+        set<T extends HalModel>(value: Array<T>) {
+          const halDocumentRaw = { models: value, uniqueModelIdentificator: `local-document-identificator-${generateUUID()}` };
+          this.datastore.storage.save(halDocumentRaw);
+          this.replaceRelationshipModel(property.name, halDocumentRaw);
         }
       });
     });
