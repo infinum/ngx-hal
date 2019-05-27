@@ -33,11 +33,7 @@ export abstract class HalModel {
   }
 
   public get uniqueModelIdentificator(): string {
-    if (!this.links[SELF_PROPERTY_NAME]) {
-      return this.localModelIdentificator;
-    }
-
-    return this.links[SELF_PROPERTY_NAME].href;
+    return this.selfLink || this.localModelIdentificator;
   }
 
   public get id(): string {
