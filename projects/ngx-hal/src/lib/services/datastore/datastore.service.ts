@@ -257,7 +257,12 @@ export class DatastoreService {
         if (rawResource) {
           return this.processRawResource(rawResource, modelClass, true);
         }
+
         model.selfLink = response.headers.get('Location');
+
+        if (!this.storage.get(model.selfLink)) {
+          this.storage.save(model);
+        }
 
         return model;
       })
