@@ -45,7 +45,7 @@ export abstract class HalModel {
   }
 
   public get endpoint(): string {
-    return this.config.endpoint || this.constructor.name;
+    return this.config.endpoint || 'unkwownModelEndpoint';
   }
 
   public get networkConfig(): NetworkConfig {
