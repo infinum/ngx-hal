@@ -52,6 +52,10 @@ export abstract class HalModel {
     return this.config.networkConfig;
   }
 
+  public get type(): string {
+    return this.config.type;
+  }
+
   public getHalDocumentClass<T extends this>(): HalDocumentConstructor<T> {
     return Reflect.getMetadata(HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, this.constructor);
   }
