@@ -64,11 +64,20 @@ export class DatastoreService {
 
     const filteredRelationships: Array<string> = this.filterUnnecessaryIncludes(relationships);
 
-    for (let i = 0; i < filteredRelationships.length; i += 1) {
-      const relationshipName: string = filteredRelationships[i];
-
-      const relationshipNameParts: Array<string> = relationshipName.split('.');
+    const currentLevelRelationshipsMap: object = filteredRelationships.reduce((relationships: any, currentRelationshipName: string) => {
+      const relationshipNameParts: Array<string> = currentRelationshipName.split('.');
       const currentLevelRelationship: string = relationshipNameParts.shift();
+
+      relationships[currentLevelRelationship] = relationships[currentLevelRelationship] || [];
+      relationships[currentLevelRelationship].push(relationshipNameParts.join('.'));
+
+      return relationships;
+    }, {});
+
+    const currentLevelRelationships: Array<string> = Object.keys(currentLevelRelationshipsMap);
+
+    for (let i = 0; i < currentLevelRelationships.length; i += 1) {
+      const currentLevelRelationship: string = currentLevelRelationships[i];
 
       const url: string = model.getRelationshipUrl(currentLevelRelationship);
       const property: ModelProperty = model.getPropertyData(currentLevelRelationship);
@@ -94,7 +103,7 @@ export class DatastoreService {
         {},
         modelClass,
         isSingleResource,
-        relationshipNameParts.length ? [relationshipNameParts.join('.')] : [],
+        currentLevelRelationshipsMap[currentLevelRelationship],
         fetchedModels
       );
 
@@ -164,7 +173,10 @@ export class DatastoreService {
     return httpRequest$;
   }
 
-  private triggerFetchingModelRelationships<T extends HalModel>(models: Array<T>, includeRelationships: Array<string>) {
+  private triggerFetchingModelRelationships<T extends HalModel>(
+    models: Array<T>,
+    includeRelationships: Array<string>
+  ): Array<Observable<any>> {
     const modelRelationshipCalls: Array<Observable<any>> = [];
 
     models.forEach((model: T) => {
