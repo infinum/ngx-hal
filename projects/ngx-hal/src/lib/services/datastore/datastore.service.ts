@@ -1,6 +1,6 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, combineLatest, of } from 'rxjs';
-import { map, flatMap, filter } from 'rxjs/operators';
+import { map, flatMap, filter, tap } from 'rxjs/operators';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
@@ -281,6 +281,15 @@ export class DatastoreService {
     );
   }
 
+  public delete<T extends HalModel>(model: T, requestOptions?: RequestOptions): Observable<void> {
+    const url: string = this.buildUrl(model);
+    return this.makeDeleteRequest(url, requestOptions).pipe(
+      tap(() => {
+        this.storage.remove(model);
+      })
+    );
+  }
+
   public get storage(): HalStorage {
     return this.internalStorage;
   }
@@ -366,6 +375,11 @@ export class DatastoreService {
   private makePutRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
     return this.http.put<T>(url, payload, options);
+  }
+
+  private makeDeleteRequest<T extends HalModel>(url: string, requestOptions: RequestOptions): Observable<any> {
+    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    return this.http.delete<T>(url, options);
   }
 
   private processRawResource<T extends HalModel>(
