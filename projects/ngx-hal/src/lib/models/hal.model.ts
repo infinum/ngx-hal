@@ -87,6 +87,11 @@ export abstract class HalModel {
     return this.datastore.save(this, Object.getPrototypeOf(this));
   }
 
+  public delete(): Observable<void> {
+    return this.datastore.delete(this);
+  }
+
+
   public generatePayload(): object {
     const attributePropertiesPayload: object = this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
       const propertyName: string = property.name;

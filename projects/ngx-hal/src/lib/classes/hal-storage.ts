@@ -21,4 +21,8 @@ export class HalStorage {
   public get(uniqueModelIdentificator: string): HalModel | HalDocument<HalModel> {
     return this.internalStorage[uniqueModelIdentificator];
   }
+
+  public remove(model: HalModel): void {
+    delete this.internalStorage[model.uniqueModelIdentificator];
+  }
 }
