@@ -1,14 +1,9 @@
 import { Observable } from 'rxjs';
 import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
-import {
-  ATTRIBUTE_PROPERTIES_METADATA_KEY,
-  HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY,
-  HAS_ONE_PROPERTIES_METADATA_KEY,
-  HAS_MANY_PROPERTIES_METADATA_KEY
-} from '../constants/metadata.constant';
+import { ATTRIBUTE_PROPERTIES_METADATA_KEY, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, HAS_ONE_PROPERTIES_METADATA_KEY, HAS_MANY_PROPERTIES_METADATA_KEY, HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
-import { ModelProperty, AttributeModelProperty, HasOneModelProperty, HasManyModelProperty } from '../interfaces/model-property.interface';
+import { ModelProperty, AttributeModelProperty, HasOneModelProperty, HasManyModelProperty, HeaderAttributeModelProperty } from '../interfaces/model-property.interface';
 import { LINKS_PROPERTY_NAME, SELF_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.constant';
 import { DatastoreService } from '../services/datastore/datastore.service';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
@@ -16,6 +11,8 @@ import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
 import { HalDocument } from '../classes/hal-document';
 import { NetworkConfig } from '../interfaces/network-config.interface';
 import { generateUUID } from '../helpers/uuid/uuid.helper';
+import { HttpResponse } from '@angular/common/http';
+import { getResponseHeader } from '../utils/get-response-headers/get-response-header.util';
 
 export abstract class HalModel {
   private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
@@ -24,10 +21,12 @@ export abstract class HalModel {
 
   constructor(
     private resource: RawHalResource = {},
-    private datastore: DatastoreService
+    private datastore: DatastoreService,
+    public rawResponse?: HttpResponse<any>
   ) {
     this.setLocalModelIdentificator();
     this.parseAttributes(resource);
+    this.parseHeaderAttributes(rawResponse);
     this.createHasOneGetters();
     this.createHasManyGetters();
   }
@@ -91,7 +90,7 @@ export abstract class HalModel {
     return this.datastore.delete(this);
   }
 
-
+  // TODO simplify this function
   public generatePayload(): object {
     const attributePropertiesPayload: object = this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
       const propertyName: string = property.name;
@@ -151,19 +150,31 @@ export abstract class HalModel {
     return payload;
   }
 
+  public generateHeaders(): object {
+    return this.headerAttributeProperties.reduce((headers: object, property: HeaderAttributeModelProperty) => {
+      const propertyName: string = property.name;
+      headers[propertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
+      return headers;
+    }, {});
+  }
+
   public get isSaved(): boolean {
     return Boolean(this.id);
   }
 
-  private get attributeProperties(): Array<ModelProperty> {
+  private get attributeProperties(): Array<AttributeModelProperty> {
     return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
   }
 
-  private get hasOneProperties(): Array<ModelProperty> {
+  private get headerAttributeProperties(): Array<HeaderAttributeModelProperty> {
+    return Reflect.getMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
+  }
+
+  private get hasOneProperties(): Array<HasOneModelProperty> {
     return Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, this) || [];
   }
 
-  private get hasManyProperties(): Array<ModelProperty> {
+  private get hasManyProperties(): Array<HasManyModelProperty> {
     return Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, this) || [];
   }
 
@@ -226,6 +237,20 @@ export abstract class HalModel {
         this[attributeProperty.name] = attributeProperty.tranformResponseValue(rawPropertyValue);
       } else {
         this[attributeProperty.name] = rawPropertyValue;
+      }
+    });
+  }
+
+  private parseHeaderAttributes(response: HttpResponse<any>): void {
+    this.headerAttributeProperties.forEach((headerAttributeProperty: HeaderAttributeModelProperty) => {
+      const rawPropertyValue: any = getResponseHeader(response, headerAttributeProperty.name);
+
+      if (headerAttributeProperty.propertyClass) {
+        this[headerAttributeProperty.name] = new headerAttributeProperty.propertyClass(rawPropertyValue);
+      } else if (headerAttributeProperty.tranformResponseValue) {
+        this[headerAttributeProperty.name] = headerAttributeProperty.tranformResponseValue(rawPropertyValue);
+      } else {
+        this[headerAttributeProperty.name] = rawPropertyValue;
       }
     });
   }

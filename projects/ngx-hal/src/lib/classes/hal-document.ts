@@ -1,3 +1,4 @@
+import { HttpResponse } from '@angular/common/http';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME, SELF_PROPERTY_NAME } from '../constants/hal.constant';
 import { HalModel } from '../models/hal.model';
@@ -14,11 +15,12 @@ export class HalDocument<Model extends HalModel> {
   public pagination: Pagination;
 
   constructor(
-    private rawResponse: RawHalResource,
+    private rawResource: RawHalResource,
+    private rawResponse: HttpResponse<any>,
     private modelClass: ModelConstructor<Model>,
     private datastore: DatastoreService
   ) {
-    this.parseRawResources(rawResponse);
+    this.parseRawResources(rawResource);
   }
 
   public get uniqueModelIdentificator(): string {
@@ -27,12 +29,12 @@ export class HalDocument<Model extends HalModel> {
   }
 
   public get hasEmbeddedItems(): boolean {
-    const listPropertyName: string = this.getListPropertyName(this.rawResponse);
-    return this.rawResponse[EMBEDDED_PROPERTY_NAME] && this.rawResponse[EMBEDDED_PROPERTY_NAME][listPropertyName];
+    const listPropertyName: string = this.getListPropertyName(this.rawResource);
+    return this.rawResource[EMBEDDED_PROPERTY_NAME] && this.rawResource[EMBEDDED_PROPERTY_NAME][listPropertyName];
   }
 
   public get itemLinks(): Array<RawHalLink> {
-    const listPropertyName: string = this.getListPropertyName(this.rawResponse);
+    const listPropertyName: string = this.getListPropertyName(this.rawResource);
     return this.links[listPropertyName] as any;
   }
 
@@ -44,7 +46,7 @@ export class HalDocument<Model extends HalModel> {
 
   private generateModels(resources: Array<RawHalResource>): Array<Model> {
     return resources.map((resource: RawHalResource) => {
-      return new this.modelClass(resource, this.datastore, resource);
+      return new this.modelClass(resource, this.datastore, this.rawResponse);
     });
   }
 
@@ -75,6 +77,6 @@ export class HalDocument<Model extends HalModel> {
   }
 
   private get links(): RawHalLinks {
-    return this.rawResponse[LINKS_PROPERTY_NAME];
+    return this.rawResource[LINKS_PROPERTY_NAME];
   }
 }

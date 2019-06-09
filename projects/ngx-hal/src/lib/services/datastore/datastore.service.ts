@@ -15,6 +15,7 @@ import { ModelProperty } from '../../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
 import { PaginationConstructor } from '../../types/pagination.type';
+import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
 
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
@@ -42,10 +43,14 @@ export class DatastoreService {
     return urlParts.filter((urlPart) => urlPart).join('/');
   }
 
-  public createHalDocument<T extends HalModel>(rawResource: RawHalResource, modelClass: ModelConstructor<T>): HalDocument<T> {
+  public createHalDocument<T extends HalModel>(
+    rawResource: RawHalResource,
+    modelClass: ModelConstructor<T>,
+    rawResponse?: HttpResponse<any>
+  ): HalDocument<T> {
     const representantiveModel = new modelClass();
     const halDocumentClass = representantiveModel.getHalDocumentClass() || this.getHalDocumentClass<T>();
-    return new halDocumentClass(rawResource, modelClass, this);
+    return new halDocumentClass(rawResource, rawResponse, modelClass, this);
   }
 
   public findOne<T extends HalModel>(
@@ -95,7 +100,7 @@ export class DatastoreService {
       let fetchedModels: T | HalDocument<T>;
 
       if (embeddedRelationship) {
-        fetchedModels = this.processRawResource(embeddedRelationship, modelClass, isSingleResource);
+        fetchedModels = this.processRawResource(embeddedRelationship, modelClass, isSingleResource, model.rawResponse);
       }
 
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
@@ -254,23 +259,28 @@ export class DatastoreService {
   public save<T extends HalModel>(model: T, modelClass: ModelConstructor<T>, requestOptions?: RequestOptions): Observable<T> {
     const url: string = this.buildUrl(model);
     const payload: object = model.generatePayload();
+    const modelHeaders: object = model.generateHeaders();
+
+    const modelRequestOptions: RequestOptions = requestOptions || {};
+    modelRequestOptions.headers = modelRequestOptions.headers || {};
+    Object.assign(modelRequestOptions.headers, modelHeaders);
 
     let request$;
 
     if (model.isSaved) {
-      request$ = this.makePutRequest(url, payload, requestOptions);
+      request$ = this.makePutRequest(url, payload, modelRequestOptions);
     } else {
-      request$ = this.makePostRequest(url, payload, requestOptions);
+      request$ = this.makePostRequest(url, payload, modelRequestOptions);
     }
 
     return request$.pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
         if (rawResource) {
-          return this.processRawResource(rawResource, modelClass, true);
+          return this.processRawResource(rawResource, modelClass, true, response);
         }
 
-        model.selfLink = response.headers.get('Location');
+        model.selfLink = getResponseHeader(response, 'Location');
 
         if (!this.storage.get(model.selfLink)) {
           this.storage.save(model);
@@ -362,7 +372,7 @@ export class DatastoreService {
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
-        return this.processRawResource(rawResource, modelClass, singleResource);
+        return this.processRawResource(rawResource, modelClass, singleResource, response);
       })
     );
   }
@@ -385,30 +395,34 @@ export class DatastoreService {
   private processRawResource<T extends HalModel>(
     rawResource: RawHalResource,
     modelClass: ModelConstructor<T>,
-    isSingleResource: false
+    isSingleResource: false,
+    response: HttpResponse<T>
   ): HalDocument<T>;
   private processRawResource<T extends HalModel>(
     rawResource: RawHalResource,
     modelClass: ModelConstructor<T>,
-    isSingleResource: true
+    isSingleResource: true,
+    response: HttpResponse<T>
   ): T;
   private processRawResource<T extends HalModel>(
     rawResource: RawHalResource,
     modelClass: ModelConstructor<T>,
-    isSingleResource: boolean
+    isSingleResource: boolean,
+    response: HttpResponse<T>
   ): T | HalDocument<T>;
   private processRawResource<T extends HalModel>(
     rawResource: RawHalResource,
     modelClass: ModelConstructor<T>,
-    isSingleResource: boolean
+    isSingleResource: boolean,
+    response: HttpResponse<T>
   ): T | HalDocument<T> {
     if (isSingleResource) {
-      const model: T = new modelClass(rawResource, this);
+      const model: T = new modelClass(rawResource, this, response);
       this.storage.save(model);
       return model;
     }
 
-    const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass);
+    const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass, response);
     this.storage.saveAll(halDocument.models);
     this.storage.saveHalDocument(halDocument);
     return halDocument;
