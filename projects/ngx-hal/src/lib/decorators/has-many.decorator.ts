@@ -14,7 +14,8 @@ export function HasMany(options: HasManyOptions) {
       includeInPayload: hasManyOptions.includeInPayload,
       name: propertyName,
       propertyClass: hasManyOptions.itemsType,
-      type: ModelProperty.HasMany
+      type: ModelProperty.HasMany,
+      externalName: options.externalName || propertyName
     };
 
     hasManyProperties.push(hasManyProperty);

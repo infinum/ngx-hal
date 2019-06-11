@@ -71,15 +71,17 @@ export abstract class HalModel {
   }
 
   public getEmbeddedResource(resourceName: string): RawHalResource | undefined {
-    if (this.resource[resourceName]) {
-      return this.resource[resourceName];
+    const property: ModelProperty = this.getPropertyData(resourceName);
+
+    if (this.resource[property.externalName]) {
+      return this.resource[property.externalName];
     }
 
     if (!this.resource[EMBEDDED_PROPERTY_NAME]) {
       return;
     }
 
-    return this.resource[EMBEDDED_PROPERTY_NAME][resourceName];
+    return this.resource[EMBEDDED_PROPERTY_NAME][property.externalName];
   }
 
   public save(): Observable<this> {
@@ -94,7 +96,8 @@ export abstract class HalModel {
   public generatePayload(): object {
     const attributePropertiesPayload: object = this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
       const propertyName: string = property.name;
-      payload[propertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
+      const externalPropertyName: string = property.externalName;
+      payload[externalPropertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
       return payload;
     }, {});
 
@@ -102,12 +105,13 @@ export abstract class HalModel {
       .filter((property: HasOneModelProperty) => property.includeInPayload)
       .reduce((payload: object, property: HasOneModelProperty) => {
         const propertyName: string = property.name;
+        const externalPropertyName: string = property.externalName;
 
         if (!this[propertyName]) {
           return payload;
         }
 
-        payload[propertyName] = {
+        payload[externalPropertyName] = {
           href: this[propertyName].selfLink
         };
 
@@ -118,7 +122,8 @@ export abstract class HalModel {
       .filter((property: HasManyModelProperty) => property.includeInPayload)
       .reduce((payload: object, property: HasManyModelProperty) => {
         const propertyName: string = property.name;
-        payload[propertyName] = [];
+        const externalPropertyName: string = property.externalName;
+        payload[externalPropertyName] = [];
 
         if (!this[propertyName]) {
           return payload;
@@ -130,7 +135,7 @@ export abstract class HalModel {
             return payload;
           }
 
-          payload[propertyName].push({
+          payload[externalPropertyName].push({
             href: model.selfLink
           });
         });
@@ -152,8 +157,9 @@ export abstract class HalModel {
 
   public generateHeaders(): object {
     return this.headerAttributeProperties.reduce((headers: object, property: HeaderAttributeModelProperty) => {
+      const externalPropertyName: string = property.externalName;
       const propertyName: string = property.name;
-      headers[propertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
+      headers[externalPropertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
       return headers;
     }, {});
   }
@@ -182,7 +188,7 @@ export abstract class HalModel {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
-          const relationshipLinks: RawHalLink = this.links[property.name];
+          const relationshipLinks: RawHalLink = this.links[property.externalName];
 
           if (!relationshipLinks) {
             return;
@@ -192,7 +198,7 @@ export abstract class HalModel {
           return this.datastore.storage.get(modelIdentificator);
         },
         set<T extends HalModel>(value: T) {
-          this.replaceRelationshipModel(property.name, value);
+          this.replaceRelationshipModel(property.externalName, value);
         }
       });
     });
@@ -202,7 +208,7 @@ export abstract class HalModel {
     this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
-          const relationshipLink: RawHalLink = this.links[property.name];
+          const relationshipLink: RawHalLink = this.links[property.externalName];
 
           if (!relationshipLink) {
             return;
@@ -221,7 +227,7 @@ export abstract class HalModel {
         set<T extends HalModel>(value: Array<T>) {
           const halDocumentRaw = { models: value, uniqueModelIdentificator: `local-document-identificator-${generateUUID()}` };
           this.datastore.storage.save(halDocumentRaw);
-          this.replaceRelationshipModel(property.name, halDocumentRaw);
+          this.replaceRelationshipModel(property.externalName, halDocumentRaw);
         }
       });
     });
@@ -229,7 +235,7 @@ export abstract class HalModel {
 
   private parseAttributes(resource: RawHalResource): void {
     this.attributeProperties.forEach((attributeProperty: AttributeModelProperty) => {
-      const rawPropertyValue: any = resource[attributeProperty.name];
+      const rawPropertyValue: any = resource[attributeProperty.externalName];
 
       if (attributeProperty.propertyClass) {
         this[attributeProperty.name] = new attributeProperty.propertyClass(rawPropertyValue);
@@ -243,7 +249,7 @@ export abstract class HalModel {
 
   private parseHeaderAttributes(response: HttpResponse<any>): void {
     this.headerAttributeProperties.forEach((headerAttributeProperty: HeaderAttributeModelProperty) => {
-      const rawPropertyValue: any = getResponseHeader(response, headerAttributeProperty.name);
+      const rawPropertyValue: any = getResponseHeader(response, headerAttributeProperty.externalName);
 
       if (headerAttributeProperty.propertyClass) {
         this[headerAttributeProperty.name] = new headerAttributeProperty.propertyClass(rawPropertyValue);

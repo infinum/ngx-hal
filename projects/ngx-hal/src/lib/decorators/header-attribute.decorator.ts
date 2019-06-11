@@ -1,6 +1,6 @@
 import { HalModel } from '../models/hal.model';
 import { HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
-import { AttributeModelProperty } from '../interfaces/model-property.interface';
+import { AttributeModelProperty, HeaderAttributeModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { HeaderAttributeOptions, DEFAULT_HEADER_ATTRIBUTE_OPTIONS } from '../interfaces/header-attribute-options.interface';
 
@@ -11,11 +11,12 @@ export function HeaderAttribute(options: HeaderAttributeOptions = {}) {
     // tslint:disable-next-line:max-line-length
     const headerAttributeProperties: Array<AttributeModelProperty> = Reflect.getOwnMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
 
-    const attributeProperty: AttributeModelProperty = {
+    const attributeProperty: HeaderAttributeModelProperty = {
       type: ModelPropertyEnum.HeaderAttribute,
       tranformResponseValue: headerAttributeOptions.transformResponseValue,
       transformBeforeSave: headerAttributeOptions.transformBeforeSave,
-      name: propertyName
+      name: propertyName,
+      externalName: options.externalName || propertyName
     };
 
     if (headerAttributeOptions.useClass) {

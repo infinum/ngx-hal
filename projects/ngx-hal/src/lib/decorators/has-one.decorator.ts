@@ -14,7 +14,8 @@ export function HasOne(options: HasOneOptions = {}) {
       includeInPayload: hasOneOptions.includeInPayload,
       name: propertyName,
       propertyClass: Reflect.getMetadata('design:type', model, propertyName),
-      type: ModelProperty.HasOne
+      type: ModelProperty.HasOne,
+      externalName: options.externalName || propertyName
     };
 
     hasOneProperties.push(hasOneProperty);
