@@ -14,7 +14,8 @@ export function Attribute(options: AttributeOptions = {}) {
       type: ModelPropertyEnum.Attribute,
       tranformResponseValue: attributeOptions.transformResponseValue,
       transformBeforeSave: attributeOptions.transformBeforeSave,
-      name: propertyName
+      name: propertyName,
+      externalName: options.externalName || propertyName
     };
 
     if (attributeOptions.useClass) {
