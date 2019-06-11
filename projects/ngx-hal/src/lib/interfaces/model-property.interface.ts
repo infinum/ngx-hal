@@ -11,6 +11,11 @@ export interface AttributeModelProperty extends ModelProperty {
   transformBeforeSave?: (raw: any) => any;
 }
 
+export interface HeaderAttributeModelProperty extends ModelProperty {
+  tranformResponseValue?: (rawAttribute: any) => any;
+  transformBeforeSave?: (raw: any) => any;
+}
+
 export interface HasOneModelProperty extends ModelProperty {
   includeInPayload?: boolean;
 }
