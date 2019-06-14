@@ -8,6 +8,7 @@ export interface ModelProperty {
 }
 
 export interface AttributeModelProperty extends ModelProperty {
+  excludeFromPayload?: boolean;
   tranformResponseValue?: (rawAttribute: any) => any;
   transformBeforeSave?: (raw: any) => any;
 }

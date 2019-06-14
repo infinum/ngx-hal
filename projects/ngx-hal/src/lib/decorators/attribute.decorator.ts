@@ -15,7 +15,8 @@ export function Attribute(options: AttributeOptions = {}) {
       tranformResponseValue: attributeOptions.transformResponseValue,
       transformBeforeSave: attributeOptions.transformBeforeSave,
       name: propertyName,
-      externalName: options.externalName || propertyName
+      externalName: options.externalName || propertyName,
+      excludeFromPayload: options.excludeFromPayload
     };
 
     if (attributeOptions.useClass) {

@@ -95,6 +95,9 @@ export abstract class HalModel {
   // TODO simplify this function
   public generatePayload(): object {
     const attributePropertiesPayload: object = this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
+      if (property.excludeFromPayload) {
+        return payload;
+      }
       const propertyName: string = property.name;
       const externalPropertyName: string = property.externalName;
       payload[externalPropertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
