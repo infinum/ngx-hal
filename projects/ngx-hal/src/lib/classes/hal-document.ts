@@ -5,10 +5,10 @@ import { HalModel } from '../models/hal.model';
 import { Pagination } from './pagination';
 import { ModelConstructor } from '../types/model-constructor.type';
 import { DatastoreService } from '../services/datastore/datastore.service';
-import { isArray } from '../utils/isArray/is-array.util';
+import { isArray } from '../utils/is-array/is-array.util';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
-import { removeQueryParams } from '../utils/removeQueryParams/remove-query-params.util';
+import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
 
 export class HalDocument<Model extends HalModel> {
   public models: Array<Model>;
