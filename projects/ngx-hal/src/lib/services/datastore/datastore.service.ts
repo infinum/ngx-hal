@@ -16,7 +16,9 @@ import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.e
 import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
 import { PaginationConstructor } from '../../types/pagination.type';
 import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
+import { Injectable } from '@angular/core';
 
+@Injectable()
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
   private internalStorage: HalStorage = new HalStorage();
@@ -331,6 +333,14 @@ export class DatastoreService {
     requestOptions: RequestOptions,
     modelClass: ModelConstructor<T>,
     singleResource: boolean,
+    includeNetworkConfig?: boolean
+  ): Observable<HalDocument<T> | T>;
+  public request<T extends HalModel>(
+    method: string,
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: boolean,
     includeNetworkConfig: boolean = true
   ): Observable<HalDocument<T> | T> {
     const customUrl: string = includeNetworkConfig ? `${this.buildHostUrl(new modelClass())}/${url}` : url;
@@ -473,6 +483,6 @@ export class DatastoreService {
     // tslint:disable-next-line:max-line-length
     const networkEndpoint: string = model && model.networkConfig && model.networkConfig.endpoint ? model.networkConfig.endpoint : this.networkConfig.endpoint;
 
-    return [baseUrl, networkEndpoint].join('/');
+    return [baseUrl, networkEndpoint].filter((urlPart) => urlPart).join('/');
   }
 }
