@@ -4,6 +4,7 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { DatastoreService } from './datastore.service';
 import { MockModel } from '../../mocks/mock-model';
 import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
+import mockModelResponseJson from '../../mocks/mock-model-response.json';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -77,6 +78,22 @@ describe('DatastoreService', () => {
       }).toThrowError(`Method ${method} is not supported.`);
 
       httpTestingController.expectNone(customUrl);
+    });
+
+    it('should create model from fetched resource and save it in the local store', () => {
+      const customUrl = 'model-endpoint-2';
+
+      datastoreService.request('get', customUrl, {}, MockModel, true, false).subscribe((model: MockModel) => {
+        expect(model instanceof MockModel).toBeTruthy();
+        const modelFromDatastore = datastoreService.storage.get(model.uniqueModelIdentificator);
+        expect(modelFromDatastore).toBe(model);
+      });
+
+      const req = httpTestingController.expectOne(customUrl);
+
+      expect(req.request.method).toEqual('GET');
+
+      req.flush(mockModelResponseJson);
     });
   });
 });

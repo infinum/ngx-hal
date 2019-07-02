@@ -1,5 +1,5 @@
-import { HalModel } from '../models/hal.model';
-import { HalDocument } from './hal-document';
+import { HalModel } from '../../models/hal.model';
+import { HalDocument } from './../hal-document';
 
 export class HalStorage {
   private internalStorage: { [K: string]: any } = {};

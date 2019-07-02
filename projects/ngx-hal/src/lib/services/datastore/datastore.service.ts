@@ -10,7 +10,7 @@ import { HalDocumentConstructor } from '../../types/hal-document-construtor.type
 import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
-import { HalStorage } from '../../classes/hal-storage';
+import { HalStorage } from '../../classes/hal-storage/hal-storage';
 import { ModelProperty } from '../../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
