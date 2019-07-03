@@ -171,6 +171,10 @@ export abstract class HalModel {
     return Boolean(this.id);
   }
 
+  public fetchRelationships(relationshipNames: string | Array<string>): Observable<this> {
+    return this.datastore.fetchModelRelationships(this, relationshipNames);
+  }
+
   private get attributeProperties(): Array<AttributeModelProperty> {
     return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
   }
