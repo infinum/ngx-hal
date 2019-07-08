@@ -191,6 +191,12 @@ export abstract class HalModel {
     return Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, this) || [];
   }
 
+  private getModelIdentificator(modelClass, modelSelfLink: string): string {
+    const model = new modelClass();
+    model.selfLink = modelSelfLink;
+    return model.uniqueModelIdentificator;
+  }
+
   private createHasOneGetters(): void {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
@@ -201,7 +207,7 @@ export abstract class HalModel {
             return;
           }
 
-          const modelIdentificator: string = relationshipLinks.href;
+          const modelIdentificator: string = this.getModelIdentificator(property.propertyClass, relationshipLinks.href);
           return this.datastore.storage.get(modelIdentificator);
         },
         set<T extends HalModel>(value: T) {
@@ -221,7 +227,7 @@ export abstract class HalModel {
             return;
           }
 
-          const modelIdentificator: string = relationshipLink.href;
+          const modelIdentificator: string = this.getModelIdentificator(property.propertyClass, relationshipLink.href);
           const halDocument: HalDocument<HalModel> = this.datastore.storage.get(modelIdentificator) as HalDocument<HalModel>;
 
           if (!halDocument) {
