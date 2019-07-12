@@ -1,20 +1,22 @@
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from './../hal-document';
+import { HttpResponse } from '@angular/common/http';
+import { HalStorage } from '../../interfaces/hal-storage.interface';
 
-export class HalStorage {
+export class SimpleHalStorage implements HalStorage {
   private internalStorage: { [K: string]: any } = {};
 
-  public save(model: HalModel): void {
+  public save<T extends HalModel>(model: T, response?: HttpResponse<T>): void {
     this.internalStorage[model.uniqueModelIdentificator] = model;
   }
 
-  public saveAll(models: Array<HalModel>): void {
+  public saveAll<T extends HalModel>(models: Array<T>, response?: HttpResponse<T>): void {
     models.forEach((model) => {
       this.internalStorage[model.uniqueModelIdentificator] = model;
     });
   }
 
-  public saveHalDocument<T extends HalModel>(halDocument: HalDocument<T>): void {
+  public saveHalDocument<T extends HalModel>(halDocument: HalDocument<T>, response?: HttpResponse<T>): void {
     this.internalStorage[halDocument.uniqueModelIdentificator] = halDocument;
   }
 
