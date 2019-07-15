@@ -2,6 +2,7 @@ import { HalModel } from '../../models/hal.model';
 import { HalDocument } from './../hal-document';
 import { HttpResponse } from '@angular/common/http';
 import { HalStorage } from '../../interfaces/hal-storage.interface';
+import { RequestOptions } from '../../types/request-options.type';
 
 export class SimpleHalStorage implements HalStorage {
   private internalStorage: { [K: string]: any } = {};
@@ -26,5 +27,9 @@ export class SimpleHalStorage implements HalStorage {
 
   public remove(model: HalModel): void {
     delete this.internalStorage[model.uniqueModelIdentificator];
+  }
+
+  public enrichRequestOptions(uniqueModelIdentificator: string, requestOptions: RequestOptions): void {
+    // noop
   }
 }

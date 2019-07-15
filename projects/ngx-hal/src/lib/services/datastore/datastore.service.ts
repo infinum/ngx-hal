@@ -301,7 +301,7 @@ export class DatastoreService {
         model.selfLink = getResponseHeader(response, 'Location');
 
         if (!this.storage.get(model.selfLink)) {
-          this.storage.save(model);
+          this.storage.save(model, response);
         }
 
         return model;
@@ -318,7 +318,7 @@ export class DatastoreService {
     );
   }
 
-  public get storage(): HalStorageType {
+  public get storage(): any {
     return this.internalStorage;
   }
 
@@ -395,6 +395,8 @@ export class DatastoreService {
   ): Observable<HalDocument<T> | T> {
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
 
+    this.storage.enrichRequestOptions(url, options);
+
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
@@ -444,13 +446,13 @@ export class DatastoreService {
   ): T | HalDocument<T> {
     if (isSingleResource) {
       const model: T = new modelClass(rawResource, this, response);
-      this.storage.save(model);
+      this.storage.save(model, response);
       return model;
     }
 
     const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass, response);
     this.storage.saveAll(halDocument.models);
-    this.storage.saveHalDocument(halDocument);
+    this.storage.saveHalDocument(halDocument, response);
     return halDocument;
   }
 
