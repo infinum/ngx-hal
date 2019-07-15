@@ -1,36 +1,18 @@
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from './../hal-document';
 import { HttpResponse } from '@angular/common/http';
-import { HalStorage } from '../../interfaces/hal-storage.interface';
 import { RequestOptions } from '../../types/request-options.type';
+import { HalStorage } from './hal-storage';
 
 interface StorageModel<T extends HalModel> {
   model: T | HalDocument<T>;
   etag: string;
 }
 
-export class EtagHalStorage implements HalStorage {
-  private internalStorage: { [K: string]: StorageModel<any> } = {};
-
-  public save<T extends HalModel>(model: T, response?: HttpResponse<T>): void {
+export class EtagHalStorage extends HalStorage {
+  public save<T extends HalModel>(model: T | HalDocument<T>, response?: HttpResponse<T>): void {
     this.internalStorage[model.uniqueModelIdentificator] = {
       model,
-      etag: this.getEtagFromResponse(response)
-    };
-  }
-
-  public saveAll<T extends HalModel>(models: Array<T>, response?: HttpResponse<T>): void {
-    models.forEach((model) => {
-      this.internalStorage[model.uniqueModelIdentificator] = {
-        model,
-        etag: undefined
-      };
-    });
-  }
-
-  public saveHalDocument<T extends HalModel>(halDocument: HalDocument<T>, response?: HttpResponse<T>): void {
-    this.internalStorage[halDocument.uniqueModelIdentificator] = {
-      model: halDocument,
       etag: this.getEtagFromResponse(response)
     };
   }
@@ -38,10 +20,6 @@ export class EtagHalStorage implements HalStorage {
   public get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T> {
     const localModel: StorageModel<T> = this.getRawStorageModel(uniqueModelIdentificator);
     return localModel ? localModel.model : undefined;
-  }
-
-  public remove(model: HalModel): void {
-    delete this.internalStorage[model.uniqueModelIdentificator];
   }
 
   public enrichRequestOptions(uniqueModelIdentificator: string, requestOptions: RequestOptions): void {

@@ -452,7 +452,7 @@ export class DatastoreService {
 
     const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass, response);
     this.storage.saveAll(halDocument.models);
-    this.storage.saveHalDocument(halDocument, response);
+    this.storage.save(halDocument, response);
     return halDocument;
   }
 
