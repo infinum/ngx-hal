@@ -13,6 +13,8 @@ export * from './lib/models/hal.model';
 export * from './lib/classes/hal-document';
 export * from './lib/classes/pagination';
 
+export * from './lib/enums/cache-strategy.enum';
+
 export * from './lib/interfaces/network-config.interface';
 export * from './lib/interfaces/datastore-options.interface';
 export * from './lib/interfaces/model-service-options.interface';

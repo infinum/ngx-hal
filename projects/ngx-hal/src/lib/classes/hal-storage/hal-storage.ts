@@ -1,28 +1,26 @@
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from './../hal-document';
+import { HttpResponse } from '@angular/common/http';
+import { RequestOptions } from '../../types/request-options.type';
 
-export class HalStorage {
-  private internalStorage: { [K: string]: any } = {};
+export abstract class HalStorage {
+  protected internalStorage: { [K: string]: any } = {};
 
-  public save(model: HalModel): void {
-    this.internalStorage[model.uniqueModelIdentificator] = model;
-  }
+  public abstract save<T extends HalModel>(model: T | HalDocument<T>, response?: HttpResponse<T>): void;
 
-  public saveAll(models: Array<HalModel>): void {
-    models.forEach((model) => {
-      this.internalStorage[model.uniqueModelIdentificator] = model;
+  public abstract get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T>;
+
+  public saveAll<T extends HalModel>(models: Array<T>): void {
+    models.forEach((model: T) => {
+      this.save(model);
     });
-  }
-
-  public saveHalDocument<T extends HalModel>(halDocument: HalDocument<T>): void {
-    this.internalStorage[halDocument.uniqueModelIdentificator] = halDocument;
-  }
-
-  public get(uniqueModelIdentificator: string): HalModel | HalDocument<HalModel> {
-    return this.internalStorage[uniqueModelIdentificator];
   }
 
   public remove(model: HalModel): void {
     delete this.internalStorage[model.uniqueModelIdentificator];
+  }
+
+  public enrichRequestOptions(uniqueModelIdentificator: string, requestOptions: RequestOptions): void {
+    // noop
   }
 }

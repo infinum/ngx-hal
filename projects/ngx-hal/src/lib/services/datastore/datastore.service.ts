@@ -1,6 +1,7 @@
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, combineLatest, of } from 'rxjs';
-import { map, flatMap, filter, tap } from 'rxjs/operators';
+import { map, flatMap, tap } from 'rxjs/operators';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
@@ -10,18 +11,19 @@ import { HalDocumentConstructor } from '../../types/hal-document-construtor.type
 import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
-import { HalStorage } from '../../classes/hal-storage/hal-storage';
 import { ModelProperty } from '../../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
 import { PaginationConstructor } from '../../types/pagination.type';
 import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
-import { Injectable } from '@angular/core';
+import { CacheStrategy } from '../../enums/cache-strategy.enum';
+import { createHalStorage, HalStorageType } from '../../classes/hal-storage/hal-storage-factory';
 
 @Injectable()
 export class DatastoreService {
   public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
-  private internalStorage: HalStorage = new HalStorage();
+  private cacheStrategy: CacheStrategy;
+  private internalStorage  = createHalStorage(this.cacheStrategy);
   public paginationClass: PaginationConstructor;
 
   constructor(public http: HttpClient) {}
@@ -299,7 +301,7 @@ export class DatastoreService {
         model.selfLink = getResponseHeader(response, 'Location');
 
         if (!this.storage.get(model.selfLink)) {
-          this.storage.save(model);
+          this.storage.save(model, response);
         }
 
         return model;
@@ -316,7 +318,7 @@ export class DatastoreService {
     );
   }
 
-  public get storage(): HalStorage {
+  public get storage(): any {
     return this.internalStorage;
   }
 
@@ -393,6 +395,8 @@ export class DatastoreService {
   ): Observable<HalDocument<T> | T> {
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
 
+    this.storage.enrichRequestOptions(url, options);
+
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
@@ -442,13 +446,13 @@ export class DatastoreService {
   ): T | HalDocument<T> {
     if (isSingleResource) {
       const model: T = new modelClass(rawResource, this, response);
-      this.storage.save(model);
+      this.storage.save(model, response);
       return model;
     }
 
     const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass, response);
     this.storage.saveAll(halDocument.models);
-    this.storage.saveHalDocument(halDocument);
+    this.storage.save(halDocument, response);
     return halDocument;
   }
 
