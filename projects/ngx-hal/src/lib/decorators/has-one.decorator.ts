@@ -13,7 +13,7 @@ export function HasOne(options: HasOneOptions = {}) {
     const hasOneProperty: HasOneModelProperty = {
       includeInPayload: hasOneOptions.includeInPayload,
       name: propertyName,
-      propertyClass: Reflect.getMetadata('design:type', model, propertyName),
+      propertyClass: hasOneOptions.propertyClass || Reflect.getMetadata('design:type', model, propertyName),
       type: ModelProperty.HasOne,
       externalName: options.externalName || propertyName
     };

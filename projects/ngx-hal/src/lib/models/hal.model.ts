@@ -13,6 +13,7 @@ import { NetworkConfig } from '../interfaces/network-config.interface';
 import { generateUUID } from '../helpers/uuid/uuid.helper';
 import { HttpResponse } from '@angular/common/http';
 import { getResponseHeader } from '../utils/get-response-headers/get-response-header.util';
+import { isHalModelInstance } from '../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 
 export abstract class HalModel {
   private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
@@ -207,7 +208,11 @@ export abstract class HalModel {
             return;
           }
 
-          const modelIdentificator: string = this.getModelIdentificator(property.propertyClass, relationshipLinks.href);
+          let modelIdentificator: string = relationshipLinks.href;
+          if (isHalModelInstance(property.propertyClass)) {
+            modelIdentificator = this.getModelIdentificator(property.propertyClass, relationshipLinks.href);
+          }
+
           return this.datastore.storage.get(modelIdentificator);
         },
         set<T extends HalModel>(value: T) {
