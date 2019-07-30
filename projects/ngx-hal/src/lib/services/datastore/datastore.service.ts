@@ -186,7 +186,8 @@ export class DatastoreService {
         flatMap((model: T | HalDocument<T>) => {
           const models: Array<T> = isSingleResource ? ([model] as Array<T>) : (model as HalDocument<T>).models;
 
-          const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships, options);
+          // tslint:disable-next-line:max-line-length
+          const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships, requestOptions);
 
           if (!relationshipCalls.length) {
             return of(model);
