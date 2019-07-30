@@ -82,7 +82,11 @@ export class DatastoreService {
     );
   }
 
-  private fetchRelationships<T extends HalModel>(model: T, relationships: Array<string>): Array<Observable<any>> {
+  private fetchRelationships<T extends HalModel>(
+    model: T,
+    relationships: Array<string>,
+    requestOptions?: RequestOptions
+  ): Array<Observable<any>> {
     const relationshipCalls: Array<Observable<any>> = [];
 
     const filteredRelationships: Array<string> = this.filterUnnecessaryIncludes(relationships);
@@ -123,7 +127,9 @@ export class DatastoreService {
 
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
         url,
-        {},
+        {
+          headers: requestOptions.headers
+        },
         modelClass,
         isSingleResource,
         currentLevelRelationshipsMap[currentLevelRelationship],
@@ -180,7 +186,7 @@ export class DatastoreService {
         flatMap((model: T | HalDocument<T>) => {
           const models: Array<T> = isSingleResource ? ([model] as Array<T>) : (model as HalDocument<T>).models;
 
-          const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships);
+          const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships, options);
 
           if (!relationshipCalls.length) {
             return of(model);
@@ -198,12 +204,13 @@ export class DatastoreService {
 
   private triggerFetchingModelRelationships<T extends HalModel>(
     models: Array<T>,
-    includeRelationships: Array<string>
+    includeRelationships: Array<string>,
+    requestOptions?: RequestOptions
   ): Array<Observable<any>> {
     const modelRelationshipCalls: Array<Observable<any>> = [];
 
     models.forEach((model: T) => {
-      const relationshipCalls = this.fetchRelationships(model, includeRelationships);
+      const relationshipCalls = this.fetchRelationships(model, includeRelationships, requestOptions);
       modelRelationshipCalls.push(...relationshipCalls);
     });
 
