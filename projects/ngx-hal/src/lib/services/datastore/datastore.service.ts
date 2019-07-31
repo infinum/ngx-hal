@@ -274,8 +274,13 @@ export class DatastoreService {
     );
   }
 
-  public save<T extends HalModel>(model: T, modelClass: ModelConstructor<T>, requestOptions?: RequestOptions): Observable<T> {
-    const url: string = this.buildUrl(model);
+  public save<T extends HalModel>(
+    model: T,
+    modelClass: ModelConstructor<T>,
+    requestOptions?: RequestOptions,
+    customUrl?: string
+  ): Observable<T> {
+    const url: string = customUrl || this.buildUrl(model);
     const payload: object = model.generatePayload();
     const modelHeaders: object = model.generateHeaders();
 
