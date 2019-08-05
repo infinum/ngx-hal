@@ -96,5 +96,48 @@ describe('DatastoreService', () => {
       req.flush(mockModelResponseJson);
     });
   });
+
+  describe('save method', () => {
+    it('should make a POST request if saving newly created model', () => {
+      const mockModel = new MockModel({}, datastoreService);
+
+      mockModel.save().subscribe();
+
+      const req = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('POST');
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a request to a custom URL if buildUrl function is provided', () => {
+      const mockModel = new MockModel({}, datastoreService);
+
+      const customUrl = 'fully-custom-rul';
+
+      mockModel.save({}, () => {
+        return customUrl;
+      }).subscribe();
+
+      const req = httpTestingController.expectOne(customUrl);
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a request to a custom URL if buildUrl function is provided and model should be provided there', () => {
+      const modelName = 'mockModell23';
+      const mockModel = new MockModel({ name: modelName }, datastoreService);
+
+      const customUrl = 'fully-custom-rul';
+
+      mockModel.save({}, (model) => {
+        return `${customUrl}/${model.name}`;
+      }).subscribe();
+
+      const req = httpTestingController.expectOne(`${customUrl}/${modelName}`);
+
+      req.flush(mockModelResponseJson);
+    });
+  });
 });
 

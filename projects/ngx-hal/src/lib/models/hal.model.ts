@@ -86,8 +86,9 @@ export abstract class HalModel {
     return this.resource[EMBEDDED_PROPERTY_NAME][property.externalName];
   }
 
-  public save(requestOptions?: RequestOptions, customUrl?: string): Observable<this> {
-    return this.datastore.save(this, Object.getPrototypeOf(this), requestOptions, customUrl);
+  public save(requestOptions?: RequestOptions, buildUrlFunction?: (model: this, urlFromModel: string) => string): Observable<this> {
+    const modelClass = Object.getPrototypeOf(this).constructor;
+    return this.datastore.save(this, modelClass, requestOptions, buildUrlFunction);
   }
 
   public delete(): Observable<void> {
