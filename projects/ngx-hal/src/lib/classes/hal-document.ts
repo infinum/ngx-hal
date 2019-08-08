@@ -43,7 +43,7 @@ export class HalDocument<Model extends HalModel> {
     const params = Object.assign({ page: pageNumber }, requestParams);
     //  TODO find out why casting is necessary here
     // tslint:disable-next-line:max-line-length
-    return (this.datastore.request('GET', this.links[SELF_PROPERTY_NAME].href, { params }, this.modelClass, false) as unknown) as Observable<HalDocument<T>>;
+    return (this.datastore.request('GET', this.links[SELF_PROPERTY_NAME].href, { params }, this.modelClass, false, false) as unknown) as Observable<HalDocument<T>>;
   }
 
   private parseRawResources(resources: RawHalResource): void {
