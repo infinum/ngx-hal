@@ -231,6 +231,11 @@ export abstract class HalModel {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
           const halDocument = this.getHasManyRelationship(property);
+
+          if (!halDocument) {
+            return;
+          }
+
           return halDocument.models;
         },
         set<T extends HalModel>(value: Array<T>) {
