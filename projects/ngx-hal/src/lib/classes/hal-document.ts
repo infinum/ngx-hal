@@ -1,4 +1,5 @@
 import { HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME, SELF_PROPERTY_NAME } from '../constants/hal.constant';
 import { HalModel } from '../models/hal.model';
@@ -36,6 +37,13 @@ export class HalDocument<Model extends HalModel> {
   public get itemLinks(): Array<RawHalLink> {
     const listPropertyName: string = this.getListPropertyName(this.rawResource);
     return this.links[listPropertyName] as any;
+  }
+
+  public getPage<T extends HalModel>(pageNumber: number, requestParams: { [param: string]: string } = {}): Observable<HalDocument<T>> {
+    const params = Object.assign({ page: pageNumber }, requestParams);
+    //  TODO find out why casting is necessary here
+    // tslint:disable-next-line:max-line-length
+    return (this.datastore.request('GET', this.links[SELF_PROPERTY_NAME].href, { params }, this.modelClass, false) as unknown) as Observable<HalDocument<T>>;
   }
 
   private parseRawResources(resources: RawHalResource): void {
