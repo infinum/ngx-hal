@@ -15,6 +15,7 @@ import { HttpResponse } from '@angular/common/http';
 import { getResponseHeader } from '../utils/get-response-headers/get-response-header.util';
 import { isHalModelInstance } from '../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { RequestOptions } from '../types/request-options.type';
+import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 
 export abstract class HalModel {
   private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
@@ -178,6 +179,18 @@ export abstract class HalModel {
     return this.datastore.fetchModelRelationships(this, relationshipNames);
   }
 
+  public getRelationship<T extends HalModel>(relationshipName: string): T | HalDocument<T> {
+    const property: ModelProperty = this.getPropertyData(relationshipName);
+
+    const isHasOneProperty: boolean = property.type === ModelPropertyEnum.HasOne;
+
+    if (isHasOneProperty) {
+      return this.getHasOneRelationship(property) as T;
+    }
+
+    return this.getHasManyRelationship(property);
+  }
+
   private get attributeProperties(): Array<AttributeModelProperty> {
     return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
   }
@@ -204,18 +217,7 @@ export abstract class HalModel {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
-          const relationshipLinks: RawHalLink = this.links[property.externalName];
-
-          if (!relationshipLinks) {
-            return;
-          }
-
-          let modelIdentificator: string = relationshipLinks.href;
-          if (isHalModelInstance(property.propertyClass)) {
-            modelIdentificator = this.getModelIdentificator(property.propertyClass, relationshipLinks.href);
-          }
-
-          return this.datastore.storage.get(modelIdentificator);
+          return this.getHasOneRelationship(property);
         },
         set<T extends HalModel>(value: T) {
           this.replaceRelationshipModel(property.externalName, value);
@@ -228,20 +230,7 @@ export abstract class HalModel {
     this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
-          const relationshipLink: RawHalLink = this.links[property.externalName];
-
-          if (!relationshipLink) {
-            return;
-          }
-
-          const modelIdentificator: string = this.getModelIdentificator(property.propertyClass, relationshipLink.href);
-          const halDocument: HalDocument<HalModel> = this.datastore.storage.get(modelIdentificator) as HalDocument<HalModel>;
-
-          if (!halDocument) {
-            console.warn(`Has many relationship ${property.name} is not fetched.`);
-            return;
-          }
-
+          const halDocument = this.getHasManyRelationship(property);
           return halDocument.models;
         },
         set<T extends HalModel>(value: Array<T>) {
@@ -279,6 +268,39 @@ export abstract class HalModel {
         this[headerAttributeProperty.name] = rawPropertyValue;
       }
     });
+  }
+
+  private getHasOneRelationship<T extends HalModel>(property: ModelProperty): T {
+    const relationshipLinks: RawHalLink = this.links[property.externalName];
+
+    if (!relationshipLinks) {
+      return;
+    }
+
+    let modelIdentificator: string = relationshipLinks.href;
+    if (isHalModelInstance(property.propertyClass)) {
+      modelIdentificator = this.getModelIdentificator(property.propertyClass, relationshipLinks.href);
+    }
+
+    return this.datastore.storage.get(modelIdentificator);
+  }
+
+  private getHasManyRelationship<T extends HalModel>(property: ModelProperty): HalDocument<T> {
+    const relationshipLink: RawHalLink = this.links[property.externalName];
+
+    if (!relationshipLink) {
+      return;
+    }
+
+    const modelIdentificator: string = this.getModelIdentificator(property.propertyClass, relationshipLink.href);
+    const halDocument: HalDocument<T> = this.datastore.storage.get(modelIdentificator) as HalDocument<T>;
+
+    if (!halDocument) {
+      console.warn(`Has many relationship ${property.name} is not fetched.`);
+      return;
+    }
+
+    return halDocument;
   }
 
   private get links(): RawHalLinks | {} {
