@@ -35,7 +35,7 @@ export class HalDocument<Model extends HalModel> {
 
   public get itemLinks(): Array<RawHalLink> {
     const listPropertyName: string = this.getListPropertyName(this.rawResource);
-    return this.links[listPropertyName] as any;
+    return (this.links[listPropertyName] as any) || [];
   }
 
   private parseRawResources(resources: RawHalResource): void {
