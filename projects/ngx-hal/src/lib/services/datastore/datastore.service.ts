@@ -497,6 +497,10 @@ export class DatastoreService {
       modelCalls.push(call$);
     });
 
+    if (!modelCalls.length) {
+      return of([]);
+    }
+
     return combineLatest(...modelCalls);
   }
 
