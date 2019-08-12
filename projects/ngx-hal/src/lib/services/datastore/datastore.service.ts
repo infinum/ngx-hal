@@ -85,7 +85,7 @@ export class DatastoreService {
   private fetchRelationships<T extends HalModel>(
     model: T,
     relationships: Array<string>,
-    requestOptions?: RequestOptions
+    requestOptions: RequestOptions = {}
   ): Array<Observable<any>> {
     const relationshipCalls: Array<Observable<any>> = [];
 
@@ -127,9 +127,7 @@ export class DatastoreService {
 
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
         url,
-        {
-          headers: requestOptions.headers
-        },
+        requestOptions,
         modelClass,
         isSingleResource,
         currentLevelRelationshipsMap[currentLevelRelationship],
