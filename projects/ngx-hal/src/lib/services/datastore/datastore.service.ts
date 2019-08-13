@@ -497,8 +497,12 @@ export class DatastoreService {
     const modelCalls: Array<Observable<T>> = [];
 
     halDocument.itemLinks.forEach((link: RawHalLink) => {
-      const call$ = this.handleGetRequestWithRelationships(link.href, {}, modelClass, true, includeRelationships);
-      modelCalls.push(call$);
+      const url: string = link.href;
+
+      if (url) {
+        const call$ = this.handleGetRequestWithRelationships(url, {}, modelClass, true, includeRelationships);
+        modelCalls.push(call$);
+      }
     });
 
     if (!modelCalls.length) {
