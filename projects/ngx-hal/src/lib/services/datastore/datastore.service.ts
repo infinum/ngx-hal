@@ -121,6 +121,10 @@ export class DatastoreService {
         fetchedModels = this.processRawResource(embeddedRelationship, modelClass, isSingleResource, model.rawResponse);
       }
 
+      if (!url) {
+        break;
+      }
+
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
         url,
         {},
