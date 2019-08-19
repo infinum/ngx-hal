@@ -42,7 +42,10 @@ export class HalDocument<Model extends HalModel> {
 
   public getPage<T extends HalModel>(pageNumber: number, requestOptions: RequestOptions): Observable<HalDocument<T>> {
     requestOptions.params = requestOptions.params || {};
-    requestOptions.params['page'] = pageNumber;
+
+    if (pageNumber || pageNumber === 0) {
+      requestOptions.params['page'] = pageNumber;
+    }
 
     const relationshipUrl: string = removeQueryParams(this.links[SELF_PROPERTY_NAME].href);
 
