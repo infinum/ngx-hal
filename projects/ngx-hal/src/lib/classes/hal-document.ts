@@ -44,9 +44,11 @@ export class HalDocument<Model extends HalModel> {
     requestOptions.params = requestOptions.params || {};
     requestOptions.params['page'] = pageNumber;
 
+    const relationshipUrl: string = removeQueryParams(this.links[SELF_PROPERTY_NAME].href);
+
     //  TODO find out why casting is necessary here
     // tslint:disable-next-line:max-line-length
-    return (this.datastore.request('GET', this.links[SELF_PROPERTY_NAME].href, requestOptions, this.modelClass, false, false) as unknown) as Observable<HalDocument<T>>;
+    return (this.datastore.request('GET', relationshipUrl, requestOptions, this.modelClass, false, false) as unknown) as Observable<HalDocument<T>>;
   }
 
   private parseRawResources(resources: RawHalResource): void {
