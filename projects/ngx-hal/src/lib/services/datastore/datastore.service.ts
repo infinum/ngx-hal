@@ -101,12 +101,11 @@ export class DatastoreService {
 
     for (let i = 0; i < currentLevelRelationships.length; i += 1) {
       const currentLevelRelationship: string = currentLevelRelationships[i];
-
       const url: string = model.getRelationshipUrl(currentLevelRelationship);
       const property: ModelProperty = model.getPropertyData(currentLevelRelationship);
 
       if (!property) {
-        break;
+        continue;
       }
 
       const modelClass = property.propertyClass;
