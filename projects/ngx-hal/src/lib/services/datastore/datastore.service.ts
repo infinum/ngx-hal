@@ -122,7 +122,7 @@ export class DatastoreService {
       }
 
       if (!url) {
-        break;
+        continue;
       }
 
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
