@@ -62,7 +62,9 @@ export abstract class HalModel {
   }
 
   public getRelationshipUrl(relationshipName: string): string {
-    return this.links[relationshipName] ? this.links[relationshipName].href : '';
+    const property: ModelProperty = this.getPropertyData(relationshipName);
+    const fieldName: string = property.externalName || relationshipName;
+    return this.links[fieldName] ? this.links[fieldName].href : '';
   }
 
   public getPropertyData(propertyName: string): ModelProperty {
