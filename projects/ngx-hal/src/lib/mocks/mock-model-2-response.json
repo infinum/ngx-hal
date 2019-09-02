@@ -1,0 +1,8 @@
+{
+  "name": "Mock model 2 name",
+  "_links": {
+    "self": {
+      "href": "https://test.com/Mock2/nup52clo"
+    }
+  }
+}

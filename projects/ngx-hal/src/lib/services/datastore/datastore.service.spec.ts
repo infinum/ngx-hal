@@ -5,6 +5,7 @@ import { DatastoreService } from './datastore.service';
 import { MockModel } from '../../mocks/mock-model';
 import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
 import mockModelResponseJson from '../../mocks/mock-model-response.json';
+import mockModel2ResponseJson from '../../mocks/mock-model-2-response.json';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -137,6 +138,46 @@ describe('DatastoreService', () => {
       const req = httpTestingController.expectOne(`${customUrl}/${modelName}`);
 
       req.flush(mockModelResponseJson);
+    });
+  });
+
+  describe('findOne method', () => {
+    it('should make a GET request for fetching a single model', () => {
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId'
+      ).subscribe();
+
+      const req = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
+
+      expect(req.request.method).toEqual('GET');
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a GET request for fetching a single model if noone is subscribed to it', () => {
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId'
+      );
+
+      httpTestingController.expectNone(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
+    });
+
+    it('should make a GET request for the original model and another GET request for fetching a HasOne relationship', () => {
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId',
+        ['mockModel2Connection']
+      ).subscribe();
+
+      const originalReq = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
+      expect(originalReq.request.method).toEqual('GET');
+
+      originalReq.flush(mockModelResponseJson);
+
+      const req = httpTestingController.expectOne(`${BASE_NETWORK_URL}/Mock2/nup52clo`);
+      expect(req.request.method).toEqual('GET');
     });
   });
 });
