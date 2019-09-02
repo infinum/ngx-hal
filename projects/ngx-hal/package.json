@@ -1,6 +1,6 @@
 {
   "name": "ngx-hal",
-  "version": "0.0.33",
+  "version": "0.0.40",
   "description": "Angular library for supporting HAL format APIs",
   "author": "Infinum <javascript.team@infinum.co>",
   "license": "MIT",
@@ -21,8 +21,8 @@
     "url": "git+https://github.com/infinum/ngx-hal"
   },
   "peerDependencies": {
-    "@angular/common": "^7.2.0",
-    "@angular/core": "^7.2.0",
-    "reflect-metadata": "^0.1.13"
+    "@angular/common": ">=7.2.0",
+    "@angular/core": ">=7.2.0",
+    "reflect-metadata": ">=0.1.13"
   }
 }

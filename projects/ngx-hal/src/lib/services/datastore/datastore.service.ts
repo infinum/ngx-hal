@@ -17,7 +17,7 @@ import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
 import { PaginationConstructor } from '../../types/pagination.type';
 import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
 import { CacheStrategy } from '../../enums/cache-strategy.enum';
-import { createHalStorage, HalStorageType } from '../../classes/hal-storage/hal-storage-factory';
+import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory';
 
 @Injectable()
 export class DatastoreService {
@@ -105,12 +105,11 @@ export class DatastoreService {
 
     for (let i = 0; i < currentLevelRelationships.length; i += 1) {
       const currentLevelRelationship: string = currentLevelRelationships[i];
-
       const url: string = model.getRelationshipUrl(currentLevelRelationship);
       const property: ModelProperty = model.getPropertyData(currentLevelRelationship);
 
       if (!property) {
-        break;
+        continue;
       }
 
       const modelClass = property.propertyClass;
@@ -123,6 +122,10 @@ export class DatastoreService {
 
       if (embeddedRelationship) {
         fetchedModels = this.processRawResource(embeddedRelationship, modelClass, isSingleResource, model.rawResponse);
+      }
+
+      if (!url) {
+        continue;
       }
 
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
@@ -280,8 +283,13 @@ export class DatastoreService {
     );
   }
 
-  public save<T extends HalModel>(model: T, modelClass: ModelConstructor<T>, requestOptions?: RequestOptions): Observable<T> {
-    const url: string = this.buildUrl(model);
+  public save<T extends HalModel>(
+    model: T,
+    modelClass: ModelConstructor<T>,
+    requestOptions?: RequestOptions,
+    urlBuildFunction: (model: T, urlFromModel: string) => string = this.defaultUrlBuildFunction
+  ): Observable<T> {
+    const url: string = urlBuildFunction(model, this.buildUrl(model));
     const payload: object = model.generatePayload();
     const modelHeaders: object = model.generateHeaders();
 
@@ -494,9 +502,17 @@ export class DatastoreService {
     const modelCalls: Array<Observable<T>> = [];
 
     halDocument.itemLinks.forEach((link: RawHalLink) => {
-      const call$ = this.handleGetRequestWithRelationships(link.href, {}, modelClass, true, includeRelationships);
-      modelCalls.push(call$);
+      const url: string = link.href;
+
+      if (url) {
+        const call$ = this.handleGetRequestWithRelationships(url, {}, modelClass, true, includeRelationships);
+        modelCalls.push(call$);
+      }
     });
+
+    if (!modelCalls.length) {
+      return of([]);
+    }
 
     return combineLatest(...modelCalls);
   }
@@ -508,5 +524,9 @@ export class DatastoreService {
     const networkEndpoint: string = model && model.networkConfig && model.networkConfig.endpoint ? model.networkConfig.endpoint : this.networkConfig.endpoint;
 
     return [baseUrl, networkEndpoint].filter((urlPart) => urlPart).join('/');
+  }
+
+  private defaultUrlBuildFunction<T extends HalModel>(model: T, urlFromModel: string): string {
+    return urlFromModel;
   }
 }

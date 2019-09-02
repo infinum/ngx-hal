@@ -14,6 +14,7 @@ import { generateUUID } from '../helpers/uuid/uuid.helper';
 import { HttpResponse } from '@angular/common/http';
 import { getResponseHeader } from '../utils/get-response-headers/get-response-header.util';
 import { isHalModelInstance } from '../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
+import { RequestOptions } from '../types/request-options.type';
 
 export abstract class HalModel {
   private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
@@ -61,7 +62,9 @@ export abstract class HalModel {
   }
 
   public getRelationshipUrl(relationshipName: string): string {
-    return this.links[relationshipName] ? this.links[relationshipName].href : '';
+    const property: ModelProperty = this.getPropertyData(relationshipName);
+    const fieldName: string = property.externalName || relationshipName;
+    return this.links[fieldName] ? this.links[fieldName].href : '';
   }
 
   public getPropertyData(propertyName: string): ModelProperty {
@@ -85,8 +88,9 @@ export abstract class HalModel {
     return this.resource[EMBEDDED_PROPERTY_NAME][property.externalName];
   }
 
-  public save(): Observable<this> {
-    return this.datastore.save(this, Object.getPrototypeOf(this));
+  public save(requestOptions?: RequestOptions, buildUrlFunction?: (model: this, urlFromModel: string) => string): Observable<this> {
+    const modelClass = Object.getPrototypeOf(this).constructor;
+    return this.datastore.save(this, modelClass, requestOptions, buildUrlFunction);
   }
 
   public delete(): Observable<void> {
