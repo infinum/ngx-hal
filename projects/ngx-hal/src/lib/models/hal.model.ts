@@ -63,7 +63,9 @@ export abstract class HalModel {
   }
 
   public getRelationshipUrl(relationshipName: string): string {
-    return this.links[relationshipName] ? this.links[relationshipName].href : '';
+    const property: ModelProperty = this.getPropertyData(relationshipName);
+    const fieldName: string = property.externalName || relationshipName;
+    return this.links[fieldName] ? this.links[fieldName].href : '';
   }
 
   public getPropertyData(propertyName: string): ModelProperty {
@@ -239,9 +241,15 @@ export abstract class HalModel {
           return halDocument.models;
         },
         set<T extends HalModel>(value: Array<T>) {
-          const halDocumentRaw = { models: value, uniqueModelIdentificator: `local-document-identificator-${generateUUID()}` };
-          this.datastore.storage.save(halDocumentRaw);
-          this.replaceRelationshipModel(property.externalName, halDocumentRaw);
+          const existingHalDocument: HalDocument<HalModel> = this.getHasManyRelationship(property);
+
+          if (existingHalDocument) {
+            existingHalDocument.models = value;
+          } else {
+            const halDocumentRaw = { models: value, uniqueModelIdentificator: `local-document-identificator-${generateUUID()}` };
+            this.datastore.storage.save(halDocumentRaw);
+            this.replaceRelationshipModel(property.externalName, halDocumentRaw);
+          }
         }
       });
     });
