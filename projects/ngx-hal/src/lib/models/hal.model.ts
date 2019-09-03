@@ -232,7 +232,7 @@ export abstract class HalModel {
     this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
-          const halDocument = this.getHasManyRelationship(property);
+          const halDocument: HalDocument<HalModel> = this.getHasManyRelationship(property);
 
           if (!halDocument) {
             return;
