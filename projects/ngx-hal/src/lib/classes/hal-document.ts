@@ -1,4 +1,5 @@
 import { HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME, SELF_PROPERTY_NAME } from '../constants/hal.constant';
 import { HalModel } from '../models/hal.model';
@@ -9,6 +10,7 @@ import { isArray } from '../utils/is-array/is-array.util';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
 import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
+import { RequestOptions } from '../types/request-options.type';
 
 export class HalDocument<Model extends HalModel> {
   public models: Array<Model>;
@@ -36,6 +38,20 @@ export class HalDocument<Model extends HalModel> {
   public get itemLinks(): Array<RawHalLink> {
     const listPropertyName: string = this.getListPropertyName(this.rawResource);
     return (this.links[listPropertyName] as any) || [];
+  }
+
+  public getPage<T extends HalModel>(pageNumber: number, requestOptions: RequestOptions = {}): Observable<HalDocument<T>> {
+    requestOptions.params = requestOptions.params || {};
+
+    if (pageNumber || pageNumber === 0) {
+      requestOptions.params['page'] = pageNumber;
+    }
+
+    const relationshipUrl: string = removeQueryParams(this.links[SELF_PROPERTY_NAME].href);
+
+    //  TODO find out why casting is necessary here
+    // tslint:disable-next-line:max-line-length
+    return (this.datastore.request('GET', relationshipUrl, requestOptions, this.modelClass, false, false) as unknown) as Observable<HalDocument<T>>;
   }
 
   private parseRawResources(resources: RawHalResource): void {
