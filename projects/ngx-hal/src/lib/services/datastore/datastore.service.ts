@@ -18,13 +18,7 @@ import { PaginationConstructor } from '../../types/pagination.type';
 import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
 import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory';
-
-interface RequestsOptions {
-  mainRequest: RequestOptions;
-  subsequentRequests?: {
-    [K: string]: string
-  } | RequestOptions;
-}
+import { RequestsOptions } from '../../interfaces/requests-options.interface';
 
 @Injectable()
 export class DatastoreService {
