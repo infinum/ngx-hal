@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { DatastoreService } from './datastore.service';
 import { MockModel } from '../../mocks/mock-model';
@@ -39,7 +39,7 @@ describe('DatastoreService', () => {
 
       datastoreService.request('get', customUrl, {}, MockModel, false, false).subscribe();
 
-      const req = httpTestingController.expectOne(customUrl);
+      const req: TestRequest = httpTestingController.expectOne(customUrl);
 
       expect(req.request.method).toEqual('GET');
 
@@ -51,7 +51,7 @@ describe('DatastoreService', () => {
 
       datastoreService.request('gEt', customUrl, {}, MockModel, false, false).subscribe();
 
-      const req = httpTestingController.expectOne(customUrl);
+      const req: TestRequest = httpTestingController.expectOne(customUrl);
 
       expect(req.request.method).toEqual('GET');
 
@@ -63,7 +63,7 @@ describe('DatastoreService', () => {
 
       datastoreService.request('get', customUrl, {}, MockModel, false, true).subscribe();
 
-      const req = httpTestingController.expectOne(`${BASE_NETWORK_URL}/${customUrl}`);
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/${customUrl}`);
 
       expect(req.request.method).toEqual('GET');
 
@@ -90,7 +90,7 @@ describe('DatastoreService', () => {
         expect(modelFromDatastore).toBe(model);
       });
 
-      const req = httpTestingController.expectOne(customUrl);
+      const req: TestRequest = httpTestingController.expectOne(customUrl);
 
       expect(req.request.method).toEqual('GET');
 
@@ -104,7 +104,7 @@ describe('DatastoreService', () => {
 
       mockModel.save().subscribe();
 
-      const req = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
 
       expect(req.request.method).toEqual('POST');
 
@@ -120,7 +120,7 @@ describe('DatastoreService', () => {
         return customUrl;
       }).subscribe();
 
-      const req = httpTestingController.expectOne(customUrl);
+      const req: TestRequest = httpTestingController.expectOne(customUrl);
 
       req.flush(mockModelResponseJson);
     });
@@ -135,7 +135,7 @@ describe('DatastoreService', () => {
         return `${customUrl}/${model.name}`;
       }).subscribe();
 
-      const req = httpTestingController.expectOne(`${customUrl}/${modelName}`);
+      const req: TestRequest = httpTestingController.expectOne(`${customUrl}/${modelName}`);
 
       req.flush(mockModelResponseJson);
     });
@@ -148,7 +148,7 @@ describe('DatastoreService', () => {
         'mockModelId'
       ).subscribe();
 
-      const req = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
 
       expect(req.request.method).toEqual('GET');
 
@@ -171,13 +171,133 @@ describe('DatastoreService', () => {
         ['mockModel2Connection']
       ).subscribe();
 
-      const originalReq = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
+      const originalReq: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
       expect(originalReq.request.method).toEqual('GET');
 
       originalReq.flush(mockModelResponseJson);
 
-      const req = httpTestingController.expectOne(`${BASE_NETWORK_URL}/Mock2/nup52clo`);
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/Mock2/nup52clo`);
       expect(req.request.method).toEqual('GET');
+    });
+
+    it('should make a GET request with custom parameters', () => {
+      const pageParam = '3';
+      const qParam = 'cool';
+
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId',
+        [],
+        {
+          params: {
+            page: pageParam,
+            q: qParam
+          }
+        }
+      ).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
+        const isCorrectMethod: boolean = request.method === 'GET';
+        const hasCorrectQueryParams: boolean = request.params.get('page') === pageParam && request.params.get('q') === qParam;
+        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 2;
+
+        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should make a GET request with custom headers', () => {
+      const language = 'en';
+
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId',
+        [],
+        {
+          headers: {
+            language
+          }
+        }
+      ).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
+        const isCorrectMethod: boolean = request.method === 'GET';
+        const hasCorrectHeaders: boolean = request.headers.get('language') === language;
+
+        return isCorrectUrl && isCorrectMethod && hasCorrectHeaders;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should pass custom headers to subsequent requests', () => {
+      const language = 'en';
+
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId',
+        ['mockModel2Connection'],
+        {
+          headers: {
+            language
+          }
+        }
+      ).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
+        const isCorrectMethod: boolean = request.method === 'GET';
+        const hasCorrectHeaders: boolean = request.headers.get('language') === language;
+
+        return isCorrectUrl && isCorrectMethod && hasCorrectHeaders;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+
+      httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2/nup52clo`;
+        const isCorrectMethod: boolean = request.method === 'GET';
+        const hasCorrectHeaders: boolean = request.headers.get('language') === language;
+
+        return isCorrectUrl && isCorrectMethod && hasCorrectHeaders;
+      });
+    });
+
+    it('should pass custom params to subsequent requests', () => {
+      const language = 'en';
+
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId',
+        ['mockModel2Connection'],
+        {
+          params: {
+            language
+          }
+        }
+      ).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
+        const isCorrectMethod: boolean = request.method === 'GET';
+        const hasCorrectQueryParams: boolean = request.params.get('language') === language;
+        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 1;
+
+        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+
+      httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2/nup52clo`;
+        const isCorrectMethod: boolean = request.method === 'GET';
+        const hasCorrectParams: boolean = request.params.get('language') === language;
+
+        return isCorrectUrl && isCorrectMethod && hasCorrectParams;
+      });
     });
   });
 });
