@@ -226,18 +226,23 @@ export abstract class HalModel {
     });
   }
 
+  private getHalDocumentOfProperty<T extends HalModel>(property: ModelProperty): HalDocument<T> {
+    const relationshipLink: RawHalLink = this.links[property.externalName];
+
+    if (!relationshipLink) {
+      return;
+    }
+
+    const modelIdentificator: string = this.getModelIdentificator(property.propertyClass, relationshipLink.href);
+    return this.datastore.storage.get(modelIdentificator);
+
+  }
+
   private createHasManyGetters(): void {
     this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
-          const relationshipLink: RawHalLink = this.links[property.externalName];
-
-          if (!relationshipLink) {
-            return;
-          }
-
-          const modelIdentificator: string = this.getModelIdentificator(property.propertyClass, relationshipLink.href);
-          const halDocument: HalDocument<HalModel> = this.datastore.storage.get(modelIdentificator) as HalDocument<HalModel>;
+          const halDocument: HalDocument<HalModel> = this.getHalDocumentOfProperty(property);
 
           if (!halDocument) {
             console.warn(`Has many relationship ${property.name} is not fetched.`);
@@ -247,9 +252,15 @@ export abstract class HalModel {
           return halDocument.models;
         },
         set<T extends HalModel>(value: Array<T>) {
-          const halDocumentRaw = { models: value, uniqueModelIdentificator: `local-document-identificator-${generateUUID()}` };
-          this.datastore.storage.save(halDocumentRaw);
-          this.replaceRelationshipModel(property.externalName, halDocumentRaw);
+          const existingHalDocument: HalDocument<HalModel> = this.getHalDocumentOfProperty(property);
+
+          if (existingHalDocument) {
+            existingHalDocument.models = value;
+          } else {
+            const halDocumentRaw = { models: value, uniqueModelIdentificator: `local-document-identificator-${generateUUID()}` };
+            this.datastore.storage.save(halDocumentRaw);
+            this.replaceRelationshipModel(property.externalName, halDocumentRaw);
+          }
         }
       });
     });
