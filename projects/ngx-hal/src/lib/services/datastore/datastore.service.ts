@@ -18,6 +18,7 @@ import { PaginationConstructor } from '../../types/pagination.type';
 import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
 import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory';
+import { RequestsOptions } from '../../interfaces/requests-options.interface';
 
 @Injectable()
 export class DatastoreService {
@@ -62,10 +63,17 @@ export class DatastoreService {
     modelId: string,
     includeRelationships: Array<string> = [],
     requestOptions: RequestOptions = {},
-    customUrl?: string
+    customUrl?: string,
+    subsequentRequestsOptions: RequestOptions = {}
   ): Observable<T> {
     const url: string = customUrl || this.buildModelUrl(modelClass, modelId);
-    return this.handleGetRequestWithRelationships(url, requestOptions, modelClass, true, includeRelationships);
+
+    const requestsOptions: RequestsOptions = {
+      mainRequest: requestOptions,
+      subsequentRequests: subsequentRequestsOptions
+    };
+
+    return this.handleGetRequestWithRelationships(url, requestsOptions, modelClass, true, includeRelationships);
   }
 
   public fetchModelRelationships<T extends HalModel>(model: T, relationshipNames: string | Array<string>): Observable<T> {
@@ -82,7 +90,11 @@ export class DatastoreService {
     );
   }
 
-  private fetchRelationships<T extends HalModel>(model: T, relationships: Array<string>): Array<Observable<any>> {
+  private fetchRelationships<T extends HalModel>(
+    model: T,
+    relationships: Array<string>,
+    requestOptions: RequestOptions = {}
+  ): Array<Observable<any>> {
     const relationshipCalls: Array<Observable<any>> = [];
 
     const filteredRelationships: Array<string> = this.filterUnnecessaryIncludes(relationships);
@@ -124,9 +136,13 @@ export class DatastoreService {
         continue;
       }
 
+      const requestsOptions: RequestsOptions = {
+        mainRequest: requestOptions
+      };
+
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
         url,
-        {},
+        requestsOptions,
         modelClass,
         isSingleResource,
         currentLevelRelationshipsMap[currentLevelRelationship],
@@ -141,49 +157,60 @@ export class DatastoreService {
 
   private handleGetRequestWithRelationships<T extends HalModel>(
     url: string,
-    requestOptions: RequestOptions,
+    requestsOptions: RequestsOptions,
     modelClass: ModelConstructor<T>,
     isSingleResource: true,
     includeRelationships: Array<string>
   ): Observable<T>;
   private handleGetRequestWithRelationships<T extends HalModel>(
     url: string,
-    requestOptions: RequestOptions,
+    requestsOptions: RequestsOptions,
     modelClass: ModelConstructor<T>,
     isSingleResource: false,
     includeRelationships: Array<string>
   ): Observable<HalDocument<T>>;
   private handleGetRequestWithRelationships<T extends HalModel>(
     url: string,
-    requestOptions: RequestOptions,
+    requestsOptions: RequestsOptions,
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     includeRelationships: Array<string>
     ): Observable<T | HalDocument<T>>;
   private handleGetRequestWithRelationships<T extends HalModel>(
     url: string,
-    requestOptions: RequestOptions,
+    requestsOptions: RequestsOptions,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean,
+    includeRelationships: Array<string>,
+    fetchedModels: T | HalDocument<T>,
+    subsequentRequestsOptions: RequestsOptions
+    ): Observable<T | HalDocument<T>>;
+  private handleGetRequestWithRelationships<T extends HalModel>(
+    url: string,
+    requestsOptions: RequestsOptions,
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     includeRelationships: Array<string>,
     fetchedModels: T | HalDocument<T>
-    ): Observable<T | HalDocument<T>>;
+  ): Observable<T | HalDocument<T>>;
   private handleGetRequestWithRelationships<T extends HalModel>(
     url: string,
-    requestOptions: RequestOptions,
+    requestsOptions: RequestsOptions,
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     includeRelationships: Array<string> = [],
     fetchedModels: T | HalDocument<T> = null
   ): Observable<T | HalDocument<T>> {
-    const httpRequest$ = fetchedModels ? of(fetchedModels) : this.makeGetRequest(url, requestOptions, modelClass, isSingleResource);
+    // tslint:disable-next-line:max-line-length
+    const httpRequest$ = fetchedModels ? of(fetchedModels) : this.makeGetRequest(url, requestsOptions.mainRequest, modelClass, isSingleResource);
 
     if (includeRelationships.length) {
       return httpRequest$.pipe(
         flatMap((model: T | HalDocument<T>) => {
           const models: Array<T> = isSingleResource ? ([model] as Array<T>) : (model as HalDocument<T>).models;
 
-          const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships);
+          // tslint:disable-next-line:max-line-length
+          const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(models, includeRelationships, requestsOptions.subsequentRequests);
 
           if (!relationshipCalls.length) {
             return of(model);
@@ -201,12 +228,13 @@ export class DatastoreService {
 
   private triggerFetchingModelRelationships<T extends HalModel>(
     models: Array<T>,
-    includeRelationships: Array<string>
+    includeRelationships: Array<string>,
+    requestOptions?: RequestOptions
   ): Array<Observable<any>> {
     const modelRelationshipCalls: Array<Observable<any>> = [];
 
     models.forEach((model: T) => {
-      const relationshipCalls = this.fetchRelationships(model, includeRelationships);
+      const relationshipCalls = this.fetchRelationships(model, includeRelationships, requestOptions);
       modelRelationshipCalls.push(...relationshipCalls);
     });
 
@@ -250,23 +278,46 @@ export class DatastoreService {
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
+    params: object,
+    includeMeta: boolean,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    customUrl: string
+  ): Observable<Array<T> | HalDocument<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object,
+    includeMeta: boolean,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    customUrl: string,
+    subsequentRequestsOptions: RequestOptions
+  ): Observable<Array<T> | HalDocument<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
     params: object = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string> = [],
     requestOptions: RequestOptions = {},
-    customUrl?: string
+    customUrl?: string,
+    subsequentRequestsOptions: RequestOptions = {}
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = customUrl || this.buildModelUrl(modelClass);
-    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, requestOptions);
+    const options = Object.assign({}, requestOptions);
     options.params = Object.assign({}, options.params, params);
 
-    return this.handleGetRequestWithRelationships(url, options, modelClass, false, includeRelationships).pipe(
+    const requestsOptions: RequestsOptions = {
+      mainRequest: options,
+      subsequentRequests: subsequentRequestsOptions
+    };
+
+    return this.handleGetRequestWithRelationships(url, requestsOptions, modelClass, false, includeRelationships).pipe(
       flatMap((halDocument: HalDocument<T>) => {
         if (halDocument.hasEmbeddedItems) {
           return of(halDocument);
         }
 
-        return this.fetchEmbeddedListItems(halDocument, modelClass, includeRelationships).pipe(
+        return this.fetchEmbeddedListItems(halDocument, modelClass, includeRelationships, subsequentRequestsOptions).pipe(
           map((models: Array<T>) => {
             halDocument.models = models;
             return halDocument;
@@ -491,7 +542,8 @@ export class DatastoreService {
   private fetchEmbeddedListItems<T extends HalModel>(
     halDocument: HalDocument<T>,
     modelClass: ModelConstructor<T>,
-    includeRelationships: Array<string> = []
+    includeRelationships: Array<string> = [],
+    requestOptions: RequestOptions = {}
   ): Observable<Array<T>> {
     const modelCalls: Array<Observable<T>> = [];
 
@@ -499,7 +551,7 @@ export class DatastoreService {
       const url: string = link.href;
 
       if (url) {
-        const call$ = this.handleGetRequestWithRelationships(url, {}, modelClass, true, includeRelationships);
+        const call$ = this.handleGetRequestWithRelationships(url, { mainRequest: requestOptions }, modelClass, true, includeRelationships);
         modelCalls.push(call$);
       }
     });
