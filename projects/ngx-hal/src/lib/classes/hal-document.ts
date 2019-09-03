@@ -40,7 +40,7 @@ export class HalDocument<Model extends HalModel> {
     return this.links[listPropertyName] as any;
   }
 
-  public getPage<T extends HalModel>(pageNumber: number, requestOptions: RequestOptions): Observable<HalDocument<T>> {
+  public getPage<T extends HalModel>(pageNumber: number, requestOptions: RequestOptions = {}): Observable<HalDocument<T>> {
     requestOptions.params = requestOptions.params || {};
 
     if (pageNumber || pageNumber === 0) {
