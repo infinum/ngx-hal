@@ -9,8 +9,20 @@ import { ModelConstructor } from '../../types/model-constructor.type';
 export abstract class ModelService<Model extends HalModel> {
   constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
 
-  public findOne(modelId: string, includeRelationships: Array<string> = [], requestOptions: RequestOptions = {}): Observable<Model> {
-    return this.datastore.findOne<Model>(this.modelClass, modelId, includeRelationships, requestOptions);
+  public findOne(
+    modelId: string,
+    includeRelationships: Array<string> = [],
+    requestOptions: RequestOptions = {},
+    subsequentRequestsOptions: RequestOptions = {}
+  ): Observable<Model> {
+    return this.datastore.findOne<Model>(
+      this.modelClass,
+      modelId,
+      includeRelationships,
+      requestOptions,
+      undefined,
+      subsequentRequestsOptions
+    );
   }
 
   public find(params: object): Observable<Array<Model>>;
@@ -31,12 +43,28 @@ export abstract class ModelService<Model extends HalModel> {
     requestOptions: RequestOptions
   ): Observable<HalDocument<Model>>;
   public find(
+    params: object,
+    includeMeta: true,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    subsequentRequestsOptions: RequestOptions
+  ): Observable<HalDocument<Model>>;
+  public find(
     params: object = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string> = [],
-    requestOptions: RequestOptions = {}
+    requestOptions: RequestOptions = {},
+    subsequentRequestsOptions: RequestOptions = {}
   ): Observable<HalDocument<Model> | Array<Model>> {
-    return this.datastore.find(this.modelClass, params, includeMeta, includeRelationships, requestOptions);
+    return this.datastore.find(
+      this.modelClass,
+      params,
+      includeMeta,
+      includeRelationships,
+      requestOptions,
+      undefined,
+      subsequentRequestsOptions
+    );
   }
 
   public createNewModel(recordData: object = {}): Model {
