@@ -137,7 +137,8 @@ export class DatastoreService {
       }
 
       const requestsOptions: RequestsOptions = {
-        mainRequest: requestOptions
+        mainRequest: requestOptions,
+        subsequentRequests: requestOptions
       };
 
       const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
