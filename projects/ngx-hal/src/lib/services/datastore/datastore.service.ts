@@ -547,11 +547,16 @@ export class DatastoreService {
   ): Observable<Array<T>> {
     const modelCalls: Array<Observable<T>> = [];
 
+    const requestsOptions: RequestsOptions = {
+      mainRequest: requestOptions,
+      subsequentRequests: requestOptions
+    };
+
     halDocument.itemLinks.forEach((link: RawHalLink) => {
       const url: string = link.href;
 
       if (url) {
-        const call$ = this.handleGetRequestWithRelationships(url, { mainRequest: requestOptions }, modelClass, true, includeRelationships);
+        const call$ = this.handleGetRequestWithRelationships(url, requestsOptions, modelClass, true, includeRelationships);
         modelCalls.push(call$);
       }
     });

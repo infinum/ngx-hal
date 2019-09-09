@@ -514,5 +514,23 @@ describe('DatastoreService', () => {
       });
     });
   });
+
+  xdescribe('find method', () => {
+    it('should fetch embedded list items', () => {
+
+    });
+
+    it('should pass proper request options to the requests for fetching embedded list items', () => {
+
+    });
+
+    it('should fetch the relationships of embedded list items', () => {
+
+    });
+
+    it('should pass proper request options while fetching the relationships of embedded list items', () => {
+
+    });
+  });
 });
 
