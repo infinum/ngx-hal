@@ -210,7 +210,7 @@ export abstract class HalModel {
   }
 
   private getModelIdentificator(modelClass, modelSelfLink: string): string {
-    const model = new modelClass();
+    const model = new modelClass({}, this.datastore);
     model.selfLink = modelSelfLink;
     return model.uniqueModelIdentificator;
   }

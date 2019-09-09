@@ -1,0 +1,53 @@
+{
+  "_embedded": {
+    "item": [
+      {
+        "quantity": "20",
+        "unit": "GRAM",
+        "_links": {
+          "self": {
+            "href": "http://test.com/Ingredient/213213123"
+          },
+          "food": {
+            "href": "http://test.com/Food/food-id-423234234"
+          }
+        }
+      }, {
+        "quantity": "48",
+        "unit": "MILLILITER",
+        "_links": {
+          "self": {
+            "href": "http://test.com/Ingredient/832876455"
+          },
+          "food": {
+            "href": "http://test.com/Food/food-id-4324987"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "first": {
+      "href": "http://test.com/Recipe/recipe-id-345678/Ingredient?page=0&size=10"
+    },
+    "item": [
+      {
+        "href": "http://test.com/Ingredient/213213123"
+      }, {
+        "href": "http://test.com/Ingredient/832876455"
+      }
+    ],
+    "last": {
+      "href": "http://test.com/Recipe/recipe-id-345678/Ingredient?page=10&size=10"
+    },
+    "next": {
+      "href": "http://test.com/Recipe/recipe-id-345678/Ingredient?page=2&size=10"
+    },
+    "prev": {
+      "href": "http://test.com/Recipe/recipe-id-345678/Ingredient?page=0&size=10"
+    },
+    "self": {
+      "href": "http://test.com/Recipe/recipe-id-345678/Ingredient?page=1&size=10"
+    }
+  }
+}

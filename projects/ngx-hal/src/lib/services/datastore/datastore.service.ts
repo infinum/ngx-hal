@@ -53,7 +53,7 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     rawResponse?: HttpResponse<any>
   ): HalDocument<T> {
-    const representantiveModel = new modelClass();
+    const representantiveModel = new modelClass({}, this);
     const halDocumentClass = representantiveModel.getHalDocumentClass() || this.getHalDocumentClass<T>();
     return new halDocumentClass(rawResource, rawResponse, modelClass, this);
   }
@@ -419,7 +419,7 @@ export class DatastoreService {
     singleResource: boolean,
     includeNetworkConfig: boolean = true
   ): Observable<HalDocument<T> | T> {
-    const customUrl: string = includeNetworkConfig ? `${this.buildHostUrl(new modelClass())}/${url}` : url;
+    const customUrl: string = includeNetworkConfig ? `${this.buildHostUrl(new modelClass({}, this))}/${url}` : url;
 
     switch (method.toLocaleLowerCase()) {
       case 'get':
@@ -517,7 +517,7 @@ export class DatastoreService {
   }
 
   private buildModelUrl(modelClass: ModelConstructor<HalModel>, modelId?: string): string {
-    const modelUrl: string = this.buildUrl(new modelClass());
+    const modelUrl: string = this.buildUrl(new modelClass({}, this));
     return modelId ? `${modelUrl}/${modelId}` : modelUrl;
   }
 

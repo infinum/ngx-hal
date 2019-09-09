@@ -1,0 +1,25 @@
+{
+  "_embedded": {
+    "media": {
+      "name": "mymedia",
+      "_links": {
+        "self": {
+          "href": "http://test.com/Media/7654345678"
+        }
+      }
+    }
+  },
+  "name": "Pineapple spinach smoothie",
+  "status": "ONLINE",
+  "_links": {
+    "self": {
+      "href": "http://test.com/Recipe/recipe-id-345678"
+    },
+    "media": {
+      "href": "http://test.com/Media/7654345678"
+    },
+    "ingredients": {
+      "href": "http://test.com/Recipe/recipe-id-345678/Ingredient"
+    }
+  }
+}
