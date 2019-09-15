@@ -9,7 +9,7 @@ export function HeaderAttribute(options: HeaderAttributeOptions = {}) {
     const headerAttributeOptions = Object.assign({}, DEFAULT_HEADER_ATTRIBUTE_OPTIONS, options);
 
     // tslint:disable-next-line:max-line-length
-    const headerAttributeProperties: Array<AttributeModelProperty> = Reflect.getOwnMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
+    const headerAttributeProperties: Array<AttributeModelProperty> = Reflect.getMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
 
     const attributeProperty: HeaderAttributeModelProperty = {
       type: ModelPropertyEnum.HeaderAttribute,

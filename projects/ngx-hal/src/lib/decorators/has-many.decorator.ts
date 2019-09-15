@@ -8,7 +8,7 @@ export function HasMany(options: HasManyOptions) {
   return (model: HalModel, propertyName: string) => {
     const hasManyOptions = Object.assign({}, DEFAULT_HAS_MANY_OPTIONS, options);
 
-    const hasManyProperties: Array<HasManyModelProperty> = Reflect.getOwnMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, model) || [];
+    const hasManyProperties: Array<HasManyModelProperty> = Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, model) || [];
 
     const hasManyProperty: HasManyModelProperty = {
       includeInPayload: hasManyOptions.includeInPayload,

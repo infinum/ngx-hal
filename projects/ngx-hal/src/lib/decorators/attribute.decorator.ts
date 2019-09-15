@@ -7,8 +7,7 @@ import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum
 export function Attribute(options: AttributeOptions = {}) {
   return (model: HalModel, propertyName: string) => {
     const attributeOptions = Object.assign({}, DEFAULT_ATTRIBUTE_OPTIONS, options);
-
-    const attributeProperties: Array<AttributeModelProperty> = Reflect.getOwnMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
+    const attributeProperties: Array<AttributeModelProperty> = Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
 
     const attributeProperty: AttributeModelProperty = {
       type: ModelPropertyEnum.Attribute,
