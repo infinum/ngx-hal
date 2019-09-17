@@ -3,11 +3,12 @@ import { ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constan
 import { AttributeOptions, DEFAULT_ATTRIBUTE_OPTIONS } from '../interfaces/attribute-options.interface';
 import { AttributeModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
+import { updateModelPropertiesWithTheNewOne } from '../helpers/replace-model-property/replace-model-property.helper';
 
 export function Attribute(options: AttributeOptions = {}) {
   return (model: HalModel, propertyName: string) => {
     const attributeOptions = Object.assign({}, DEFAULT_ATTRIBUTE_OPTIONS, options);
-    const attributeProperties: Array<AttributeModelProperty> = Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
+    const existingAttributeProperties: Array<AttributeModelProperty> = Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
 
     const attributeProperty: AttributeModelProperty = {
       type: ModelPropertyEnum.Attribute,
@@ -27,7 +28,10 @@ export function Attribute(options: AttributeOptions = {}) {
       }
     }
 
-    attributeProperties.push(attributeProperty);
+    const attributeProperties: Array<AttributeModelProperty> = updateModelPropertiesWithTheNewOne(
+      existingAttributeProperties,
+      attributeProperty
+    );
 
     Reflect.defineMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, attributeProperties, model);
   };

@@ -3,12 +3,13 @@ import { HAS_MANY_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant
 import { HasManyModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty } from '../enums/model-property.enum';
 import { HasManyOptions, DEFAULT_HAS_MANY_OPTIONS } from '../interfaces/has-many-options.interface';
+import { updateModelPropertiesWithTheNewOne } from '../helpers/replace-model-property/replace-model-property.helper';
 
 export function HasMany(options: HasManyOptions) {
   return (model: HalModel, propertyName: string) => {
     const hasManyOptions = Object.assign({}, DEFAULT_HAS_MANY_OPTIONS, options);
 
-    const hasManyProperties: Array<HasManyModelProperty> = Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, model) || [];
+    const existingHasManyProperties: Array<HasManyModelProperty> = Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, model) || [];
 
     const hasManyProperty: HasManyModelProperty = {
       includeInPayload: hasManyOptions.includeInPayload,
@@ -18,7 +19,7 @@ export function HasMany(options: HasManyOptions) {
       externalName: options.externalName || propertyName
     };
 
-    hasManyProperties.push(hasManyProperty);
+    const hasManyProperties: Array<HasManyModelProperty> = updateModelPropertiesWithTheNewOne(existingHasManyProperties, hasManyProperty);
 
     Reflect.defineMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, hasManyProperties, model);
   };

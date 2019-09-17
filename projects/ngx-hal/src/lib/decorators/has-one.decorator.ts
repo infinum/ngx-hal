@@ -3,12 +3,13 @@ import { HAS_ONE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant'
 import { HasOneModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty } from '../enums/model-property.enum';
 import { HasOneOptions, DEFAULT_HAS_ONE_OPTIONS } from '../interfaces/has-one-options.interface';
+import { updateModelPropertiesWithTheNewOne } from '../helpers/replace-model-property/replace-model-property.helper';
 
 export function HasOne(options: HasOneOptions = {}) {
   return (model: HalModel, propertyName: string) => {
     const hasOneOptions = Object.assign({}, DEFAULT_HAS_ONE_OPTIONS, options);
 
-    const hasOneProperties: Array<HasOneModelProperty> = Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, model) || [];
+    const existingHasOneProperties: Array<HasOneModelProperty> = Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, model) || [];
 
     const hasOneProperty: HasOneModelProperty = {
       includeInPayload: hasOneOptions.includeInPayload,
@@ -18,7 +19,7 @@ export function HasOne(options: HasOneOptions = {}) {
       externalName: options.externalName || propertyName
     };
 
-    hasOneProperties.push(hasOneProperty);
+    const hasOneProperties: Array<HasOneModelProperty> = updateModelPropertiesWithTheNewOne(existingHasOneProperties, hasOneProperty);
 
     Reflect.defineMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, hasOneProperties, model);
   };

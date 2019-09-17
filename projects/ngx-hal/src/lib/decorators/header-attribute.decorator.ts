@@ -3,13 +3,14 @@ import { HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.
 import { AttributeModelProperty, HeaderAttributeModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { HeaderAttributeOptions, DEFAULT_HEADER_ATTRIBUTE_OPTIONS } from '../interfaces/header-attribute-options.interface';
+import { updateModelPropertiesWithTheNewOne } from '../helpers/replace-model-property/replace-model-property.helper';
 
 export function HeaderAttribute(options: HeaderAttributeOptions = {}) {
   return (model: HalModel, propertyName: string) => {
     const headerAttributeOptions = Object.assign({}, DEFAULT_HEADER_ATTRIBUTE_OPTIONS, options);
 
     // tslint:disable-next-line:max-line-length
-    const headerAttributeProperties: Array<AttributeModelProperty> = Reflect.getMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
+    const existingHeaderAttributeProperties: Array<AttributeModelProperty> = Reflect.getMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
 
     const attributeProperty: HeaderAttributeModelProperty = {
       type: ModelPropertyEnum.HeaderAttribute,
@@ -28,7 +29,10 @@ export function HeaderAttribute(options: HeaderAttributeOptions = {}) {
       }
     }
 
-    headerAttributeProperties.push(attributeProperty);
+    const headerAttributeProperties: Array<HeaderAttributeModelProperty> = updateModelPropertiesWithTheNewOne(
+      existingHeaderAttributeProperties,
+      attributeProperty
+    );
 
     Reflect.defineMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, headerAttributeProperties, model);
   };
