@@ -8,8 +8,8 @@ export function updateModelPropertiesWithTheNewOne<T extends ModelProperty>(mode
   });
 
   if (existingProperty) {
-    const index: number = properties.indexOf(existingProperty);
-    properties[index] = existingProperty;
+    const indexOfExistingProperty: number = properties.indexOf(existingProperty);
+    properties[indexOfExistingProperty] = newModelProperty;
   } else {
     properties.push(newModelProperty);
   }
