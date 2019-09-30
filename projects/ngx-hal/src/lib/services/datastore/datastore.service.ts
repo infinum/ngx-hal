@@ -192,6 +192,22 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     includeRelationships: Array<string>,
+    fetchedModels: T
+  ): Observable<T>;
+  private handleGetRequestWithRelationships<T extends HalModel>(
+    url: string,
+    requestsOptions: RequestsOptions,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean,
+    includeRelationships: Array<string>,
+    fetchedModels: HalDocument<T>
+  ): Observable<HalDocument<T>>;
+  private handleGetRequestWithRelationships<T extends HalModel>(
+    url: string,
+    requestsOptions: RequestsOptions,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean,
+    includeRelationships: Array<string>,
     fetchedModels: T | HalDocument<T>
   ): Observable<T | HalDocument<T>>;
   private handleGetRequestWithRelationships<T extends HalModel>(
@@ -314,10 +330,6 @@ export class DatastoreService {
 
     return this.handleGetRequestWithRelationships(url, requestsOptions, modelClass, false, includeRelationships).pipe(
       flatMap((halDocument: HalDocument<T>) => {
-        if (halDocument.hasEmbeddedItems) {
-          return of(halDocument);
-        }
-
         return this.fetchEmbeddedListItems(halDocument, modelClass, includeRelationships, subsequentRequestsOptions).pipe(
           map((models: Array<T>) => {
             halDocument.models = models;
@@ -553,14 +565,22 @@ export class DatastoreService {
       subsequentRequests: requestOptions
     };
 
-    halDocument.itemLinks.forEach((link: RawHalLink) => {
-      const url: string = link.href;
-
-      if (url) {
-        const call$ = this.handleGetRequestWithRelationships(url, requestsOptions, modelClass, true, includeRelationships);
+    // Don't fetch the list items if they are embedded
+    if (halDocument.hasEmbeddedItems) {
+      halDocument.models.forEach((model: T) => {
+        const call$ = this.handleGetRequestWithRelationships(null, requestsOptions, modelClass, true, includeRelationships, model);
         modelCalls.push(call$);
-      }
-    });
+      });
+    } else {
+      halDocument.itemLinks.forEach((link: RawHalLink) => {
+        const url: string = link.href;
+
+        if (url) {
+          const call$ = this.handleGetRequestWithRelationships(url, requestsOptions, modelClass, true, includeRelationships);
+          modelCalls.push(call$);
+        }
+      });
+    }
 
     if (!modelCalls.length) {
       return of([]);
