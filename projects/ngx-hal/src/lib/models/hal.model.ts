@@ -339,6 +339,11 @@ export abstract class HalModel {
     }
 
     this.resource[LINKS_PROPERTY_NAME][relationshipName] = relationshipLink;
+
+    // Save the model to the storage if it's not already there
+    if (!this[relationshipName]) {
+      this.datastore.storage.save(relationshipModel);
+    }
   }
 
   private setLocalModelIdentificator(): void {
