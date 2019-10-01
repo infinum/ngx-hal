@@ -331,9 +331,14 @@ export abstract class HalModel {
   private replaceRelationshipModel<T extends HalModel>(relationshipName: string, relationshipModel: T): void {
     this.resource[LINKS_PROPERTY_NAME] = this.resource[LINKS_PROPERTY_NAME] || { self: null };
 
-    this.resource[LINKS_PROPERTY_NAME][relationshipName] = {
-      href: relationshipModel.selfLink || relationshipModel.uniqueModelIdentificator
-    };
+    let relationshipLink = null;
+    if (relationshipModel) {
+      relationshipLink = {
+        href: relationshipModel.selfLink || relationshipModel.uniqueModelIdentificator
+      };
+    }
+
+    this.resource[LINKS_PROPERTY_NAME][relationshipName] = relationshipLink;
   }
 
   private setLocalModelIdentificator(): void {
