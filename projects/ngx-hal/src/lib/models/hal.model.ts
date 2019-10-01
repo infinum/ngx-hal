@@ -23,8 +23,8 @@ export abstract class HalModel {
   private localModelIdentificator: string;
 
   constructor(
-    private resource: RawHalResource = {},
-    private datastore: DatastoreService,
+    protected resource: RawHalResource = {},
+    protected datastore: DatastoreService,
     public rawResponse?: HttpResponse<any>
   ) {
     this.setLocalModelIdentificator();
