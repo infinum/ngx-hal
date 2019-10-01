@@ -47,7 +47,7 @@ export abstract class HalModel {
   }
 
   public get endpoint(): string {
-    return this.config.endpoint || 'unkwownModelEndpoint';
+    return this.config.endpoint || 'unknownModelEndpoint';
   }
 
   public get networkConfig(): NetworkConfig {
