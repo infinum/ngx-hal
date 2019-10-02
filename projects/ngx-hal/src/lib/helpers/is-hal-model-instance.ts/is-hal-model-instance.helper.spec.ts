@@ -19,7 +19,7 @@ describe('isHalModelInstance', () => {
     expect(isHalModelInstance(instance)).toBe(true);
   });
 
-  it('should return false for instance of class that does not HalModel', () => {
+  it('should return false for an instance of a class which does not extend HalModel', () => {
     const instance: DoesNotInherit = new DoesNotInherit();
     expect(isHalModelInstance(instance)).toBe(false);
   });
