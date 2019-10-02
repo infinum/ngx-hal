@@ -11,7 +11,7 @@ describe('getResponseHeader', () => {
 
   beforeEach(() => TestBed.configureTestingModule({}));
 
-  it('should get header', () => {
+  it('should get a single header', () => {
     expect(getResponseHeader(response, 'Header-One')).toBe(headers.get('Header-One'));
   });
 
