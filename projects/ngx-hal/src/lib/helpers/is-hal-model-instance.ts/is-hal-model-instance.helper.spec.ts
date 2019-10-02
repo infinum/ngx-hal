@@ -13,7 +13,7 @@ describe('isHalModelInstance', () => {
     providers: [DatastoreService]
   }));
 
-  it('should return true for instance of class that extends HalModel', () => {
+  it('should return true for an instance of a class which extends HalModel', () => {
     const datastoreService: DatastoreService = TestBed.get(DatastoreService);
     const instance: InheritsHal = new InheritsHal({}, datastoreService);
     expect(isHalModelInstance(instance)).toBe(true);
