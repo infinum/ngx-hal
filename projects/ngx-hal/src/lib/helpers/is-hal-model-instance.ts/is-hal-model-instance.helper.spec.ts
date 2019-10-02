@@ -32,7 +32,7 @@ describe('isHalModelInstance', () => {
     expect(isHalModelInstance({})).toBe(false);
   });
 
-  it('should return false a number', () => {
+  it('should return false for a number', () => {
     expect(isHalModelInstance(1)).toBe(false);
   });
 });
