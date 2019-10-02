@@ -15,7 +15,7 @@ describe('getResponseHeader', () => {
     expect(getResponseHeader(response, 'Header-One')).toBe(headers.get('Header-One'));
   });
 
-  it('should get header if it is requested with wrong case', () => {
+  it('should get a header if it is requested with wrong case', () => {
     expect(getResponseHeader(response, 'hEader-One')).toBe(headers.get('Header-One'));
   });
 
