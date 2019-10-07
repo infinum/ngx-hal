@@ -139,6 +139,44 @@ describe('DatastoreService', () => {
 
       req.flush(mockModelResponseJson);
     });
+
+    it('should save a newly created model to the local storage under selfLink value', () => {
+      const mockModel = new MockModel({}, datastoreService);
+      const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
+      const selfLink = 'http://test.com/Mock/1c5e7b79';
+
+      mockModel.save().subscribe((savedModel: MockModel) => {
+        expect(savedModel.uniqueModelIdentificator).toEqual(selfLink);
+        expect(datastoreService.storage.get(savedModel.uniqueModelIdentificator)).toBeTruthy();
+      });
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should save a newly created model to the local storage under Location header value if 201 is returned', () => {
+      const modelData = {
+        test: 23
+      };
+
+      const mockModel = new MockModel(modelData, datastoreService);
+      const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
+      const locationHeader = 'http://newLocation.com/Mock/1c5e7b79';
+
+      mockModel.save().subscribe((savedModel: MockModel) => {
+        expect(savedModel.uniqueModelIdentificator).toEqual(locationHeader);
+        expect(datastoreService.storage.get(savedModel.uniqueModelIdentificator)).toBeTruthy();
+      });
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+
+      req.flush(null, { headers: { Location: locationHeader } });
+    });
   });
 
   describe('findOne method', () => {
