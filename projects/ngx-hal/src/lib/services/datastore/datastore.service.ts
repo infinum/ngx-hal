@@ -19,6 +19,7 @@ import { getResponseHeader } from '../../utils/get-response-headers/get-response
 import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory';
 import { RequestsOptions } from '../../interfaces/requests-options.interface';
+import { makeQueryParamsString } from '../../helpers/make-query-params-string/make-query-params-string.helper';
 
 @Injectable()
 export class DatastoreService {
@@ -470,13 +471,7 @@ export class DatastoreService {
     this.storage.enrichRequestOptions(url, options);
 
     const queryParams = options.params || {};
-    const queryParamsString = Object.keys(queryParams).sort().reduce((params: string, queryParamKey: string) => {
-      if (!params) {
-        return `${queryParamKey}=${queryParams[queryParamKey]}`;
-      }
-
-      return `${params}&${queryParamKey}=${queryParams[queryParamKey]}`;
-    }, '');
+    const queryParamsString: string = makeQueryParamsString(queryParams, true);
 
     const urlWithParams = queryParamsString ? `${url}?${queryParamsString}` : url;
 
