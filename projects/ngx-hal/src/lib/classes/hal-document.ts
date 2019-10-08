@@ -26,8 +26,7 @@ export class HalDocument<Model extends HalModel> {
   }
 
   public get uniqueModelIdentificator(): string {
-    // TODO check if it is safe to remove query params
-    return removeQueryParams(this.links[SELF_PROPERTY_NAME].href);
+    return this.links[SELF_PROPERTY_NAME].href;
   }
 
   public get hasEmbeddedItems(): boolean {
