@@ -10,11 +10,20 @@ interface StorageModel<T extends HalModel> {
 }
 
 export class EtagHalStorage extends HalStorage {
-  public save<T extends HalModel>(model: T | HalDocument<T>, response?: HttpResponse<T>): void {
-    this.internalStorage[model.uniqueModelIdentificator] = {
-      model,
-      etag: this.getEtagFromResponse(response)
-    };
+  public save<T extends HalModel>(
+    model: T | HalDocument<T>,
+    response?: HttpResponse<T>,
+    alternateUniqueIdentificators: Array<string> = []
+  ): void {
+    const identificators: Array<string> = [].concat(alternateUniqueIdentificators);
+    identificators.push(model.uniqueModelIdentificator);
+
+    identificators.forEach((identificator: string) => {
+      this.internalStorage[identificator] = {
+        model,
+        etag: this.getEtagFromResponse(response)
+      };
+    });
   }
 
   public get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T> {

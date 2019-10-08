@@ -6,7 +6,11 @@ import { RequestOptions } from '../../types/request-options.type';
 export abstract class HalStorage {
   protected internalStorage: { [K: string]: any } = {};
 
-  public abstract save<T extends HalModel>(model: T | HalDocument<T>, response?: HttpResponse<T>): void;
+  public abstract save<T extends HalModel>(
+    model: T | HalDocument<T>,
+    response?: HttpResponse<T>,
+    alternateUniqueIdentificators?: Array<string>
+  ): void;
 
   public abstract get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T>;
 
