@@ -469,10 +469,21 @@ export class DatastoreService {
 
     this.storage.enrichRequestOptions(url, options);
 
+    const queryParams = options.params || {};
+    const queryParamsString = Object.keys(queryParams).sort().reduce((params: string, queryParamKey: string) => {
+      if (!params) {
+        return `${queryParamKey}=${queryParams[queryParamKey]}`;
+      }
+
+      return `${params}&${queryParamKey}=${queryParams[queryParamKey]}`;
+    }, '');
+
+    const urlWithParams = queryParamsString ? `${url}?${queryParamsString}` : url;
+
     return this.http.get<T>(url, options).pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
-        return this.processRawResource(rawResource, modelClass, singleResource, response);
+        return this.processRawResource(rawResource, modelClass, singleResource, response, urlWithParams);
       })
     );
   }
@@ -514,17 +525,25 @@ export class DatastoreService {
     rawResource: RawHalResource,
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
-    response: HttpResponse<T>
+    response: HttpResponse<T>,
+    url?: string
+  ): T | HalDocument<T>;
+  private processRawResource<T extends HalModel>(
+    rawResource: RawHalResource,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean,
+    response: HttpResponse<T>,
+    url?: string
   ): T | HalDocument<T> {
     if (isSingleResource) {
       const model: T = new modelClass(rawResource, this, response);
-      this.storage.save(model, response);
+      this.storage.save(model, response, [url]);
       return model;
     }
 
     const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass, response);
     this.storage.saveAll(halDocument.models);
-    this.storage.save(halDocument, response);
+    this.storage.save(halDocument, response, [url]);
     return halDocument;
   }
 
