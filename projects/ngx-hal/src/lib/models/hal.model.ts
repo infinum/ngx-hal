@@ -98,9 +98,25 @@ export abstract class HalModel {
     return this.datastore.delete(this);
   }
 
-  // TODO simplify this function
   public generatePayload(): object {
-    const attributePropertiesPayload: object = this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
+    const attributePropertiesPayload: object = this.attributePropertiesPayload;
+    const hasOnePropertiesPayload: object = this.hasOnePropertiesPayload;
+    const hasManyPropertiesPayload: object = this.hasManyPropertiesPayload;
+
+    const relationshipLinks: object = { ...hasOnePropertiesPayload, ...hasManyPropertiesPayload };
+    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
+
+    const payload = { ...attributePropertiesPayload };
+
+    if (hasRelationshipLinks) {
+      payload[LINKS_PROPERTY_NAME] = relationshipLinks;
+    }
+
+    return payload;
+  }
+
+  private get attributePropertiesPayload(): object {
+    return this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
       if (property.excludeFromPayload) {
         return payload;
       }
@@ -109,8 +125,10 @@ export abstract class HalModel {
       payload[externalPropertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
       return payload;
     }, {});
+  }
 
-    const hasOnePropertiesPayload: object = this.hasOneProperties
+  private get hasOnePropertiesPayload(): object {
+    return this.hasOneProperties
       .filter((property: HasOneModelProperty) => property.includeInPayload)
       .reduce((payload: object, property: HasOneModelProperty) => {
         const propertyName: string = property.name;
@@ -126,8 +144,10 @@ export abstract class HalModel {
 
         return payload;
       }, {});
+  }
 
-    const hasManyPropertiesPayload: object = this.hasManyProperties
+  private get hasManyPropertiesPayload(): object {
+    return this.hasManyProperties
       .filter((property: HasManyModelProperty) => property.includeInPayload)
       .reduce((payload: object, property: HasManyModelProperty) => {
         const propertyName: string = property.name;
@@ -151,17 +171,6 @@ export abstract class HalModel {
 
         return payload;
       }, {});
-
-    const relationshipLinks: object = { ...hasOnePropertiesPayload, ...hasManyPropertiesPayload };
-    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
-
-    const payload = { ...attributePropertiesPayload };
-
-    if (hasRelationshipLinks) {
-      payload[LINKS_PROPERTY_NAME] = { ...hasOnePropertiesPayload, ...hasManyPropertiesPayload };
-    }
-
-    return payload;
   }
 
   public generateHeaders(): object {
