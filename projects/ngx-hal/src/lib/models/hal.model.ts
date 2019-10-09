@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import { HttpResponse } from '@angular/common/http';
 import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import { ATTRIBUTE_PROPERTIES_METADATA_KEY, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, HAS_ONE_PROPERTIES_METADATA_KEY, HAS_MANY_PROPERTIES_METADATA_KEY, HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
@@ -11,7 +12,6 @@ import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
 import { HalDocument } from '../classes/hal-document';
 import { NetworkConfig } from '../interfaces/network-config.interface';
 import { generateUUID } from '../helpers/uuid/uuid.helper';
-import { HttpResponse } from '@angular/common/http';
 import { getResponseHeader } from '../utils/get-response-headers/get-response-header.util';
 import { isHalModelInstance } from '../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { RequestOptions } from '../types/request-options.type';
@@ -20,7 +20,7 @@ import { GeneratePayloadOptions } from '../interfaces/generate-payload-options.i
 import { UpdateOptions } from '../interfaces/update-options.interface';
 
 export abstract class HalModel {
-  private config: ModelOptions = this.config || DEFAULT_MODEL_OPTIONS;
+  private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
   private temporarySelfLink: string = null;
   private localModelIdentificator: string;
 
