@@ -23,7 +23,7 @@ import { makeQueryParamsString } from '../../helpers/make-query-params-string/ma
 
 @Injectable()
 export class DatastoreService {
-  public networkConfig: NetworkConfig = this.networkConfig || DEFAULT_NETWORK_CONFIG;
+  public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
   private cacheStrategy: CacheStrategy;
   private internalStorage  = createHalStorage(this.cacheStrategy);
   public paginationClass: PaginationConstructor;
