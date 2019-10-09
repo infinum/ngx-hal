@@ -12,6 +12,9 @@ export class MockModel extends HalModel {
   @Attribute()
   name: string;
 
+  @Attribute()
+  prop1: string;
+
   @HasOne()
   mockModel2Connection: MockModel2;
 }
