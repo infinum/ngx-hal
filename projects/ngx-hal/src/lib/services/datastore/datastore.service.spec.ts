@@ -699,6 +699,129 @@ describe('DatastoreService', () => {
     });
   });
 
+  describe('update method', () => {
+    it('should make a PATCH request', () => {
+      const mockModel = new MockModel({
+        test: 123
+      }, datastoreService);
+
+      mockModel.update().subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a PATCH request only with the properties which are changed', () => {
+      const mockModel = new MockModel({
+        name: 'john'
+      }, datastoreService);
+
+      const updatedName = 'john updated';
+      mockModel.name = updatedName;
+
+      mockModel.update().subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body.name).toEqual(updatedName);
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a PATCH request with an empty object is nothing is changed', () => {
+      const mockModel = new MockModel({
+        name: 'john'
+      }, datastoreService);
+
+      mockModel.update().subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(0);
+
+      req.flush(mockModelResponseJson);
+    });
+
+
+    it('should make a PATCH request only with the properties which are changed and specified in specifiedFields', () => {
+      const mockModel = new MockModel({
+        name: 'john'
+      }, datastoreService);
+
+      const updatedProp1 = 'prop1 value';
+      mockModel.prop1 = updatedProp1;
+
+      mockModel.update({}, { specificFields: ['prop1'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body.name).toEqual(undefined);
+      expect(body.prop1).toEqual(updatedProp1);
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a PATCH request with the properties from specifiedFields which are changed', () => {
+      const mockModel = new MockModel({
+        name: 'john',
+        prop1: 'pp'
+      }, datastoreService);
+
+      const updatedProp1 = 'prop1 value';
+      mockModel.prop1 = updatedProp1;
+
+      mockModel.update({}, { specificFields: ['prop1', 'name'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body.name).toEqual(undefined);
+      expect(body.prop1).toEqual(updatedProp1);
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a PATCH request with an empty object if some specific fields are specified but nothing is changed', () => {
+      const mockModel = new MockModel({
+        name: 'john'
+      }, datastoreService);
+
+      mockModel.update({}, { specificFields: ['name'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(0);
+      expect(body.name).toEqual(undefined);
+
+      req.flush(mockModelResponseJson);
+    });
+  });
+
   xdescribe('find method', () => {
     it('should fetch embedded list items', () => {
 

@@ -382,6 +382,27 @@ export class DatastoreService {
     );
   }
 
+  public update<T extends HalModel>(
+    model: T,
+    specificFields?: Array<string>,
+    requestOptions?: RequestOptions,
+    urlBuildFunction: (model: T, urlFromModel: string) => string = this.defaultUrlBuildFunction
+  ): Observable<T> {
+    const url: string = urlBuildFunction(model, this.buildUrl(model));
+    const payload: object = model.generatePayload({ specificFields, changedPropertiesOnly: true });
+    const modelHeaders: object = model.generateHeaders();
+
+    const modelRequestOptions: RequestOptions = requestOptions || {};
+    modelRequestOptions.headers = modelRequestOptions.headers || {};
+    Object.assign(modelRequestOptions.headers, modelHeaders);
+
+    return this.makePatchRequest(url, payload, modelRequestOptions).pipe(
+      map(() => {
+        return model;
+      })
+    );
+  }
+
   public delete<T extends HalModel>(model: T, requestOptions?: RequestOptions): Observable<void> {
     const url: string = this.buildUrl(model);
     return this.makeDeleteRequest(url, requestOptions).pipe(
@@ -491,6 +512,11 @@ export class DatastoreService {
   private makePutRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
     return this.http.put<T>(url, payload, options);
+  }
+
+  private makePatchRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
+    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    return this.http.patch<T>(url, payload, options);
   }
 
   private makeDeleteRequest<T extends HalModel>(url: string, requestOptions: RequestOptions): Observable<any> {
