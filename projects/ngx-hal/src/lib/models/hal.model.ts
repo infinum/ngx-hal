@@ -66,6 +66,12 @@ export abstract class HalModel {
 
   public getRelationshipUrl(relationshipName: string): string {
     const property: ModelProperty = this.getPropertyData(relationshipName);
+
+    if (!property) {
+      console.warn(`Relationship with the name ${relationshipName} is not defined on the model.`);
+      return;
+    }
+
     const fieldName: string = property.externalName || relationshipName;
     return this.links[fieldName] ? this.links[fieldName].href : '';
   }
