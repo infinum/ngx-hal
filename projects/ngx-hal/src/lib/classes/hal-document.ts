@@ -47,7 +47,7 @@ export class HalDocument<Model extends HalModel> {
       requestOptions.params['page'] = pageNumber;
     }
 
-    const relationshipUrl: string = removeQueryParams(this.links[SELF_PROPERTY_NAME].href);
+    const relationshipUrl: string = this.links[SELF_PROPERTY_NAME].href;
 
     //  TODO find out why casting is necessary here
     // tslint:disable-next-line:max-line-length
