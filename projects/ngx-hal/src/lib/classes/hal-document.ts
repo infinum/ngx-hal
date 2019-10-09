@@ -12,14 +12,14 @@ import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
 import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
 import { RequestOptions } from '../types/request-options.type';
 
-export class HalDocument<Model extends HalModel> {
-  public models: Array<Model>;
+export class HalDocument<T extends HalModel> {
+  public models: Array<T>;
   public pagination: Pagination;
 
   constructor(
     private rawResource: RawHalResource,
     private rawResponse: HttpResponse<any>,
-    private modelClass: ModelConstructor<Model>,
+    private modelClass: ModelConstructor<T>,
     private datastore: DatastoreService
   ) {
     this.parseRawResources(rawResource);
@@ -40,7 +40,7 @@ export class HalDocument<Model extends HalModel> {
     return (this.links[listPropertyName] as any) || [];
   }
 
-  public getPage<T extends HalModel>(pageNumber: number, requestOptions: RequestOptions = {}): Observable<HalDocument<T>> {
+  public getPage(pageNumber: number, requestOptions: RequestOptions = {}): Observable<HalDocument<T>> {
     requestOptions.params = requestOptions.params || {};
 
     if (pageNumber || pageNumber === 0) {
@@ -49,9 +49,7 @@ export class HalDocument<Model extends HalModel> {
 
     const relationshipUrl: string = this.links[SELF_PROPERTY_NAME].href;
 
-    //  TODO find out why casting is necessary here
-    // tslint:disable-next-line:max-line-length
-    return (this.datastore.request('GET', relationshipUrl, requestOptions, this.modelClass, false, false) as unknown) as Observable<HalDocument<T>>;
+    return this.datastore.request('GET', relationshipUrl, requestOptions, this.modelClass, false, false);
   }
 
   private parseRawResources(resources: RawHalResource): void {
@@ -60,7 +58,7 @@ export class HalDocument<Model extends HalModel> {
     this.pagination = this.generatePagination(resources);
   }
 
-  private generateModels(resources: Array<RawHalResource>): Array<Model> {
+  private generateModels(resources: Array<RawHalResource>): Array<T> {
     return resources.map((resource: RawHalResource) => {
       return new this.modelClass(resource, this.datastore, this.rawResponse);
     });

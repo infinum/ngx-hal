@@ -428,6 +428,22 @@ export class DatastoreService {
     url: string,
     requestOptions: RequestOptions,
     modelClass: ModelConstructor<T>,
+    singleResource: false,
+    includeNetworkConfig: false
+  ): Observable<HalDocument<T>>;
+  public request<T extends HalModel>(
+    method: string,
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
+    singleResource: false,
+    includeNetworkConfig: true
+  ): Observable<HalDocument<T>>;
+  public request<T extends HalModel>(
+    method: string,
+    url: string,
+    requestOptions: RequestOptions,
+    modelClass: ModelConstructor<T>,
     singleResource: true
   ): Observable<T>;
   public request<T extends HalModel>(
