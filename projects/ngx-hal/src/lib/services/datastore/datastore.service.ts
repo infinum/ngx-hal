@@ -283,6 +283,23 @@ export class DatastoreService {
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
+    includeMeta: true,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    customUrl?: string
+  ): Observable<HalDocument<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object,
+    includeMeta: true,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    customUrl?: string,
+    subsequentRequestsOptions?: RequestOptions
+  ): Observable<HalDocument<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object,
     includeMeta: false,
     includeRelationships: Array<string>,
     requestOptions: RequestOptions
