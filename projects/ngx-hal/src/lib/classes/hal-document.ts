@@ -39,7 +39,12 @@ export class HalDocument<T extends HalModel> {
     return (this.links[listPropertyName] as any) || [];
   }
 
-  public getPage(pageNumber: number, requestOptions: RequestOptions = {}): Observable<HalDocument<T>> {
+  public getPage(
+    pageNumber: number,
+    includeRelationships: Array<string> = [],
+    requestOptions: RequestOptions = {},
+    subsequentRequestsOptions: RequestOptions = {}
+  ): Observable<HalDocument<T>> {
     requestOptions.params = requestOptions.params || {};
 
     if (pageNumber || pageNumber === 0) {
@@ -48,7 +53,15 @@ export class HalDocument<T extends HalModel> {
 
     const relationshipUrl: string = this.links[SELF_PROPERTY_NAME].href;
 
-    return this.datastore.request('GET', relationshipUrl, requestOptions, this.modelClass, false, false);
+    return this.datastore.find(
+      this.modelClass,
+      {},
+      true,
+      includeRelationships,
+      requestOptions,
+      relationshipUrl,
+      subsequentRequestsOptions
+    );
   }
 
   private parseRawResources(resources: RawHalResource): void {
