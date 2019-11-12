@@ -3,6 +3,7 @@ import { ModelConfig } from '../decorators/model-config.decorator';
 import { Attribute } from '../decorators/attribute.decorator';
 import { MockModel2 } from './mock-model-2';
 import { HasOne } from '../decorators/has-one.decorator';
+import { HasMany } from '../decorators/has-many.decorator';
 
 @ModelConfig({
   type: 'Mock',
@@ -17,4 +18,14 @@ export class MockModel extends HalModel {
 
   @HasOne()
   mockModel2Connection: MockModel2;
+
+  @HasMany({
+    itemsType: MockModel2
+  })
+  someEmptyResources: Array<MockModel2>;
+
+  @HasMany({
+    itemsType: MockModel2
+  })
+  someResources: Array<MockModel2>;
 }

@@ -6,6 +6,9 @@
     },
     "mockModel2Connection": {
       "href": "http://test.com/Mock2/nup52clo"
+    },
+    "someResources": {
+      "href": "http://test.com/Mock2?getSomeResources=true"
     }
   }
 }
