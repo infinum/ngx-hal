@@ -6,6 +6,7 @@ import { ATTRIBUTE_PROPERTIES_METADATA_KEY, HAL_MODEL_DOCUMENT_CLASS_METADATA_KE
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
 import { ModelProperty, AttributeModelProperty, HasOneModelProperty, HasManyModelProperty, HeaderAttributeModelProperty } from '../interfaces/model-property.interface';
 import { LINKS_PROPERTY_NAME, SELF_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.constant';
+import { LOCAL_DOCUMENT_ID_PREFIX, LOCAL_MODEL_ID_PREFIX } from '../constants/general.constant';
 import { DatastoreService } from '../services/datastore/datastore.service';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
@@ -332,7 +333,7 @@ export abstract class HalModel {
           if (existingHalDocument) {
             existingHalDocument.models = value;
           } else {
-            const halDocumentRaw = { models: value, uniqueModelIdentificator: `local-document-identificator-${generateUUID()}` };
+            const halDocumentRaw = { models: value, uniqueModelIdentificator: `${LOCAL_DOCUMENT_ID_PREFIX}-${generateUUID()}` };
             this.datastore.storage.save(halDocumentRaw);
             this.replaceRelationshipModel(property.externalName, halDocumentRaw);
           }
@@ -433,6 +434,6 @@ export abstract class HalModel {
   }
 
   private setLocalModelIdentificator(): void {
-    this.localModelIdentificator = `local-model-identificator-${generateUUID()}`;
+    this.localModelIdentificator = `${LOCAL_MODEL_ID_PREFIX}-${generateUUID()}`;
   }
 }

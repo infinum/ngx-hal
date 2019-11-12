@@ -1,0 +1,8 @@
+{
+  "name": "Mock model - bare minimum",
+  "_links": {
+    "self": {
+      "href": "http://test.com/Mock/98h23nji74"
+    }
+  }
+}

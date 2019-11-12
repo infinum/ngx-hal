@@ -7,6 +7,7 @@ import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
 import { HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY } from '../../constants/metadata.constant';
+import { LOCAL_MODEL_ID_PREFIX, LOCAL_DOCUMENT_ID_PREFIX } from '../../constants/general.constant';
 import { HalDocumentConstructor } from '../../types/hal-document-construtor.type';
 import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
@@ -91,7 +92,7 @@ export class DatastoreService {
     );
   }
 
-  private fetchRelationships<T extends HalModel>(
+  private fetchRelationships<T extends HalModel, K extends HalModel>(
     model: T,
     relationships: Array<string>,
     requestOptions: RequestOptions = {}
@@ -113,9 +114,9 @@ export class DatastoreService {
     const currentLevelRelationships: Array<string> = Object.keys(currentLevelRelationshipsMap);
 
     for (let i = 0; i < currentLevelRelationships.length; i += 1) {
-      const currentLevelRelationship: string = currentLevelRelationships[i];
-      const url: string = model.getRelationshipUrl(currentLevelRelationship);
-      const property: ModelProperty = model.getPropertyData(currentLevelRelationship);
+      const currentLevelRelationshipName: string = currentLevelRelationships[i];
+      const url: string = model.getRelationshipUrl(currentLevelRelationshipName);
+      const property: ModelProperty = model.getPropertyData(currentLevelRelationshipName);
 
       if (!property) {
         continue;
@@ -126,14 +127,14 @@ export class DatastoreService {
 
       // Checks if the relationship is already embdedded inside the emdedded property, or
       // as a part of attribute properties
-      const embeddedRelationship: RawHalResource = model.getEmbeddedResource(currentLevelRelationship);
+      const embeddedRelationship: RawHalResource = model.getEmbeddedResource(currentLevelRelationshipName);
       let fetchedModels: T | HalDocument<T>;
 
       if (embeddedRelationship) {
         fetchedModels = this.processRawResource(embeddedRelationship, modelClass, isSingleResource, model.rawResponse);
       }
 
-      if (!url) {
+      if (!url || url.startsWith(LOCAL_MODEL_ID_PREFIX) || url.startsWith(LOCAL_DOCUMENT_ID_PREFIX)) {
         continue;
       }
 
@@ -147,7 +148,7 @@ export class DatastoreService {
         requestsOptions,
         modelClass,
         isSingleResource,
-        currentLevelRelationshipsMap[currentLevelRelationship],
+        currentLevelRelationshipsMap[currentLevelRelationshipName],
         fetchedModels
       );
 
