@@ -12,7 +12,7 @@ import { HalDocumentConstructor } from '../../types/hal-document-construtor.type
 import { RequestOptions } from '../../types/request-options.type';
 import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
-import { ModelProperty } from '../../interfaces/model-property.interface';
+import { ModelProperty, AttributeModelProperty } from '../../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
 import { PaginationConstructor } from '../../types/pagination.type';
@@ -400,6 +400,17 @@ export class DatastoreService {
     );
   }
 
+  // TODO this updated Attribute properties only, implement HasOne and HasMany properties
+  private updateModelWithChangedProperties<T extends HalModel>(model: T, payload: object) {
+    Object.keys(payload).forEach((externalPropertyName: string) => {
+      const property: AttributeModelProperty = model.getPropertyData(externalPropertyName);
+
+      if (payload[externalPropertyName] && property && property.type === ModelPropertyEnum.Attribute) {
+        model['resource'][externalPropertyName] = payload[externalPropertyName];
+      }
+    });
+  }
+
   public update<T extends HalModel>(
     model: T,
     specificFields?: Array<string>,
@@ -416,6 +427,7 @@ export class DatastoreService {
 
     return this.makePatchRequest(url, payload, modelRequestOptions).pipe(
       map(() => {
+        this.updateModelWithChangedProperties(model, payload);
         return model;
       })
     );

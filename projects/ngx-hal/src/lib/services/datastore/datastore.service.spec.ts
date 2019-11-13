@@ -782,6 +782,72 @@ describe('DatastoreService', () => {
       req.flush(mockModelResponseJson);
     });
 
+    it('should make a PATCH after which the model property must have a new value', () => {
+      const mockModel = new MockModel({
+        name: 'john'
+      }, datastoreService);
+
+      const updatedName = 'john updated';
+      mockModel.name = updatedName;
+
+      mockModel.update().subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body.name).toEqual(updatedName);
+
+      expect(mockModel.name).toEqual(updatedName);
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a PATCH with a new property value and after that the same PATCH request with the old value', () => {
+      const originalName = 'john';
+      const updatedName = 'john updated';
+
+      const mockModel = new MockModel({
+        name: originalName
+      }, datastoreService);
+
+      mockModel.name = updatedName;
+
+      mockModel.update().subscribe((p) => {
+        // Set the original value back
+        mockModel.name = originalName;
+
+        mockModel.update().subscribe();
+
+        const reqRevert: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+        expect(reqRevert.request.method).toEqual('PATCH');
+
+        const revertBody = reqRevert.request.body;
+
+        expect(Object.keys(revertBody).length).toEqual(1);
+        expect(revertBody.name).toEqual(originalName);
+        expect(mockModel.name).toEqual(originalName);
+
+        reqRevert.flush(mockModelResponseJson);
+      });
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body.name).toEqual(updatedName);
+      expect(mockModel.name).toEqual(updatedName);
+
+      req.flush(mockModelResponseJson);
+    });
+
     it('should make a PATCH request with an empty object is nothing is changed', () => {
       const mockModel = new MockModel({
         name: 'john'
