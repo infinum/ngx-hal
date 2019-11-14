@@ -6,7 +6,9 @@ export function makeQueryParamsString(params: object, sortAlphabetically: boolea
   }
 
   const queryParamsString: string = paramKeys.reduce((paramsString: string, queryParamKey: string) => {
-    return `${paramsString}&${queryParamKey}=${params[queryParamKey]}`;
+    const encodedQueryParamValue: string = encodeURIComponent(params[queryParamKey]);
+    console.log('encoded', encodedQueryParamValue);
+    return `${paramsString}&${queryParamKey}=${encodedQueryParamValue}`;
   }, '');
 
   return queryParamsString.slice(1);

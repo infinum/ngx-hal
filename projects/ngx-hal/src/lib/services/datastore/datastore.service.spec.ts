@@ -99,6 +99,63 @@ describe('DatastoreService', () => {
 
       req.flush(mockModelResponseJson);
     });
+
+    it('should make a GET request with a query parameter', () => {
+      const customUrl = 'test1';
+
+      const paramName = 'testParam';
+      const paramValue = 'paramVal';
+      const params = {
+        [paramName]: paramValue
+      };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${customUrl}?${paramName}=${encodeURIComponent(paramValue)}`);
+
+      expect(req.request.method).toEqual('GET');
+
+      req.flush(simpleHalDocumentJson);
+    });
+
+    it('should make a GET request with a query parameter which contains a space', () => {
+      const customUrl = 'test1';
+
+      const paramName = 'testParam';
+      const paramValue = 'paramVal with a space';
+      const encodedParamValue = encodeURIComponent(paramValue);
+      const params = {
+        [paramName]: paramValue
+      };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${customUrl}?${paramName}=${encodedParamValue}`);
+
+      expect(req.request.method).toEqual('GET');
+
+      req.flush(simpleHalDocumentJson);
+    });
+
+    it('should make a GET request with an encoded query parameter', () => {
+      const customUrl = 'test1';
+
+      const paramName = 'testParam';
+      const paramValue = (new Date()).toUTCString();
+
+      const params = {
+        [paramName]: paramValue
+      };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const url = encodeURI(`${customUrl}?${paramName}=${paramValue}`);
+      const req: TestRequest = httpTestingController.expectOne(url);
+
+      expect(req.request.method).toEqual('GET');
+
+      req.flush(simpleHalDocumentJson);
+    });
   });
 
   describe('save method', () => {
