@@ -428,7 +428,8 @@ export abstract class HalModel {
     this.resource[LINKS_PROPERTY_NAME][relationshipName] = relationshipLink;
 
     // Save the model to the storage if it's not already there
-    if (!this[relationshipName]) {
+    if (!this[relationshipName] && relationshipModel) {
+      // TODO should the model be removed from the storage if relationshipModel does not exist?
       this.datastore.storage.save(relationshipModel);
     }
   }
