@@ -24,6 +24,7 @@ import { makeQueryParamsString } from '../../helpers/make-query-params-string/ma
 import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
 import { getQueryParams } from '../../utils/get-query-params/get-query-params.util';
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
+import { encodeQueryParams } from '../../utils/encode-query-params/encode-query-params.utils';
 
 @Injectable()
 export class DatastoreService {
@@ -565,6 +566,9 @@ export class DatastoreService {
     const queryParamsString: string = makeQueryParamsString(queryParams, true);
 
     const urlWithParams = queryParamsString ? `${cleanUrl}?${queryParamsString}` : cleanUrl;
+
+    const encodedParams: object = encodeQueryParams(options.params);
+    options.params = encodedParams as {};
 
     return this.http.get<T>(cleanUrl, options).pipe(
       map((response: HttpResponse<T>) => {

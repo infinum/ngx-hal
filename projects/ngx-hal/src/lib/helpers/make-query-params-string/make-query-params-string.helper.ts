@@ -1,13 +1,15 @@
+import { encodeQueryParams } from '../../utils/encode-query-params/encode-query-params.utils';
+
 export function makeQueryParamsString(params: object, sortAlphabetically: boolean = false): string {
-  let paramKeys: Array<string> = Object.keys(params);
+  const encodedParams: object = encodeQueryParams(params);
+  let paramKeys: Array<string> = Object.keys(encodedParams);
 
   if (sortAlphabetically) {
     paramKeys = paramKeys.sort();
   }
 
   const queryParamsString: string = paramKeys.reduce((paramsString: string, queryParamKey: string) => {
-    const encodedQueryParamValue: string = encodeURIComponent(params[queryParamKey]);
-    return `${paramsString}&${queryParamKey}=${encodedQueryParamValue}`;
+    return `${paramsString}&${queryParamKey}=${encodedParams[queryParamKey]}`;
   }, '');
 
   return queryParamsString.slice(1);

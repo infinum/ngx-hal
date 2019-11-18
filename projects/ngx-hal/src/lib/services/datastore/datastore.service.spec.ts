@@ -183,11 +183,18 @@ describe('DatastoreService', () => {
 
       datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
 
-      const req: TestRequest = httpTestingController.expectOne(`${customUrl}?${paramName}=${encodedParamValue}`);
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === customUrl;
 
-      expect(req.request.method).toEqual('GET');
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(1);
+        expect(request.params.get(paramName)).not.toEqual(paramValue);
+        expect(request.params.get(paramName)).toEqual(encodeURIComponent(paramValue));
 
-      req.flush(simpleHalDocumentJson);
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
     });
 
     it('should make a GET request with an encoded query parameter', () => {
@@ -202,12 +209,18 @@ describe('DatastoreService', () => {
 
       datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
 
-      const url = encodeURI(`${customUrl}?${paramName}=${paramValue}`);
-      const req: TestRequest = httpTestingController.expectOne(url);
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === customUrl;
 
-      expect(req.request.method).toEqual('GET');
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(1);
+        expect(request.params.get(paramName)).not.toEqual(paramValue);
+        expect(request.params.get(paramName)).toEqual(encodeURIComponent(paramValue));
 
-      req.flush(simpleHalDocumentJson);
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
     });
   });
 
