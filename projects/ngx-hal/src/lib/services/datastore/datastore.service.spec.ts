@@ -118,6 +118,59 @@ describe('DatastoreService', () => {
       req.flush(simpleHalDocumentJson);
     });
 
+    it('should make a GET request with multiple query parameters', () => {
+      const customUrl = 'test1';
+
+      const paramName = 'testParam';
+      const paramValue = 'paramVal';
+
+      const paramName2 = 'testParam2';
+      const paramValue2 = 'paramVal2';
+
+      const params = {
+        [paramName]: paramValue,
+        [paramName2]: paramValue2
+      };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${customUrl}?${paramName}=${encodeURIComponent(paramValue)}&${paramName2}=${encodeURIComponent(paramValue2)}`);
+
+      expect(req.request.method).toEqual('GET');
+
+      req.flush(simpleHalDocumentJson);
+    });
+
+
+    it('should make a GET request without duplicate query parameters', () => {
+      const customUrl = 'test1';
+
+      const paramName = 'size';
+      const paramValue = '100';
+
+      const paramName2 = 'size';
+      const paramValue2 = '500';
+
+      const params = {
+        [paramName]: paramValue,
+        [paramName2]: paramValue2
+      };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === customUrl;
+
+        expect(request.method).toEqual('GET');
+        expect(request.params.get(paramName2)).toEqual(paramValue2);
+        expect(request.params.keys().length).toBe(1);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(simpleHalDocumentJson);
+    });
+
     it('should make a GET request with a query parameter which contains a space', () => {
       const customUrl = 'test1';
 
