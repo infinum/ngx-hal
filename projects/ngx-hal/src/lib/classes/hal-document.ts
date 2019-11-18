@@ -102,6 +102,10 @@ export class HalDocument<T extends HalModel> {
     }) || 'item'; // TODO defaults to the `item`, check if this should be defaulted
   }
 
+  public get selfLink(): string {
+    return this.links && this.links[SELF_PROPERTY_NAME] ? this.links[SELF_PROPERTY_NAME].href : null;
+  }
+
   private get links(): RawHalLinks {
     return this.rawResource[LINKS_PROPERTY_NAME];
   }
