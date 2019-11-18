@@ -403,7 +403,7 @@ export abstract class HalModel {
     return halDocument;
   }
 
-  private get links(): RawHalLinks | {} {
+  public get links(): RawHalLinks | {} {
     return this.resource[LINKS_PROPERTY_NAME] || {};
   }
 

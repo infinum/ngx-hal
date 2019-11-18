@@ -21,6 +21,9 @@ import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory';
 import { RequestsOptions } from '../../interfaces/requests-options.interface';
 import { makeQueryParamsString } from '../../helpers/make-query-params-string/make-query-params-string.helper';
+import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
+import { getQueryParams } from '../../utils/get-query-params/get-query-params.util';
+import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 
 @Injectable()
 export class DatastoreService {
@@ -92,7 +95,7 @@ export class DatastoreService {
     );
   }
 
-  private fetchRelationships<T extends HalModel, K extends HalModel>(
+  private fetchRelationships<T extends HalModel>(
     model: T,
     relationships: Array<string>,
     requestOptions: RequestOptions = {}
@@ -150,6 +153,19 @@ export class DatastoreService {
         isSingleResource,
         currentLevelRelationshipsMap[currentLevelRelationshipName],
         fetchedModels
+      ).pipe(
+        map((fetchedRelation) => {
+          const actualRelationshipSelfLink: string = fetchedRelation.selfLink;
+          const externalRelationshipName: string = property.externalName;
+
+          if (isHalModelInstance(model)) {
+            // The original relationship URL on the parent model must be replaced because
+            // the actual relationship URL may have some query parameteres attached to it
+            model.links[externalRelationshipName].href = actualRelationshipSelfLink;
+          }
+
+          return fetchedRelation;
+        })
       );
 
       relationshipCalls.push(relationshipCall$);
@@ -220,8 +236,11 @@ export class DatastoreService {
     includeRelationships: Array<string> = [],
     fetchedModels: T | HalDocument<T> = null
   ): Observable<T | HalDocument<T>> {
-    // tslint:disable-next-line:max-line-length
-    const httpRequest$ = fetchedModels ? of(fetchedModels) : this.makeGetRequest(url, requestsOptions.mainRequest, modelClass, isSingleResource);
+    if (fetchedModels) {
+      return of(fetchedModels);
+    }
+
+    const httpRequest$ = this.makeGetRequest(url, requestsOptions.mainRequest, modelClass, isSingleResource);
 
     if (includeRelationships.length) {
       return httpRequest$.pipe(
@@ -537,12 +556,17 @@ export class DatastoreService {
 
     this.storage.enrichRequestOptions(url, options);
 
-    const queryParams = options.params || {};
+    const urlQueryParams: object = getQueryParams(url);
+    options.params = Object.assign(urlQueryParams, options.params);
+
+    const cleanUrl: string = removeQueryParams(url);
+
+    const queryParams = Object.assign(urlQueryParams, options.params);
     const queryParamsString: string = makeQueryParamsString(queryParams, true);
 
-    const urlWithParams = queryParamsString ? `${url}?${queryParamsString}` : url;
+    const urlWithParams = queryParamsString ? `${cleanUrl}?${queryParamsString}` : cleanUrl;
 
-    return this.http.get<T>(url, options).pipe(
+    return this.http.get<T>(cleanUrl, options).pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
         return this.processRawResource(rawResource, modelClass, singleResource, response, urlWithParams);
