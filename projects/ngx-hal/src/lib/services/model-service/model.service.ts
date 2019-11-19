@@ -69,8 +69,9 @@ export abstract class ModelService<Model extends HalModel> {
   }
 
   public createNewModel(recordData: object = {}): Model {
-    const rawModelData: object = Object.assign({}, recordData, recordData[EMBEDDED_PROPERTY_NAME]);
-    const model: Model = this.createModel(rawModelData);
+    const rawRecordData: object = Object.assign({}, recordData);
+    rawRecordData[EMBEDDED_PROPERTY_NAME] = Object.assign({}, recordData, recordData[EMBEDDED_PROPERTY_NAME]);
+    const model: Model = this.createModel(rawRecordData);
     this.datastore.storage.save(model);
     return model;
   }

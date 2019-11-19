@@ -195,11 +195,11 @@ export abstract class HalModel {
   }
 
   private extractEmbeddedProperties(rawResource: RawHalResource): void {
-    const embeddedProperties: object = rawResource[EMBEDDED_PROPERTY_NAME];
+    const embeddedProperties: object = rawResource[EMBEDDED_PROPERTY_NAME] || {};
 
     Object.keys(embeddedProperties).forEach((propertyName: string) => {
       const property: ModelProperty = this.getPropertyData(propertyName);
-      if (this.isHasOneProperty(property) || this.isHasManyProperty(property)) {
+      if (property && (this.isHasOneProperty(property) || this.isHasManyProperty(property))) {
         this[property.name] = embeddedProperties[propertyName];
       }
     });
