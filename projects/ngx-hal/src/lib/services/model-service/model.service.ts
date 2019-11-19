@@ -5,6 +5,7 @@ import { DatastoreService } from '../datastore/datastore.service';
 import { RequestOptions } from '../../types/request-options.type';
 import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
+import { EMBEDDED_PROPERTY_NAME } from '../../../../../../dist/ngx-hal/lib/constants/hal.constant';
 
 export abstract class ModelService<Model extends HalModel> {
   constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
@@ -68,7 +69,8 @@ export abstract class ModelService<Model extends HalModel> {
   }
 
   public createNewModel(recordData: object = {}): Model {
-    const model: Model = this.createModel(recordData);
+    const rawModelData: object = Object.assign({}, recordData, recordData[EMBEDDED_PROPERTY_NAME]);
+    const model: Model = this.createModel(rawModelData);
     this.datastore.storage.save(model);
     return model;
   }

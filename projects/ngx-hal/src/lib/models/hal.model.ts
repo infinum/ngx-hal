@@ -33,8 +33,9 @@ export abstract class HalModel {
     this.setLocalModelIdentificator();
     this.parseAttributes(resource);
     this.parseHeaderAttributes(rawResponse);
-    this.createHasOneGetters();
-    this.createHasManyGetters();
+    this.initializeHasOneProperties();
+    this.initialzieHasManyProperties();
+    this.extractEmbeddedProperties(resource);
   }
 
   public get uniqueModelIdentificator(): string {
@@ -193,6 +194,17 @@ export abstract class HalModel {
     return payload;
   }
 
+  private extractEmbeddedProperties(rawResource: RawHalResource): void {
+    const embeddedProperties: object = rawResource[EMBEDDED_PROPERTY_NAME];
+
+    Object.keys(embeddedProperties).forEach((propertyName: string) => {
+      const property: ModelProperty = this.getPropertyData(propertyName);
+      if (this.isHasOneProperty(property) || this.isHasManyProperty(property)) {
+        this[property.name] = embeddedProperties[propertyName];
+      }
+    });
+  }
+
   private get attributePropertiesPayload(): object {
     return this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
       if (property.excludeFromPayload) {
@@ -302,7 +314,7 @@ export abstract class HalModel {
     return model.uniqueModelIdentificator;
   }
 
-  private createHasOneGetters(): void {
+  private initializeHasOneProperties(): void {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
@@ -315,7 +327,7 @@ export abstract class HalModel {
     });
   }
 
-  private createHasManyGetters(): void {
+  private initialzieHasManyProperties(): void {
     this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
         get() {
@@ -436,5 +448,13 @@ export abstract class HalModel {
 
   private setLocalModelIdentificator(): void {
     this.localModelIdentificator = `${LOCAL_MODEL_ID_PREFIX}-${generateUUID()}`;
+  }
+
+  private isHasOneProperty(property: ModelOptions): boolean {
+    return property.type === ModelPropertyEnum.HasOne;
+  }
+
+  private isHasManyProperty(property: ModelOptions): boolean {
+    return property.type === ModelPropertyEnum.HasMany;
   }
 }
