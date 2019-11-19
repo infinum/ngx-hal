@@ -425,11 +425,13 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectQueryParams: boolean = request.params.get('page') === pageParam && request.params.get('q') === qParam;
-        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 2;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(2);
+        expect(request.params.get('page')).toEqual(pageParam);
+        expect(request.params.get('q')).toEqual(qParam);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
@@ -451,10 +453,11 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectHeaders: boolean = request.headers.get('language') === language;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectHeaders;
+        expect(request.method).toEqual('GET');
+        expect(request.headers.get('language')).toEqual(language);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
@@ -483,20 +486,22 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectHeaders: boolean = request.headers.get('language') === languageMainRequest;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectHeaders;
+        expect(request.method).toEqual('GET');
+        expect(request.headers.get('language')).toEqual(languageMainRequest);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
 
       httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2/nup52clo`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectHeaders: boolean = request.headers.get('language') === languageRelationshipRequest;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectHeaders;
+        expect(request.method).toEqual('GET');
+        expect(request.headers.get('language')).toEqual(languageRelationshipRequest);
+
+        return isCorrectUrl;
       });
     });
 
@@ -516,20 +521,22 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectHeaders: boolean = request.headers.get('language') === language;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectHeaders;
+        expect(request.method).toEqual('GET');
+        expect(request.headers.get('language')).toEqual(language);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
 
       httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2/nup52clo`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const languageParamNotSet: boolean = !request.headers.get('language');
 
-        return isCorrectUrl && isCorrectMethod && languageParamNotSet;
+        expect(request.method).toEqual('GET');
+        expect(request.params.get('language')).toBeFalsy();
+
+        return isCorrectUrl;
       });
     });
 
@@ -556,21 +563,23 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectQueryParams: boolean = request.params.get('language') === languageMainRequest;
-        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 1;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(1);
+        expect(request.params.get('language')).toEqual(languageMainRequest);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
 
       httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2/nup52clo`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectParams: boolean = request.params.get('language') === languageRelationshipRequest;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectParams;
+        expect(request.method).toEqual('GET');
+        expect(request.params.get('language')).toEqual(languageRelationshipRequest);
+
+        return isCorrectUrl;
       });
     });
 
@@ -590,21 +599,23 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectQueryParams: boolean = request.params.get('language') === language;
-        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 1;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(1);
+        expect(request.params.get('language')).toEqual(language);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
 
       httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2/nup52clo`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const languageParamNotSet: boolean = !request.params.get('language');
 
-        return isCorrectUrl && isCorrectMethod && languageParamNotSet;
+        expect(request.method).toEqual('GET');
+        expect(request.params.get('language')).toBeFalsy();
+
+        return isCorrectUrl;
       });
     });
 
@@ -635,11 +646,12 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectQueryParams: boolean = request.params.get('language') === globalLanguage;
-        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 1;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(1);
+        expect(request.params.get('language')).toEqual(globalLanguage);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
@@ -657,21 +669,23 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectQueryParams: boolean = request.params.get('language') === globalLanguage;
-        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 1;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(1);
+        expect(request.params.get('language')).toEqual(globalLanguage);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
 
       httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2/nup52clo`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const correctLanguageParam: boolean = request.params.get('language') === globalLanguage;
 
-        return isCorrectUrl && isCorrectMethod && correctLanguageParam;
+        expect(request.method).toEqual('GET');
+        expect(request.params.get('language')).toEqual(globalLanguage);
+
+        return isCorrectUrl;
       });
     });
 
@@ -693,11 +707,12 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectQueryParams: boolean = request.params.get('language') === language;
-        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 1;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(1);
+        expect(request.params.get('language')).toEqual(language);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
@@ -723,21 +738,23 @@ describe('DatastoreService', () => {
 
       const calls: Array<TestRequest> = httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const hasCorrectQueryParams: boolean = request.params.get('language') === globalLanguage;
-        const hasCorrectNumberOfParams: boolean = request.params.keys().length === 1;
 
-        return isCorrectUrl && isCorrectMethod && hasCorrectQueryParams && hasCorrectNumberOfParams;
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(1);
+        expect(request.params.get('language')).toEqual(globalLanguage);
+
+        return isCorrectUrl;
       });
 
       calls[0].flush(mockModelResponseJson);
 
       httpTestingController.match((request) => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2/nup52clo`;
-        const isCorrectMethod: boolean = request.method === 'GET';
-        const correctLanguageParam: boolean = request.params.get('language') === language;
 
-        return isCorrectUrl && isCorrectMethod && correctLanguageParam;
+        expect(request.method).toEqual('GET');
+        expect(request.params.get('language')).toEqual(language);
+
+        return isCorrectUrl;
       });
     });
 
