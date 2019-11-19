@@ -194,13 +194,18 @@ export abstract class HalModel {
     return payload;
   }
 
+  // Used only when HalModels or HalDocument are passed when creating a new model
   private extractEmbeddedProperties(rawResource: RawHalResource): void {
     const embeddedProperties: object = rawResource[EMBEDDED_PROPERTY_NAME] || {};
 
     Object.keys(embeddedProperties).forEach((propertyName: string) => {
       const property: ModelProperty = this.getPropertyData(propertyName);
-      if (property && (this.isHasOneProperty(property) || this.isHasManyProperty(property))) {
-        this[property.name] = embeddedProperties[propertyName];
+      const isRelationshipProperty: boolean = property && (this.isHasOneProperty(property) || this.isHasManyProperty(property));
+      const propertyValue = embeddedProperties[propertyName];
+      const isHalModelOrDocument: boolean = isHalModelInstance(propertyValue) || propertyValue instanceof HalDocument;
+
+      if (isRelationshipProperty && isHalModelOrDocument) {
+        this[property.name] = propertyValue;
       }
     });
   }
