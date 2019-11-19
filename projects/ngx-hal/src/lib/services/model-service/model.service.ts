@@ -5,7 +5,7 @@ import { DatastoreService } from '../datastore/datastore.service';
 import { RequestOptions } from '../../types/request-options.type';
 import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
-import { EMBEDDED_PROPERTY_NAME } from '../../../../../../dist/ngx-hal/lib/constants/hal.constant';
+import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
 
 export abstract class ModelService<Model extends HalModel> {
   constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
