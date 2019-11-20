@@ -567,7 +567,7 @@ export class DatastoreService {
 
     options.params = makeHttpParams(options.params, this.httpParamsOptions);
 
-    return this.http.get(cleanUrl, options).pipe(
+    return this.http.get<T>(cleanUrl, options).pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
         return this.processRawResource(rawResource, modelClass, singleResource, response, urlWithParams);
