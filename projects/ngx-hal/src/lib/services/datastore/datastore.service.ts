@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
 import { Observable, combineLatest, of } from 'rxjs';
 import { map, flatMap, tap } from 'rxjs/operators';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
@@ -24,13 +24,14 @@ import { makeQueryParamsString } from '../../helpers/make-query-params-string/ma
 import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
 import { getQueryParams } from '../../utils/get-query-params/get-query-params.util';
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
-import { encodeQueryParams } from '../../utils/encode-query-params/encode-query-params.utils';
+import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
 
 @Injectable()
 export class DatastoreService {
   public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
   private cacheStrategy: CacheStrategy;
   private internalStorage  = createHalStorage(this.cacheStrategy);
+  protected httpParamsOptions?: object;
   public paginationClass: PaginationConstructor;
 
   constructor(public http: HttpClient) {}
@@ -561,14 +562,10 @@ export class DatastoreService {
     options.params = Object.assign(urlQueryParams, options.params);
 
     const cleanUrl: string = removeQueryParams(url);
-
-    const queryParams = Object.assign(urlQueryParams, options.params);
-    const queryParamsString: string = makeQueryParamsString(queryParams, true);
-
+    const queryParamsString: string = makeQueryParamsString(options.params, true);
     const urlWithParams = queryParamsString ? `${cleanUrl}?${queryParamsString}` : cleanUrl;
 
-    const encodedParams: object = encodeQueryParams(options.params);
-    options.params = encodedParams as {};
+    options.params = makeHttpParams(options.params, this.httpParamsOptions);
 
     return this.http.get<T>(cleanUrl, options).pipe(
       map((response: HttpResponse<T>) => {
