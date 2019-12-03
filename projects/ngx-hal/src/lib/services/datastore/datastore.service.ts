@@ -410,7 +410,10 @@ export class DatastoreService {
           return this.processRawResource(rawResource, modelClass, true, response);
         }
 
-        model.selfLink = getResponseHeader(response, 'Location');
+        const newLocationLink: string = getResponseHeader(response, 'Location');
+        if (newLocationLink && model.selfLink !== newLocationLink) {
+          model.selfLink = newLocationLink;
+        }
 
         if (!this.storage.get(model.selfLink)) {
           this.storage.save(model, response);
