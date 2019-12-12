@@ -108,8 +108,8 @@ export abstract class HalModel {
     return this.datastore.update(this, options.specificFields, requestOptions, options.buildUrlFunction);
   }
 
-  public delete(): Observable<void> {
-    return this.datastore.delete(this);
+  public delete(requestOptions?: RequestOptions, customUrl?: string): Observable<void> {
+    return this.datastore.delete(this, requestOptions, customUrl);
   }
 
   public generatePayload(options: GeneratePayloadOptions = {}): object {

@@ -457,8 +457,8 @@ export class DatastoreService {
     );
   }
 
-  public delete<T extends HalModel>(model: T, requestOptions?: RequestOptions): Observable<void> {
-    const url: string = this.buildUrl(model);
+  public delete<T extends HalModel>(model: T, requestOptions?: RequestOptions, customUrl?: string): Observable<void> {
+    const url: string = customUrl || this.buildUrl(model);
     return this.makeDeleteRequest(url, requestOptions).pipe(
       tap(() => {
         this.storage.remove(model);
