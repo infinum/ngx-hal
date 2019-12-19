@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, combineLatest, of } from 'rxjs';
 import { map, flatMap, tap } from 'rxjs/operators';
+import * as UriTemplate from 'uri-templates';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
@@ -561,10 +562,12 @@ export class DatastoreService {
 
     this.storage.enrichRequestOptions(url, options);
 
-    const urlQueryParams: object = getQueryParams(url);
+    const templatedUrl: string = (new UriTemplate(url)).fill(options.params);
+
+    const urlQueryParams: object = getQueryParams(templatedUrl);
     options.params = Object.assign(urlQueryParams, options.params);
 
-    const cleanUrl: string = removeQueryParams(url);
+    const cleanUrl: string = removeQueryParams(templatedUrl);
     const queryParamsString: string = makeQueryParamsString(options.params, true);
     const urlWithParams = queryParamsString ? `${cleanUrl}?${queryParamsString}` : cleanUrl;
 

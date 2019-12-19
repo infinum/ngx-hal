@@ -171,6 +171,75 @@ describe('DatastoreService', () => {
       calls[0].flush(simpleHalDocumentJson);
     });
 
+    it('should make a GET request with templated URL parameters', () => {
+      const country = 'cro';
+      const customUrl = 'test.com/{country}';
+
+      const params = {
+        country
+      };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `test.com/${country}`;
+
+        expect(request.method).toEqual('GET');
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(simpleHalDocumentJson);
+    });
+
+    it('should make a GET request with templated query parameters', () => {
+      const country = 'cro';
+      const id = '123';
+      const customUrl = 'test.com{?country,id}';
+
+      const params = {
+        country,
+        id
+      };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === 'test.com';
+
+        expect(request.method).toEqual('GET');
+        expect(request.params.get('country')).toEqual(country);
+        expect(request.params.get('id')).toEqual(id);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(simpleHalDocumentJson);
+    });
+
+    it('should ignore templated query parameters if the parameter is not provided', () => {
+      const country = 'cro';
+      const customUrl = 'test.com{?country,id}';
+
+      const params = {
+        country
+      };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === 'test.com';
+
+        expect(request.method).toEqual('GET');
+        expect(request.params.get('country')).toEqual(country);
+        expect(request.params.get('id')).toEqual(null);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(simpleHalDocumentJson);
+    });
+
     xit('should make a GET request with a query parameter which contains a space', () => {
       const customUrl = 'test1';
 
