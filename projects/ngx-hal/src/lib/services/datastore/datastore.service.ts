@@ -27,7 +27,6 @@ import { getQueryParams } from '../../utils/get-query-params/get-query-params.ut
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
 
-
 @Injectable()
 export class DatastoreService {
   public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
