@@ -26,6 +26,7 @@ import { removeQueryParams } from '../../utils/remove-query-params/remove-query-
 import { getQueryParams } from '../../utils/get-query-params/get-query-params.util';
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
+import { UpdateOptions } from '../../interfaces/update-options.interface';
 
 @Injectable()
 export class DatastoreService {
@@ -438,21 +439,29 @@ export class DatastoreService {
 
   public update<T extends HalModel>(
     model: T,
-    specificFields?: Array<string>,
     requestOptions?: RequestOptions,
-    urlBuildFunction: (model: T, urlFromModel: string) => string = this.defaultUrlBuildFunction
+    updateOptions: UpdateOptions<T> = {}
   ): Observable<T> {
-    const url: string = urlBuildFunction(model, this.buildUrl(model));
-    const payload: object = model.generatePayload({ specificFields, changedPropertiesOnly: true });
+    const defaultUpdateOptions: UpdateOptions<T> = {
+      buildUrlFunction: this.defaultUrlBuildFunction,
+      specificFields: null,
+      transformPayloadBeforeSave: this.defaultTransformPayloadBeforeSaveFunction
+    };
+
+    const options: UpdateOptions<T> = Object.assign(defaultUpdateOptions, updateOptions);
+
+    const url: string = options.buildUrlFunction(model, this.buildUrl(model));
+    const payload: object = model.generatePayload({ specificFields: options.specificFields, changedPropertiesOnly: true });
+    const transformedPaylaod: object = options.transformPayloadBeforeSave(payload);
     const modelHeaders: object = model.generateHeaders();
 
     const modelRequestOptions: RequestOptions = requestOptions || {};
     modelRequestOptions.headers = modelRequestOptions.headers || {};
     Object.assign(modelRequestOptions.headers, modelHeaders);
 
-    return this.makePatchRequest(url, payload, modelRequestOptions).pipe(
+    return this.makePatchRequest(url, transformedPaylaod, modelRequestOptions).pipe(
       map(() => {
-        this.updateModelWithChangedProperties(model, payload);
+        this.updateModelWithChangedProperties(model, transformedPaylaod);
         return model;
       })
     );
@@ -721,5 +730,9 @@ export class DatastoreService {
 
   private defaultUrlBuildFunction<T extends HalModel>(model: T, urlFromModel: string): string {
     return urlFromModel;
+  }
+
+  private defaultTransformPayloadBeforeSaveFunction(payload: object): object {
+    return payload;
   }
 }
