@@ -1141,6 +1141,35 @@ describe('DatastoreService', () => {
 
       req.flush(mockModelResponseJson);
     });
+
+    it('should make a PATCH request with the properties from specifiedFields which are changed', () => {
+      const customFunctionForPayloadTransformation = (originalPayload: object) => {
+        return Object.assign({ additionalProperty: 'infiltrator' }, originalPayload);
+      };
+
+      const mockModel = new MockModel({
+        name: 'john',
+        prop1: 'pp'
+      }, datastoreService);
+
+      const updatedProp1 = 'prop1 value';
+      mockModel.prop1 = updatedProp1;
+
+      mockModel.update({}, { transformPayloadBeforeSave: customFunctionForPayloadTransformation }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('PATCH');
+
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(2);
+      expect(body.name).toEqual(undefined);
+      expect(body.prop1).toEqual(updatedProp1);
+      expect(body.additionalProperty).toEqual('infiltrator');
+
+      req.flush(mockModelResponseJson);
+    });
   });
 
   xdescribe('find method', () => {
