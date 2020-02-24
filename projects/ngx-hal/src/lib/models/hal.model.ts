@@ -18,7 +18,7 @@ import { isHalModelInstance } from '../helpers/is-hal-model-instance.ts/is-hal-m
 import { RequestOptions } from '../types/request-options.type';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { GeneratePayloadOptions } from '../interfaces/generate-payload-options.interface';
-import { UpdateOptions } from '../interfaces/update-options.interface';
+import { CustomOptions } from '../interfaces/custom-options.interface';
 
 export abstract class HalModel {
   private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -99,12 +99,12 @@ export abstract class HalModel {
     return this.resource[EMBEDDED_PROPERTY_NAME][property.externalName];
   }
 
-  public save(requestOptions?: RequestOptions, buildUrlFunction?: (model: this, urlFromModel: string) => string): Observable<this> {
+  public save(requestOptions?: RequestOptions, options: CustomOptions<this> = {}): Observable<this> {
     const modelClass = Object.getPrototypeOf(this).constructor;
-    return this.datastore.save(this, modelClass, requestOptions, buildUrlFunction);
+    return this.datastore.save(this, modelClass, requestOptions, options);
   }
 
-  public update(requestOptions?: RequestOptions, options: UpdateOptions<this> = {}): Observable<this> {
+  public update(requestOptions?: RequestOptions, options: CustomOptions<this> = {}): Observable<this> {
     return this.datastore.update(this, requestOptions, options);
   }
 
