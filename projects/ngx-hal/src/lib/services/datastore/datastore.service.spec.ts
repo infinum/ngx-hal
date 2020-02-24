@@ -1241,5 +1241,36 @@ describe('DatastoreService', () => {
 
     });
   });
+
+  describe('delete method', () => {
+    it('should make a DELETE request', () => {
+      const mockModel = new MockModel({}, datastoreService);
+
+      mockModel.delete().subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/mock-model-endpoint`);
+
+      expect(req.request.method).toEqual('DELETE');
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a delete request to a custom URL if buildUrl function is provided', () => {
+      const mockModel = new MockModel({}, datastoreService);
+
+      const customUrl = 'fully-custom-rul';
+      const customOptions: CustomOptions<MockModel> = {
+        buildUrlFunction: () => {
+          return customUrl;
+        }
+      };
+
+      mockModel.delete({}, customOptions).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+      req.flush(mockModelResponseJson);
+    });
+  });
 });
 
