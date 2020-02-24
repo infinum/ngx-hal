@@ -26,7 +26,7 @@ import { removeQueryParams } from '../../utils/remove-query-params/remove-query-
 import { getQueryParams } from '../../utils/get-query-params/get-query-params.util';
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
-import { UpdateOptions } from '../../interfaces/update-options.interface';
+import { CustomOptions } from '../../interfaces/custom-options.interface';
 
 @Injectable()
 export class DatastoreService {
@@ -387,10 +387,23 @@ export class DatastoreService {
     model: T,
     modelClass: ModelConstructor<T>,
     requestOptions?: RequestOptions,
-    urlBuildFunction: (model: T, urlFromModel: string) => string = this.defaultUrlBuildFunction
+    saveOptions: CustomOptions<T> = {}
   ): Observable<T> {
-    const url: string = urlBuildFunction(model, this.buildUrl(model));
-    const payload: object = model.generatePayload();
+    const defaultSaveOptions: CustomOptions<T> = {
+      buildUrlFunction: this.defaultUrlBuildFunction,
+      specificFields: null,
+      transformPayloadBeforeSave: this.defaultTransformPayloadBeforeSaveFunction
+    };
+
+    const options: CustomOptions<T> = Object.assign(defaultSaveOptions, saveOptions);
+
+    const url: string = options.buildUrlFunction(model, this.buildUrl(model));
+    const payload: object = model.generatePayload({
+      specificFields: options.specificFields,
+      changedPropertiesOnly: false
+    });
+    console.log('payload', payload);
+    const transformedPaylaod: object = options.transformPayloadBeforeSave(payload);
     const modelHeaders: object = model.generateHeaders();
 
     const modelRequestOptions: RequestOptions = requestOptions || {};
@@ -400,9 +413,9 @@ export class DatastoreService {
     let request$;
 
     if (model.isSaved) {
-      request$ = this.makePutRequest(url, payload, modelRequestOptions);
+      request$ = this.makePutRequest(url, transformedPaylaod, modelRequestOptions);
     } else {
-      request$ = this.makePostRequest(url, payload, modelRequestOptions);
+      request$ = this.makePostRequest(url, transformedPaylaod, modelRequestOptions);
     }
 
     return request$.pipe(
@@ -440,15 +453,15 @@ export class DatastoreService {
   public update<T extends HalModel>(
     model: T,
     requestOptions?: RequestOptions,
-    updateOptions: UpdateOptions<T> = {}
+    updateOptions: CustomOptions<T> = {}
   ): Observable<T> {
-    const defaultUpdateOptions: UpdateOptions<T> = {
+    const defaultUpdateOptions: CustomOptions<T> = {
       buildUrlFunction: this.defaultUrlBuildFunction,
       specificFields: null,
       transformPayloadBeforeSave: this.defaultTransformPayloadBeforeSaveFunction
     };
 
-    const options: UpdateOptions<T> = Object.assign(defaultUpdateOptions, updateOptions);
+    const options: CustomOptions<T> = Object.assign(defaultUpdateOptions, updateOptions);
 
     const url: string = options.buildUrlFunction(model, this.buildUrl(model));
     const payload: object = model.generatePayload({ specificFields: options.specificFields, changedPropertiesOnly: true });

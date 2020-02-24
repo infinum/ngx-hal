@@ -8,6 +8,7 @@ import mockModelResponseJson from '../../mocks/mock-model-response.json';
 import mockModel2ResponseJson from '../../mocks/mock-model-2-response.json';
 import mockModelBareMinimumResponseJson from '../../mocks/mock-model-bare-minimum-response.json';
 import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
+import { CustomOptions } from '../../interfaces/custom-options.interface';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -310,10 +311,13 @@ describe('DatastoreService', () => {
       const mockModel = new MockModel({}, datastoreService);
 
       const customUrl = 'fully-custom-rul';
+      const customOptions: CustomOptions<MockModel> = {
+        buildUrlFunction: () => {
+          return customUrl;
+        }
+      };
 
-      mockModel.save({}, () => {
-        return customUrl;
-      }).subscribe();
+      mockModel.save({}, customOptions).subscribe();
 
       const req: TestRequest = httpTestingController.expectOne(customUrl);
 
@@ -325,10 +329,13 @@ describe('DatastoreService', () => {
       const mockModel = new MockModel({ name: modelName }, datastoreService);
 
       const customUrl = 'fully-custom-rul';
+      const customOptions: CustomOptions<MockModel> = {
+        buildUrlFunction: (model) => {
+          return `${customUrl}/${model.name}`;
+        }
+      };
 
-      mockModel.save({}, (model) => {
-        return `${customUrl}/${model.name}`;
-      }).subscribe();
+      mockModel.save({}, customOptions).subscribe();
 
       const req: TestRequest = httpTestingController.expectOne(`${customUrl}/${modelName}`);
 
@@ -391,6 +398,48 @@ describe('DatastoreService', () => {
 
       req.flush(null, { headers: { Location: locationHeader } });
     });
+
+    it('should make a POST request with all the properties from the model', () => {
+      const mockModel = new MockModel({
+        name: 'John',
+        prop1: 'prop1 test'
+      }, datastoreService);
+      const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
+
+      mockModel.save().subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(2);
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a POST request only with the properties which are specified in specifiedFields', () => {
+      const nameModelProperty = 'John';
+
+      const mockModel = new MockModel({
+        name: nameModelProperty,
+        prop1: 'prop1 test'
+      }, datastoreService);
+      const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
+
+      mockModel.save({}, { specificFields: ['name'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body.name).toEqual(nameModelProperty);
+      expect(body.prop1).toEqual(undefined);
+
+      req.flush(mockModelResponseJson);
+    });
   });
 
   describe('findOne method', () => {
@@ -407,13 +456,16 @@ describe('DatastoreService', () => {
       req.flush(mockModelResponseJson);
     });
 
-    it('should make a GET request for fetching a single model if noone is subscribed to it', () => {
+    it('should not make a GET request for fetching a single model if noone is subscribed to it', () => {
+      const spy = spyOn(datastoreService, 'findOne');
+
       datastoreService.findOne(
         MockModel,
         'mockModelId'
       );
 
       httpTestingController.expectNone(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
+      expect(spy).toHaveBeenCalled();
     });
 
     it('should make a GET request for the original model and another GET request for fetching a HasOne relationship', () => {
