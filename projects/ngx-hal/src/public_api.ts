@@ -22,7 +22,7 @@ export * from './lib/interfaces/attribute-options.interface';
 export * from './lib/decorators/header-attribute.decorator';
 export * from './lib/interfaces/has-many-options.interface';
 export * from './lib/interfaces/has-one-options.interface';
-export * from './lib/interfaces/update-options.interface';
+export * from './lib/interfaces/custom-options.interface';
 
 export * from './lib/services/datastore/datastore.service';
 export * from './lib/services/model-service/model.service';
