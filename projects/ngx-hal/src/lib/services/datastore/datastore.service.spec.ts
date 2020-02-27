@@ -9,6 +9,8 @@ import mockModel2ResponseJson from '../../mocks/mock-model-2-response.json';
 import mockModelBareMinimumResponseJson from '../../mocks/mock-model-bare-minimum-response.json';
 import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
+import { MockModel2 } from '../../mocks/mock-model-2';
+import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -437,6 +439,62 @@ describe('DatastoreService', () => {
       expect(Object.keys(body).length).toEqual(1);
       expect(body.name).toEqual(nameModelProperty);
       expect(body.prop1).toEqual(undefined);
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a POST request only with the properties which are specified in specifiedFields (links included)', () => {
+      const nameModelProperty = 'John';
+
+      const mockModel = new MockModel({
+        name: nameModelProperty,
+        mockModel2Connection: new MockModel2({ name: '' }, datastoreService),
+        someResources: [new MockModel2({ name: '' }, datastoreService)]
+      }, datastoreService);
+      mockModel.mockModel2Connection = new MockModel2({ name: '' }, datastoreService);
+      mockModel.someResources = [new MockModel2({ name: '' }, datastoreService)];
+
+      const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
+
+      mockModel.save({}, { specificFields: ['name', 'someResources'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(2);
+      expect(body.name).toEqual(nameModelProperty);
+      expect(body[LINKS_PROPERTY_NAME]).toBeDefined();
+      expect(body[LINKS_PROPERTY_NAME].someResources).toBeDefined();
+      expect(body[LINKS_PROPERTY_NAME].mockModel2Connection).toBeUndefined();
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should make a POST request only with the properties which are specified in specifiedFields (links excluded if there are no relationships)', () => {
+      const nameModelProperty = 'John';
+
+      const mockModel = new MockModel({
+        name: nameModelProperty,
+        mockModel2Connection: new MockModel2({ name: '' }, datastoreService),
+        someResources: [new MockModel2({ name: '' }, datastoreService)]
+      }, datastoreService);
+      mockModel.mockModel2Connection = new MockModel2({ name: '' }, datastoreService);
+      mockModel.someResources = [new MockModel2({ name: '' }, datastoreService)];
+
+      const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
+
+      mockModel.save({}, { specificFields: ['name'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body.name).toEqual(nameModelProperty);
+      expect(body[LINKS_PROPERTY_NAME]).toBeUndefined();
 
       req.flush(mockModelResponseJson);
     });
@@ -1088,7 +1146,6 @@ describe('DatastoreService', () => {
         expect(reqRevert.request.method).toEqual('PATCH');
 
         const revertBody = reqRevert.request.body;
-
         expect(Object.keys(revertBody).length).toEqual(1);
         expect(revertBody.name).toEqual(originalName);
         expect(mockModel.name).toEqual(originalName);

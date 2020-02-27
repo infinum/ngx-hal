@@ -141,20 +141,51 @@ export abstract class HalModel {
     return payload;
   }
 
-  // Currently works with Attribute properties only
   private generatePayloadWithChangedProperties(): object {
     const attributePropertiesPayload: object = this.attributePropertiesPayload;
     const hasOnePropertiesPayload: object = this.hasOnePropertiesPayload;
     const hasManyPropertiesPayload: object = this.hasManyPropertiesPayload;
 
-    const changedAttributeProperties: object = {};
-    Object.keys(attributePropertiesPayload).forEach((propertyName: string) => {
-      if (attributePropertiesPayload[propertyName] !== this.resource[propertyName]) {
-        changedAttributeProperties[propertyName] = attributePropertiesPayload[propertyName];
-      }
-    });
+    const changedAttributeProperties: object = this.extractChangedPropertiesOnly(attributePropertiesPayload);
+    const changedHasOneProperties: object = this.extractChangedPropertiesOnly(hasOnePropertiesPayload);
+    const changedHasMannyProperties: object = this.extractChangedPropertiesOnly(hasManyPropertiesPayload);
 
-    const relationshipLinks: object = { ...hasOnePropertiesPayload, ...hasManyPropertiesPayload };
+    const relationshipLinks: object = { ...changedHasOneProperties, ...changedHasMannyProperties };
+    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
+    console.log(relationshipLinks);
+    const payload = { ...changedAttributeProperties };
+
+    if (hasRelationshipLinks) {
+      payload[LINKS_PROPERTY_NAME] = relationshipLinks;
+    }
+
+    return payload;
+  }
+
+  private generatePayloadWithSpecificPropertiesOnly(specificFields: Array<string>, changedPropertiesOnly: boolean = false): object {
+    const attributePropertiesPayload: object = this.attributePropertiesPayload;
+    const hasOnePropertiesPayload: object = this.hasOnePropertiesPayload;
+    const hasManyPropertiesPayload: object = this.hasManyPropertiesPayload;
+
+    const changedAttributeProperties: object = this.extractSpecificProperties(
+      attributePropertiesPayload,
+      specificFields,
+      changedPropertiesOnly
+    );
+
+    const changedHasOneProperties: object = this.extractSpecificProperties(
+      hasOnePropertiesPayload,
+      specificFields,
+      changedPropertiesOnly
+    );
+
+    const changedHasManyProperties: object = this.extractSpecificProperties(
+      hasManyPropertiesPayload,
+      specificFields,
+      changedPropertiesOnly
+    );
+
+    const relationshipLinks: object = { ...changedHasOneProperties, ...changedHasManyProperties };
     const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
 
     const payload = { ...changedAttributeProperties };
@@ -166,32 +197,31 @@ export abstract class HalModel {
     return payload;
   }
 
-  // Currently works with Attribute properties only
-  private generatePayloadWithSpecificPropertiesOnly(specificFields: Array<string>, changedPropertiesOnly: boolean = false): object {
-    const attributePropertiesPayload: object = this.attributePropertiesPayload;
-    const hasOnePropertiesPayload: object = this.hasOnePropertiesPayload;
-    const hasManyPropertiesPayload: object = this.hasManyPropertiesPayload;
+  private extractChangedPropertiesOnly(propertiesPayload: object): object {
+    const changedProperties: object = {};
 
-    const changedAttributeProperties: object = {};
-    Object.keys(attributePropertiesPayload).forEach((propertyName: string) => {
-      const isPropertyInWantedFields: boolean = specificFields.indexOf(propertyName) !== -1;
-      const isChanged: boolean = attributePropertiesPayload[propertyName] !== this.resource[propertyName];
-
-      if (isPropertyInWantedFields && (!changedPropertiesOnly || isChanged)) {
-        changedAttributeProperties[propertyName] = attributePropertiesPayload[propertyName];
+    Object.keys(propertiesPayload).forEach((propertyName: string) => {
+      if (propertiesPayload[propertyName] !== this.resource[propertyName]) {
+        changedProperties[propertyName] = propertiesPayload[propertyName];
       }
     });
 
-    const relationshipLinks: object = { ...hasOnePropertiesPayload, ...hasManyPropertiesPayload };
-    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
+    return changedProperties;
+  }
 
-    const payload = { ...changedAttributeProperties };
+  private extractSpecificProperties(propertiesPayload: object, specificFields: Array<string>, changedPropertiesOnly: boolean) {
+    const changedProperties: object = {};
 
-    if (hasRelationshipLinks) {
-      payload[LINKS_PROPERTY_NAME] = relationshipLinks;
-    }
+    Object.keys(propertiesPayload).forEach((propertyName: string) => {
+      const isPropertyInWantedFields: boolean = specificFields.indexOf(propertyName) !== -1;
+      const isChanged: boolean = propertiesPayload[propertyName] !== this.resource[propertyName];
 
-    return payload;
+      if (isPropertyInWantedFields && (!changedPropertiesOnly || isChanged)) {
+        changedProperties[propertyName] = propertiesPayload[propertyName];
+      }
+    });
+
+    return changedProperties;
   }
 
   // Used only when HalModels or HalDocument are passed when creating a new model
@@ -247,7 +277,8 @@ export abstract class HalModel {
       .reduce((payload: object, property: HasManyModelProperty) => {
         const propertyName: string = property.name;
         const externalPropertyName: string = property.externalName;
-        payload[externalPropertyName] = [];
+
+        const hasManyPropertyLinks = [];
 
         if (!this[propertyName]) {
           return payload;
@@ -259,10 +290,14 @@ export abstract class HalModel {
             return payload;
           }
 
-          payload[externalPropertyName].push({
+          hasManyPropertyLinks.push({
             href: model.selfLink
           });
         });
+
+        if (hasManyPropertyLinks.length) {
+          payload[externalPropertyName] = hasManyPropertyLinks;
+        }
 
         return payload;
       }, {});

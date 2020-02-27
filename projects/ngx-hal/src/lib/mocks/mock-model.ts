@@ -16,16 +16,20 @@ export class MockModel extends HalModel {
   @Attribute()
   prop1: string;
 
-  @HasOne()
+  @HasOne({
+    includeInPayload: true
+  })
   mockModel2Connection: MockModel2;
 
   @HasMany({
-    itemsType: MockModel2
+    itemsType: MockModel2,
+    includeInPayload: true
   })
   someEmptyResources: Array<MockModel2>;
 
   @HasMany({
-    itemsType: MockModel2
+    itemsType: MockModel2,
+    includeInPayload: true
   })
   someResources: Array<MockModel2>;
 }
