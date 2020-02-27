@@ -402,7 +402,7 @@ export class DatastoreService {
       specificFields: options.specificFields,
       changedPropertiesOnly: false
     });
-    console.log('payload', payload);
+
     const transformedPaylaod: object = options.transformPayloadBeforeSave(payload);
     const modelHeaders: object = model.generateHeaders();
 

@@ -152,7 +152,7 @@ export abstract class HalModel {
 
     const relationshipLinks: object = { ...changedHasOneProperties, ...changedHasMannyProperties };
     const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
-    console.log(relationshipLinks);
+
     const payload = { ...changedAttributeProperties };
 
     if (hasRelationshipLinks) {
