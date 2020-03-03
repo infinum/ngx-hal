@@ -11,6 +11,7 @@ import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-
 import { CustomOptions } from '../../interfaces/custom-options.interface';
 import { MockModel2 } from '../../mocks/mock-model-2';
 import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
+import { CarModel } from '../../mocks/car.mock.model';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -37,6 +38,39 @@ describe('DatastoreService', () => {
 
   it('should be created', () => {
     expect(datastoreService).toBeTruthy();
+  });
+
+  describe('HAL model creation', () => {
+    let carModel: CarModel;
+    const carName = 'nice car';
+    const partName = 'engine';
+    const companyName = 'coolCompanyLtd';
+
+    beforeEach(() => {
+      carModel = new CarModel({
+        name: carName,
+        prentCompany: new MockModel2({ name: companyName }, datastoreService),
+        parts: [new MockModel2({ name: partName }, datastoreService)]
+      }, datastoreService);
+    });
+
+    it('should create a HAL model from a raw response with different attribute property names', () => {
+      expect(carModel.carName).toBeDefined();
+      expect(carModel.carName).toBe(carName);
+    });
+
+    // TODO implement
+    xit('should create a HAL model from a raw response with different hasOne property names', () => {
+      expect(carModel.company).toBeDefined();
+      expect(carModel.company.name).toBe(companyName);
+    });
+
+    // TODO implement
+    xit('should create a HAL model from a raw response with different hasMany property names', () => {
+      expect(carModel.carParts).toBeDefined();
+      expect(carModel.carParts.length).toBe(1);
+      expect(carModel.carParts[0].name).toBe(partName);
+    });
   });
 
   describe('request method', () => {
@@ -495,6 +529,195 @@ describe('DatastoreService', () => {
       expect(Object.keys(body).length).toEqual(1);
       expect(body.name).toEqual(nameModelProperty);
       expect(body[LINKS_PROPERTY_NAME]).toBeUndefined();
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should take into consideration external property names and it should not use external attribute name as identificator', () => {
+      const carName = 'nice car';
+      const partName = 'engine';
+      const companyName = 'coolCompanyLtd';
+
+      const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      const partsModel = new MockModel2({ name: partName }, datastoreService);
+
+      const carModel = new CarModel({
+        name: carName,
+        prentCompany: companyModel,
+        parts: [partsModel]
+      }, datastoreService);
+      carModel.company = companyModel;
+      carModel.carParts = [partsModel];
+
+      const modelUrl = `${BASE_NETWORK_URL}/car`;
+
+      carModel.save({}, { specificFields: ['name'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(0);
+      expect(body[LINKS_PROPERTY_NAME]).toBeUndefined();
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should take into consideration external property names when doing POST request with attribute specific fields', () => {
+      const carName = 'nice car';
+      const partName = 'engine';
+      const companyName = 'coolCompanyLtd';
+
+      const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      const partsModel = new MockModel2({ name: partName }, datastoreService);
+
+      const carModel = new CarModel({
+        name: carName,
+        prentCompany: companyModel,
+        parts: [partsModel]
+      }, datastoreService);
+      carModel.company = companyModel;
+      carModel.carParts = [partsModel];
+
+      const modelUrl = `${BASE_NETWORK_URL}/car`;
+
+      carModel.save({}, { specificFields: ['carName'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body.name).toEqual(carName);
+      expect(body[LINKS_PROPERTY_NAME]).toBeUndefined();
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should take into consideration external property names and it should not use external hasOne name as identificator', () => {
+      const carName = 'nice car';
+      const partName = 'engine';
+      const companyName = 'coolCompanyLtd';
+
+      const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      const partsModel = new MockModel2({ name: partName }, datastoreService);
+
+      const carModel = new CarModel({
+        name: carName,
+        prentCompany: companyModel,
+        parts: [partsModel]
+      }, datastoreService);
+      carModel.company = companyModel;
+      carModel.carParts = [partsModel];
+
+      const modelUrl = `${BASE_NETWORK_URL}/car`;
+
+      carModel.save({}, { specificFields: ['parentCompany'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(0);
+      expect(body[LINKS_PROPERTY_NAME]).toBeUndefined();
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should take into consideration external property names when doing POST request with hasOne specific fields', () => {
+      const carName = 'nice car';
+      const partName = 'engine';
+      const companyName = 'coolCompanyLtd';
+
+      const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      const partsModel = new MockModel2({ name: partName }, datastoreService);
+
+      const carModel = new CarModel({
+        name: carName,
+        prentCompany: companyModel,
+        parts: [partsModel]
+      }, datastoreService);
+      carModel.company = companyModel;
+      carModel.carParts = [partsModel];
+
+      const modelUrl = `${BASE_NETWORK_URL}/car`;
+
+      carModel.save({}, { specificFields: ['company'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body[LINKS_PROPERTY_NAME]).toBeDefined();
+      expect(Object.keys(body[LINKS_PROPERTY_NAME]).length).toEqual(1);
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should take into consideration external property names and it should not use external hasMany name as identificator', () => {
+      const carName = 'nice car';
+      const partName = 'engine';
+      const companyName = 'coolCompanyLtd';
+
+      const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      const partsModel = new MockModel2({ name: partName }, datastoreService);
+
+      const carModel = new CarModel({
+        name: carName,
+        prentCompany: companyModel,
+        parts: [partsModel]
+      }, datastoreService);
+      carModel.company = companyModel;
+      carModel.carParts = [partsModel];
+
+      const modelUrl = `${BASE_NETWORK_URL}/car`;
+
+      carModel.save({}, { specificFields: ['parts'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(0);
+      expect(body[LINKS_PROPERTY_NAME]).toBeUndefined();
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should take into consideration external property names when doing POST request with hasMany specific fields', () => {
+      const carName = 'nice car';
+      const partName = 'engine';
+      const companyName = 'coolCompanyLtd';
+
+      const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      const partsModel = new MockModel2({ name: partName }, datastoreService);
+
+      const carModel = new CarModel({
+        name: carName,
+        prentCompany: companyModel,
+        parts: [partsModel]
+      }, datastoreService);
+      carModel.company = companyModel;
+      carModel.carParts = [partsModel];
+
+      const modelUrl = `${BASE_NETWORK_URL}/car`;
+
+      carModel.save({}, { specificFields: ['carParts'] }).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(1);
+      expect(body[LINKS_PROPERTY_NAME]).toBeDefined();
+      expect(Object.keys(body[LINKS_PROPERTY_NAME]).length).toEqual(1);
 
       req.flush(mockModelResponseJson);
     });

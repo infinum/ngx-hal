@@ -113,115 +113,17 @@ export abstract class HalModel {
   }
 
   public generatePayload(options: GeneratePayloadOptions = {}): object {
-    if (options.specificFields) {
-      return this.generatePayloadWithSpecificPropertiesOnly(options.specificFields, options.changedPropertiesOnly);
-    }
-
-    if (options.changedPropertiesOnly) {
-      return this.generatePayloadWithChangedProperties();
-    }
-
-    return this.generatePayloadWithAllProperties;
-  }
-
-  private get generatePayloadWithAllProperties(): object {
-    const attributePropertiesPayload: object = this.attributePropertiesPayload;
-    const hasOnePropertiesPayload: object = this.hasOnePropertiesPayload;
-    const hasManyPropertiesPayload: object = this.hasManyPropertiesPayload;
-
-    const relationshipLinks: object = { ...hasOnePropertiesPayload, ...hasManyPropertiesPayload };
-    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
+    const attributePropertiesPayload: object = this.getAttributePropertiesPayload(options);
+    const relationshipsPayload: object = this.generateRelationshipsPayload(options);
+    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipsPayload).length);
 
     const payload = { ...attributePropertiesPayload };
 
     if (hasRelationshipLinks) {
-      payload[LINKS_PROPERTY_NAME] = relationshipLinks;
+      payload[LINKS_PROPERTY_NAME] = relationshipsPayload;
     }
 
     return payload;
-  }
-
-  private generatePayloadWithChangedProperties(): object {
-    const attributePropertiesPayload: object = this.attributePropertiesPayload;
-    const hasOnePropertiesPayload: object = this.hasOnePropertiesPayload;
-    const hasManyPropertiesPayload: object = this.hasManyPropertiesPayload;
-
-    const changedAttributeProperties: object = this.extractChangedPropertiesOnly(attributePropertiesPayload);
-    const changedHasOneProperties: object = this.extractChangedPropertiesOnly(hasOnePropertiesPayload);
-    const changedHasMannyProperties: object = this.extractChangedPropertiesOnly(hasManyPropertiesPayload);
-
-    const relationshipLinks: object = { ...changedHasOneProperties, ...changedHasMannyProperties };
-    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
-
-    const payload = { ...changedAttributeProperties };
-
-    if (hasRelationshipLinks) {
-      payload[LINKS_PROPERTY_NAME] = relationshipLinks;
-    }
-
-    return payload;
-  }
-
-  private generatePayloadWithSpecificPropertiesOnly(specificFields: Array<string>, changedPropertiesOnly: boolean = false): object {
-    const attributePropertiesPayload: object = this.attributePropertiesPayload;
-    const hasOnePropertiesPayload: object = this.hasOnePropertiesPayload;
-    const hasManyPropertiesPayload: object = this.hasManyPropertiesPayload;
-
-    const changedAttributeProperties: object = this.extractSpecificProperties(
-      attributePropertiesPayload,
-      specificFields,
-      changedPropertiesOnly
-    );
-
-    const changedHasOneProperties: object = this.extractSpecificProperties(
-      hasOnePropertiesPayload,
-      specificFields,
-      changedPropertiesOnly
-    );
-
-    const changedHasManyProperties: object = this.extractSpecificProperties(
-      hasManyPropertiesPayload,
-      specificFields,
-      changedPropertiesOnly
-    );
-
-    const relationshipLinks: object = { ...changedHasOneProperties, ...changedHasManyProperties };
-    const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipLinks).length);
-
-    const payload = { ...changedAttributeProperties };
-
-    if (hasRelationshipLinks) {
-      payload[LINKS_PROPERTY_NAME] = relationshipLinks;
-    }
-
-    return payload;
-  }
-
-  private extractChangedPropertiesOnly(propertiesPayload: object): object {
-    const changedProperties: object = {};
-
-    Object.keys(propertiesPayload).forEach((propertyName: string) => {
-      if (propertiesPayload[propertyName] !== this.resource[propertyName]) {
-        changedProperties[propertyName] = propertiesPayload[propertyName];
-      }
-    });
-
-    return changedProperties;
-  }
-
-  private extractSpecificProperties(propertiesPayload: object, specificFields: Array<string>, changedPropertiesOnly: boolean) {
-    const changedProperties: object = {};
-
-    Object.keys(propertiesPayload).forEach((propertyName: string) => {
-      const isPropertyInWantedFields: boolean = specificFields.indexOf(propertyName) !== -1;
-      const isChanged: boolean = propertiesPayload[propertyName] !== this.resource[propertyName];
-
-      if (isPropertyInWantedFields && (!changedPropertiesOnly || isChanged)) {
-        changedProperties[propertyName] = propertiesPayload[propertyName];
-      }
-    });
-
-    return changedProperties;
   }
 
   // Used only when HalModels or HalDocument are passed when creating a new model
@@ -240,64 +142,97 @@ export abstract class HalModel {
     });
   }
 
-  private get attributePropertiesPayload(): object {
+  private getAttributePropertiesPayload(payloadOptions: GeneratePayloadOptions = {}): object {
+    const { specificFields, changedPropertiesOnly } = payloadOptions;
+
     return this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
-      if (property.excludeFromPayload) {
+      const propertyName: string = property.name;
+      const isPropertyExcludedFromPaylaod: boolean = property.excludeFromPayload;
+      const isSpecificFieldsSpecified: boolean = specificFields && Boolean(specificFields.length);
+      const isSpecificFieldsConditionSatisfied: boolean = !isSpecificFieldsSpecified || specificFields.indexOf(propertyName) !== -1;
+
+      if (isPropertyExcludedFromPaylaod || !isSpecificFieldsConditionSatisfied) {
         return payload;
       }
-      const propertyName: string = property.name;
+
       const externalPropertyName: string = property.externalName;
-      payload[externalPropertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
+      const propertyPayload: object = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
+
+      if (changedPropertiesOnly) {
+        const isPropertyChanged: boolean = propertyPayload !== this.resource[propertyName];
+
+        if (isPropertyChanged) {
+          payload[externalPropertyName] = propertyPayload;
+        }
+      } else {
+        payload[externalPropertyName] = propertyPayload;
+      }
+
       return payload;
     }, {});
   }
 
-  private get hasOnePropertiesPayload(): object {
-    return this.hasOneProperties
-      .filter((property: HasOneModelProperty) => property.includeInPayload)
-      .reduce((payload: object, property: HasOneModelProperty) => {
-        const propertyName: string = property.name;
-        const externalPropertyName: string = property.externalName;
+  private generateHasOnePropertyPayload(property: HasOneModelProperty): object {
+    const payload: object = {};
 
-        if (!this[propertyName]) {
-          return payload;
-        }
+    const propertyName: string = property.name;
+    const externalPropertyName: string = property.externalName;
 
-        payload[externalPropertyName] = {
-          href: this[propertyName].selfLink
-        };
+    payload[externalPropertyName] = {
+      href: this[propertyName].selfLink
+    };
 
-        return payload;
-      }, {});
+    return payload;
   }
 
-  private get hasManyPropertiesPayload(): object {
-    return this.hasManyProperties
-      .filter((property: HasManyModelProperty) => property.includeInPayload)
-      .reduce((payload: object, property: HasManyModelProperty) => {
-        const propertyName: string = property.name;
-        const externalPropertyName: string = property.externalName;
 
-        const hasManyPropertyLinks = [];
+  private generateHasManyPropertyPayload(property: HasManyModelProperty): object {
+    const payload: object = {};
+    const hasManyPropertyLinks = [];
+
+    const propertyName: string = property.name;
+    const externalPropertyName: string = property.externalName;
+
+    // TODO check if this[propertyName] is an array of models or just a HalDocument
+    this[propertyName].forEach((model: HalModel) => {
+      if (model) {
+        hasManyPropertyLinks.push({
+          href: model.selfLink
+        });
+      }
+    });
+
+    if (hasManyPropertyLinks.length) {
+      payload[externalPropertyName] = hasManyPropertyLinks;
+    }
+
+    return payload;
+  }
+
+  private generateRelationshipsPayload(payloadOptions: GeneratePayloadOptions = {}): object {
+    const { specificFields } = payloadOptions;
+    const isSpecificFieldsSpecified: boolean = specificFields && Boolean(specificFields.length);
+
+    return [...this.hasOneProperties, ...this.hasManyProperties]
+      .filter((property: HasOneModelProperty) => property.includeInPayload)
+      .filter((property: HasOneModelProperty) => !isSpecificFieldsSpecified || specificFields.indexOf(property.name) !== -1)
+      .reduce((payload: object, property: HasOneModelProperty) => {
+        const propertyName: string = property.name;
 
         if (!this[propertyName]) {
           return payload;
         }
 
-        // TODO check if this[propertyName] is an array of models or just a HalDocument
-        this[propertyName].forEach((model: HalModel) => {
-          if (!model) {
-            return payload;
-          }
+        const isHasOneProperty: boolean = property.type === ModelPropertyEnum.HasOne;
+        let propertyPayload: object;
 
-          hasManyPropertyLinks.push({
-            href: model.selfLink
-          });
-        });
-
-        if (hasManyPropertyLinks.length) {
-          payload[externalPropertyName] = hasManyPropertyLinks;
+        if (isHasOneProperty) {
+          propertyPayload = this.generateHasOnePropertyPayload(property);
+        } else {
+          propertyPayload = this.generateHasManyPropertyPayload(property);
         }
+
+        Object.assign(payload, propertyPayload);
 
         return payload;
       }, {});
@@ -394,6 +329,7 @@ export abstract class HalModel {
     });
   }
 
+  // TODO refactor those similar parseSomething methods
   private parseAttributes(resource: RawHalResource): void {
     this.attributeProperties.forEach((attributeProperty: AttributeModelProperty) => {
       const rawPropertyValue: any = resource[attributeProperty.externalName];
