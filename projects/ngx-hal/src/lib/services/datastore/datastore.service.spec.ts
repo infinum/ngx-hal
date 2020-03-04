@@ -5,13 +5,16 @@ import { DatastoreService } from './datastore.service';
 import { MockModel } from '../../mocks/mock-model';
 import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
 import mockModelResponseJson from '../../mocks/mock-model-response.json';
+import carsResponseJson from '../../mocks/cars-response.json';
+import listItemsWithDifferentListNamesResponseJson from '../../mocks/list-items-with-different-list-names-response.json';
 import mockModel2ResponseJson from '../../mocks/mock-model-2-response.json';
 import mockModelBareMinimumResponseJson from '../../mocks/mock-model-bare-minimum-response.json';
 import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
 import { MockModel2 } from '../../mocks/mock-model-2';
-import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
+import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
 import { CarModel } from '../../mocks/car.mock.model';
+import { HalDocument } from '../../classes/hal-document';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -1552,5 +1555,41 @@ describe('DatastoreService', () => {
       req.flush(mockModelResponseJson);
     });
   });
+
+  describe('HAL Document', () => {
+    it('should correctly extract list items if list property name is "item"', () => {
+      const cars: HalDocument<CarModel> = datastoreService.createHalDocument(
+        carsResponseJson as any,
+        CarModel,
+        { body: carsResponseJson } as any
+      );
+
+      expect(cars.models.length).toBe(3);
+    });
+
+    it('should correctly extract list items if list property name is not "item"', () => {
+      const listItemPropertyName = 'testListItems';
+      const modifiedCarsResponseJson = JSON.parse(JSON.stringify(carsResponseJson).replace(/item/g, listItemPropertyName));
+
+      const cars: HalDocument<CarModel> = datastoreService.createHalDocument(
+        modifiedCarsResponseJson as any,
+        CarModel,
+        { body: carsResponseJson } as any
+      );
+
+      expect(cars.models.length).toBe(3);
+    });
+
+    it('should correctly extract list items if list property name is "list"', () => {
+      const cars: HalDocument<CarModel> = datastoreService.createHalDocument(
+        listItemsWithDifferentListNamesResponseJson as any,
+        CarModel,
+        { body: carsResponseJson } as any
+      );
+
+      expect(cars.models.length).toBe(3);
+    });
+  });
 });
+
 

@@ -97,9 +97,12 @@ export class HalDocument<T extends HalModel> {
   private getListPropertyName(listResponse: RawHalResource): string {
     const links = listResponse[LINKS_PROPERTY_NAME];
 
+    const embdedded: object = this.rawResource[EMBEDDED_PROPERTY_NAME];
+    const fallbackListPropertyName = embdedded ? Object.keys(embdedded)[0] : 'noListPropertyPresent';
+
     return Object.keys(links).find((propertyName: string) => {
       return isArray(links[propertyName]);
-    }) || 'item'; // TODO defaults to the `item`, check if this should be defaulted
+    }) || fallbackListPropertyName;
   }
 
   public get selfLink(): string {
