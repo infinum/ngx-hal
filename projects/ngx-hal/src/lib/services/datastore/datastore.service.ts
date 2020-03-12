@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Observable, combineLatest, of } from 'rxjs';
-import { map, flatMap, tap } from 'rxjs/operators';
+import { Observable, combineLatest, of, throwError } from 'rxjs';
+import { map, flatMap, tap, catchError } from 'rxjs/operators';
 import * as UriTemplate from 'uri-templates';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
@@ -608,6 +608,17 @@ export class DatastoreService {
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
         return this.processRawResource(rawResource, modelClass, singleResource, response, urlWithParams);
+      }),
+      catchError((response: HttpResponse<T>) => {
+        if (response.status === 304) {
+          const cachedModel: T = this.storage.get(url);
+
+          if (cachedModel) {
+            return of(cachedModel);
+          }
+        }
+
+        return throwError(response);
       })
     );
   }
