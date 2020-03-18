@@ -251,8 +251,8 @@ export abstract class HalModel {
     return Boolean(this.id);
   }
 
-  public fetchRelationships(relationshipNames: string | Array<string>): Observable<this> {
-    return this.datastore.fetchModelRelationships(this, relationshipNames);
+  public fetchRelationships(relationshipNames: string | Array<string>, requestOptions: RequestOptions = {}): Observable<this> {
+    return this.datastore.fetchModelRelationships(this, relationshipNames, requestOptions);
   }
 
   public getRelationship<T extends HalModel>(relationshipName: string): T | HalDocument<T> {
