@@ -85,10 +85,13 @@ export class DatastoreService {
     return this.handleGetRequestWithRelationships(url, requestsOptions, modelClass, true, includeRelationships);
   }
 
-  public fetchModelRelationships<T extends HalModel>(model: T, relationshipNames: string | Array<string>): Observable<T> {
+  public fetchModelRelationships<T extends HalModel>(
+    model: T, relationshipNames: string | Array<string>,
+    requestOptions: RequestOptions = {}
+  ): Observable<T> {
     const ensuredRelationshipNames: Array<string> = [].concat(relationshipNames);
 
-    const relationships$: Array<Observable<any>> = this.fetchRelationships(model, ensuredRelationshipNames);
+    const relationships$: Array<Observable<any>> = this.fetchRelationships(model, ensuredRelationshipNames, requestOptions);
 
     if (!relationships$.length) {
       return of(model);
