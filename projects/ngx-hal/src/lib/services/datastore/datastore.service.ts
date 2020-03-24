@@ -206,11 +206,10 @@ export class DatastoreService {
     url: string,
     requestsOptions: RequestsOptions,
     modelClass: ModelConstructor<T>,
-    isSingleResource: boolean,
+    isSingleResource: true,
     includeRelationships: Array<string>,
-    fetchedModels: T | HalDocument<T>,
-    subsequentRequestsOptions: RequestsOptions
-    ): Observable<T | HalDocument<T>>;
+    fetchedModels: T | HalDocument<T>
+    ): Observable<T>;
   private handleGetRequestWithRelationships<T extends HalModel>(
     url: string,
     requestsOptions: RequestsOptions,
@@ -233,7 +232,8 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     includeRelationships: Array<string>,
-    fetchedModels: T | HalDocument<T>
+    fetchedModels: T | HalDocument<T>,
+    storePartialModels?: boolean
   ): Observable<T | HalDocument<T>>;
   private handleGetRequestWithRelationships<T extends HalModel>(
     url: string,
@@ -241,13 +241,14 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     includeRelationships: Array<string> = [],
-    fetchedModels: T | HalDocument<T> = null
+    fetchedModels: T | HalDocument<T> = null,
+    storePartialModels?: boolean
   ): Observable<T | HalDocument<T>> {
     if (fetchedModels) {
       return of(fetchedModels);
     }
 
-    const httpRequest$ = this.makeGetRequest(url, requestsOptions.mainRequest, modelClass, isSingleResource);
+    const httpRequest$ = this.makeGetRequest(url, requestsOptions.mainRequest, modelClass, isSingleResource, storePartialModels);
 
     if (includeRelationships.length) {
       return httpRequest$.pipe(
@@ -357,12 +358,22 @@ export class DatastoreService {
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
+    params: object,
+    includeMeta: true,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    customUrl: string,
+    subsequentRequestsOptions: RequestOptions
+  ): Observable<HalDocument<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
     params: object = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string> = [],
     requestOptions: RequestOptions = {},
     customUrl?: string,
-    subsequentRequestsOptions: RequestOptions = {}
+    subsequentRequestsOptions: RequestOptions = {},
+    storePartialModels: boolean = false
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = customUrl || this.buildModelUrl(modelClass);
     const options = Object.assign({}, requestOptions);
@@ -373,7 +384,15 @@ export class DatastoreService {
       subsequentRequests: subsequentRequestsOptions
     };
 
-    return this.handleGetRequestWithRelationships(url, requestsOptions, modelClass, false, includeRelationships).pipe(
+    return this.handleGetRequestWithRelationships(
+      url,
+      requestsOptions,
+      modelClass,
+      false,
+      includeRelationships,
+      null,
+      storePartialModels
+    ).pipe(
       flatMap((halDocument: HalDocument<T>) => {
         return this.fetchEmbeddedListItems(halDocument, modelClass, includeRelationships, subsequentRequestsOptions).pipe(
           map((models: Array<T>) => {
@@ -584,13 +603,15 @@ export class DatastoreService {
     url: string,
     requestOptions: RequestOptions,
     modelClass: ModelConstructor<T>,
-    singleResource: boolean
+    singleResource: boolean,
+    storePartialModels?: boolean
   ): Observable<HalDocument<T> | T>;
   private makeGetRequest<T extends HalModel>(
     url: string,
     requestOptions: RequestOptions,
     modelClass: ModelConstructor<T>,
-    singleResource: boolean
+    singleResource: boolean,
+    storePartialModels?: boolean
   ): Observable<HalDocument<T> | T> {
     const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
 
@@ -610,7 +631,7 @@ export class DatastoreService {
     return this.http.get<T>(cleanUrl, options).pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
-        return this.processRawResource(rawResource, modelClass, singleResource, response, urlWithParams);
+        return this.processRawResource(rawResource, modelClass, singleResource, response, urlWithParams, storePartialModels);
       }),
       catchError((response: HttpResponse<T>) => {
         if (response.status === 304) {
@@ -669,14 +690,16 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     response: HttpResponse<T>,
-    url?: string
+    url?: string,
+    savePartialModels?: boolean
   ): T | HalDocument<T>;
   private processRawResource<T extends HalModel>(
     rawResource: RawHalResource,
     modelClass: ModelConstructor<T>,
     isSingleResource: boolean,
     response: HttpResponse<T>,
-    url?: string
+    url?: string,
+    savePartialModels?: boolean
   ): T | HalDocument<T> {
     if (isSingleResource) {
       const model: T = new modelClass(rawResource, this, response);
@@ -685,7 +708,8 @@ export class DatastoreService {
     }
 
     const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass, response);
-    this.storage.saveAll(halDocument.models);
+
+    this.storage.saveAll(halDocument.models, savePartialModels);
     this.storage.save(halDocument, response, [url]);
     return halDocument;
   }
@@ -727,7 +751,7 @@ export class DatastoreService {
       subsequentRequests: requestOptions
     };
 
-    // Don't fetch the list items if they are embedded
+    // Don't fetch list items if they are embedded
     if (halDocument.hasEmbeddedItems) {
       halDocument.models.forEach((model: T) => {
         const call$ = this.handleGetRequestWithRelationships(null, requestsOptions, modelClass, true, includeRelationships, model);

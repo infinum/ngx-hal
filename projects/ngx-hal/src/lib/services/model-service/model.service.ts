@@ -55,7 +55,8 @@ export abstract class ModelService<Model extends HalModel> {
     includeMeta: boolean = false,
     includeRelationships: Array<string> = [],
     requestOptions: RequestOptions = {},
-    subsequentRequestsOptions: RequestOptions = {}
+    subsequentRequestsOptions: RequestOptions = {},
+    customUrl?: string
   ): Observable<HalDocument<Model> | Array<Model>> {
     return this.datastore.find(
       this.modelClass,
@@ -63,7 +64,7 @@ export abstract class ModelService<Model extends HalModel> {
       includeMeta,
       includeRelationships,
       requestOptions,
-      undefined,
+      customUrl,
       subsequentRequestsOptions
     );
   }
