@@ -319,15 +319,6 @@ export class DatastoreService {
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
-    includeMeta: true,
-    includeRelationships: Array<string>,
-    requestOptions: RequestOptions,
-    customUrl?: string,
-    subsequentRequestsOptions?: RequestOptions
-  ): Observable<HalDocument<T>>;
-  public find<T extends HalModel>(
-    modelClass: ModelConstructor<T>,
-    params: object,
     includeMeta: false,
     includeRelationships: Array<string>,
     requestOptions: RequestOptions
@@ -363,8 +354,29 @@ export class DatastoreService {
     includeRelationships: Array<string>,
     requestOptions: RequestOptions,
     customUrl: string,
-    subsequentRequestsOptions: RequestOptions
+    subsequentRequestsOptions: RequestOptions,
+    storePartialModels?: boolean
   ): Observable<HalDocument<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object,
+    includeMeta: false,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    customUrl: string,
+    subsequentRequestsOptions: RequestOptions,
+    storePartialModels?: boolean
+  ): Observable<T>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object,
+    includeMeta: boolean,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    customUrl: string,
+    subsequentRequestsOptions: RequestOptions,
+    storePartialModels?: boolean
+  ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object = {},
