@@ -1523,6 +1523,14 @@ describe('DatastoreService', () => {
     it('should pass proper request options while fetching the relationships of embedded list items', () => {
 
     });
+
+    it('should save the embedded items to the local store if the items do not exist in the store already', () => {
+
+    });
+
+    it('should save the embedded items to the local store if storePartialModels is set to true', () => {
+
+    });
   });
 
   describe('delete method', () => {
