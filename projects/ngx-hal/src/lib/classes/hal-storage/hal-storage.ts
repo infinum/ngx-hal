@@ -14,9 +14,11 @@ export abstract class HalStorage {
 
   public abstract get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T>;
 
-  public saveAll<T extends HalModel>(models: Array<T>): void {
+  public saveAll<T extends HalModel>(models: Array<T>, savePartialModels: boolean = false): void {
     models.forEach((model: T) => {
-      this.save(model);
+      if (savePartialModels || !this.get(model.uniqueModelIdentificator)) {
+        this.save(model);
+      }
     });
   }
 

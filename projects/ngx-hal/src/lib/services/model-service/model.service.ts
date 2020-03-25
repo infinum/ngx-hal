@@ -48,14 +48,18 @@ export abstract class ModelService<Model extends HalModel> {
     includeMeta: true,
     includeRelationships: Array<string>,
     requestOptions: RequestOptions,
-    subsequentRequestsOptions: RequestOptions
+    subsequentRequestsOptions: RequestOptions,
+    customUrl?: string,
+    storePartialModels?: boolean
   ): Observable<HalDocument<Model>>;
   public find(
     params: object = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string> = [],
     requestOptions: RequestOptions = {},
-    subsequentRequestsOptions: RequestOptions = {}
+    subsequentRequestsOptions: RequestOptions = {},
+    customUrl?: string,
+    storePartialModels?: boolean
   ): Observable<HalDocument<Model> | Array<Model>> {
     return this.datastore.find(
       this.modelClass,
@@ -63,8 +67,9 @@ export abstract class ModelService<Model extends HalModel> {
       includeMeta,
       includeRelationships,
       requestOptions,
-      undefined,
-      subsequentRequestsOptions
+      customUrl,
+      subsequentRequestsOptions,
+      storePartialModels
     );
   }
 
