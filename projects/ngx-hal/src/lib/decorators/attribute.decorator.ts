@@ -4,10 +4,11 @@ import { AttributeOptions, DEFAULT_ATTRIBUTE_OPTIONS } from '../interfaces/attri
 import { AttributeModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { updateModelPropertiesWithTheNewOne } from '../helpers/replace-model-property/replace-model-property.helper';
+import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
 
 export function Attribute(options: AttributeOptions = {}) {
   return (model: HalModel, propertyName: string) => {
-    const attributeOptions = Object.assign({}, DEFAULT_ATTRIBUTE_OPTIONS, options);
+    const attributeOptions: AttributeOptions = deepmergeWrapper(DEFAULT_ATTRIBUTE_OPTIONS, options);
     const existingAttributeProperties: Array<AttributeModelProperty> = Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];
 
     const attributeProperty: AttributeModelProperty = {

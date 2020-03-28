@@ -1123,6 +1123,102 @@ describe('DatastoreService', () => {
       calls[0].flush(mockModelResponseJson);
     });
 
+    it('should not mutate globalRequestOptions', () => {
+      const globalLanguage = 'en';
+      const testParam1 = 'testParam1Value';
+      datastoreService.networkConfig.globalRequestOptions = { params: { language: globalLanguage } };
+
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId',
+        [],
+        {
+          params: {
+            testParam1
+          }
+        }
+      ).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
+
+        expect(request.method).toEqual('GET');
+        expect(request.params.get('testParam1')).toEqual(testParam1);
+
+        // Global headers should not change
+        expect(Object.keys(datastoreService.networkConfig.globalRequestOptions).length).toEqual(1);
+        expect(Object.keys(datastoreService.networkConfig.globalRequestOptions.params).length).toEqual(1);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should send both globalRequestOptions and local params in a payload', () => {
+      const globalLanguage = 'en';
+      const testParam1 = 'testParam1Value';
+      datastoreService.networkConfig.globalRequestOptions = { params: { language: globalLanguage } };
+
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId',
+        [],
+        {
+          params: {
+            testParam1
+          }
+        }
+      ).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
+
+        expect(request.method).toEqual('GET');
+        expect(request.params.keys().length).toBe(2);
+        expect(request.params.get('language')).toEqual(globalLanguage);
+        expect(request.params.get('testParam1')).toEqual(testParam1);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should send both globalRequestOptions and local headers in a payload', () => {
+      const testHeader1 = 'testHeader1Value';
+      const testParam1 = 'testParam1Value';
+      datastoreService.networkConfig.globalRequestOptions = { headers: { testHeader1 } };
+
+      datastoreService.findOne(
+        MockModel,
+        'mockModelId',
+        [],
+        {
+          headers: {
+            testParam1
+          }
+        }
+      ).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`;
+
+        expect(request.method).toEqual('GET');
+        expect(request.headers.keys().length).toBe(2);
+        expect(request.headers.get('testHeader1')).toEqual(testHeader1);
+        expect(request.headers.get('testParam1')).toEqual(testParam1);
+
+        // Global headers should not change
+        expect(Object.keys(datastoreService.networkConfig.globalRequestOptions).length).toEqual(1);
+        expect(Object.keys(datastoreService.networkConfig.globalRequestOptions.headers).length).toEqual(1);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+    });
+
     it('should use the provided params instead of the default Datastore params for subsequent requests', () => {
       const globalLanguage = 'en';
       const language = 'us';

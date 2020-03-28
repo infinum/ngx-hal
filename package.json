@@ -38,6 +38,7 @@
     "@angular/platform-browser-dynamic": "~8.2.9",
     "@angular/router": "~8.2.9",
     "core-js": "^3.2.1",
+    "deepmerge": "^4.2.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.5.3",
     "uri-templates": "^0.2.0",

@@ -27,6 +27,7 @@ import { getQueryParams } from '../../utils/get-query-params/get-query-params.ut
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
+import { deepmergeWrapper } from '../../utils/deepmerge-wrapper';
 
 @Injectable()
 export class DatastoreService {
@@ -388,8 +389,7 @@ export class DatastoreService {
     storePartialModels: boolean = false
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = customUrl || this.buildModelUrl(modelClass);
-    const options = Object.assign({}, requestOptions);
-    options.params = Object.assign({}, options.params, params);
+    const options: RequestOptions = deepmergeWrapper(requestOptions, { params });
 
     const requestsOptions: RequestsOptions = {
       mainRequest: options,
@@ -429,7 +429,7 @@ export class DatastoreService {
       transformPayloadBeforeSave: this.defaultTransformPayloadBeforeSaveFunction
     };
 
-    const options: CustomOptions<T> = Object.assign(defaultSaveOptions, saveOptions);
+    const options: CustomOptions<T> = deepmergeWrapper(defaultSaveOptions, saveOptions);
 
     const url: string = options.buildUrlFunction(model, this.buildUrl(model));
     const payload: object = model.generatePayload({
@@ -495,7 +495,7 @@ export class DatastoreService {
       transformPayloadBeforeSave: this.defaultTransformPayloadBeforeSaveFunction
     };
 
-    const options: CustomOptions<T> = Object.assign(defaultUpdateOptions, updateOptions);
+    const options: CustomOptions<T> = deepmergeWrapper(defaultUpdateOptions, updateOptions);
 
     const url: string = options.buildUrlFunction(model, this.buildUrl(model));
     const payload: object = model.generatePayload({ specificFields: options.specificFields, changedPropertiesOnly: true });
@@ -522,7 +522,8 @@ export class DatastoreService {
     const defaultUpdateOptions: CustomOptions<T> = {
       buildUrlFunction: this.defaultUrlBuildFunction
     };
-    const options: CustomOptions<T> = Object.assign(defaultUpdateOptions, updateOptions);
+
+    const options: CustomOptions<T> = deepmergeWrapper(defaultUpdateOptions, updateOptions);
     const url: string = options.buildUrlFunction(model, this.buildUrl(model));
 
     return this.makeDeleteRequest(url, requestOptions).pipe(
@@ -625,7 +626,7 @@ export class DatastoreService {
     singleResource: boolean,
     storePartialModels?: boolean
   ): Observable<HalDocument<T> | T> {
-    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options: any = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
 
     this.storage.enrichRequestOptions(url, options);
 
@@ -660,22 +661,22 @@ export class DatastoreService {
   }
 
   private makePostRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
-    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
     return this.http.post<T>(url, payload, options);
   }
 
   private makePutRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
-    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
     return this.http.put<T>(url, payload, options);
   }
 
   private makePatchRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
-    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
     return this.http.patch<T>(url, payload, options);
   }
 
   private makeDeleteRequest<T extends HalModel>(url: string, requestOptions: RequestOptions): Observable<any> {
-    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
     return this.http.delete<T>(url, options);
   }
 
