@@ -3,5 +3,9 @@
   "dest": "../../dist/ngx-hal",
   "lib": {
     "entryFile": "src/public_api.ts"
-  }
+  },
+  "whitelistedNonPeerDependencies": [
+    "deepmerge",
+    "uri-templates"
+  ]
 }
