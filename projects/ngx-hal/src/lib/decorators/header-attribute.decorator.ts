@@ -4,10 +4,11 @@ import { AttributeModelProperty, HeaderAttributeModelProperty } from '../interfa
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { HeaderAttributeOptions, DEFAULT_HEADER_ATTRIBUTE_OPTIONS } from '../interfaces/header-attribute-options.interface';
 import { updateModelPropertiesWithTheNewOne } from '../helpers/replace-model-property/replace-model-property.helper';
+import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
 
 export function HeaderAttribute(options: HeaderAttributeOptions = {}) {
   return (model: HalModel, propertyName: string) => {
-    const headerAttributeOptions = Object.assign({}, DEFAULT_HEADER_ATTRIBUTE_OPTIONS, options);
+    const headerAttributeOptions: HeaderAttributeOptions = deepmergeWrapper(DEFAULT_HEADER_ATTRIBUTE_OPTIONS, options);
 
     // tslint:disable-next-line:max-line-length
     const existingHeaderAttributeProperties: Array<AttributeModelProperty> = Reflect.getMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, model) || [];

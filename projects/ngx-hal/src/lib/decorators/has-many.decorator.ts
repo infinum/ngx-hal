@@ -4,10 +4,11 @@ import { HasManyModelProperty } from '../interfaces/model-property.interface';
 import { ModelProperty } from '../enums/model-property.enum';
 import { HasManyOptions, DEFAULT_HAS_MANY_OPTIONS } from '../interfaces/has-many-options.interface';
 import { updateModelPropertiesWithTheNewOne } from '../helpers/replace-model-property/replace-model-property.helper';
+import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
 
 export function HasMany(options: HasManyOptions) {
   return (model: HalModel, propertyName: string) => {
-    const hasManyOptions = Object.assign({}, DEFAULT_HAS_MANY_OPTIONS, options);
+    const hasManyOptions: HasManyOptions = deepmergeWrapper(DEFAULT_HAS_MANY_OPTIONS, options);
 
     const existingHasManyProperties: Array<HasManyModelProperty> = Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, model) || [];
 
