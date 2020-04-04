@@ -53,6 +53,15 @@ export abstract class ModelService<Model extends HalModel> {
     storePartialModels?: boolean
   ): Observable<HalDocument<Model>>;
   public find(
+    params: object,
+    includeMeta: false,
+    includeRelationships: Array<string>,
+    requestOptions: RequestOptions,
+    subsequentRequestsOptions: RequestOptions,
+    customUrl?: string,
+    storePartialModels?: boolean
+  ): Observable<Array<Model>>;
+  public find(
     params: object = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string> = [],
