@@ -1,5 +1,3 @@
-[![CircleCI](https://circleci.com/gh/infinum/ngx-hal/tree/master.svg?style=svg)](https://circleci.com/gh/infinum/ngx-hal/tree/master)
-
 # NgxHal
 
 ngx-hal is a data store with a support for handling [HAL formatted](http://stateless.co/hal_specification.html) HTTP requests.
