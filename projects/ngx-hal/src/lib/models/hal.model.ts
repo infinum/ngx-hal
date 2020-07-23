@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, concat } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
 import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
@@ -19,6 +19,8 @@ import { RequestOptions } from '../types/request-options.type';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { GeneratePayloadOptions } from '../interfaces/generate-payload-options.interface';
 import { CustomOptions } from '../interfaces/custom-options.interface';
+import { ensureRelationshipRequestDescriptors } from '../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
+import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
 
 export abstract class HalModel {
   private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -251,8 +253,13 @@ export abstract class HalModel {
     return Boolean(this.id);
   }
 
-  public fetchRelationships(relationshipNames: string | Array<string>, requestOptions: RequestOptions = {}): Observable<this> {
-    return this.datastore.fetchModelRelationships(this, relationshipNames, requestOptions);
+  public fetchRelationships(
+    relationships: string | Array<string> | RelationshipRequestDescriptor | Array<RelationshipRequestDescriptor>,
+    requestOptions: RequestOptions = {}
+  ): Observable<this> {
+    const relationshipsArray: Array<string | RelationshipRequestDescriptor> = [].concat(relationships);
+    const relationshipDescriptors: Array<RelationshipRequestDescriptor> = ensureRelationshipRequestDescriptors(relationshipsArray);
+    return this.datastore.fetchModelRelationships(this, relationshipDescriptors, requestOptions);
   }
 
   public getRelationship<T extends HalModel>(relationshipName: string): T | HalDocument<T> {
