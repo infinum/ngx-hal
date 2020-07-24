@@ -1706,10 +1706,6 @@ describe('DatastoreService', () => {
     const toysRelationshipDescriptor: RelationshipRequestDescriptor = { name: 'toys', options: requestOptions2 };
     const userAnimalsRelationshipDescriptor: RelationshipRequestDescriptor = { name: 'user.animals', options: requestOptions2 };
 
-    beforeEach(() => {
-    });
-
-
     it('should return an empty object if an empty array is passed in', () => {
       const result = datastoreService['extractCurrentLevelRelationships']([]);
       expect(result).toEqual({});

@@ -92,7 +92,8 @@ export class DatastoreService {
   }
 
   public fetchModelRelationships<T extends HalModel>(
-    model: T, relationshipNames: RelationshipRequestDescriptor | Array<RelationshipRequestDescriptor>,
+    model: T,
+    relationshipNames: RelationshipRequestDescriptor | Array<RelationshipRequestDescriptor>,
     requestOptions: RequestOptions = {}
   ): Observable<T> {
     const ensuredRelationshipNames: Array<RelationshipRequestDescriptor> = [].concat(relationshipNames);
@@ -237,7 +238,6 @@ export class DatastoreService {
   private extractCurrentLevelRelationships(
     relationshipDescriptors: Array<RelationshipRequestDescriptor>
   ): RelationshipDescriptorMappings {
-
     return relationshipDescriptors.reduce((
       relationships: RelationshipDescriptorMappings,
       currentRelationshipDescriptor: RelationshipRequestDescriptor
