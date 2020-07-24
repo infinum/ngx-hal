@@ -254,7 +254,7 @@ export abstract class HalModel {
   }
 
   public fetchRelationships(
-    relationships: string | Array<string> | RelationshipRequestDescriptor | Array<RelationshipRequestDescriptor>,
+    relationships: string | RelationshipRequestDescriptor | Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions = {}
   ): Observable<this> {
     const relationshipsArray: Array<string | RelationshipRequestDescriptor> = [].concat(relationships);
