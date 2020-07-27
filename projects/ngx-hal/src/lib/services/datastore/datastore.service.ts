@@ -374,26 +374,26 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: false,
-    includeRelationships: Array<string>
+    includeRelationships: Array<string | RelationshipRequestDescriptor>
   ): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: true,
-    includeRelationships: Array<string>
+    includeRelationships: Array<string | RelationshipRequestDescriptor>
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: true,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: true,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
     customUrl?: string
   ): Observable<HalDocument<T>>;
@@ -401,21 +401,21 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: false,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: boolean,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: boolean,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
     customUrl: string
   ): Observable<Array<T> | HalDocument<T>>;
@@ -423,7 +423,7 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: boolean,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
     customUrl: string,
     subsequentRequestsOptions: RequestOptions
@@ -432,7 +432,7 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: true,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
     customUrl: string,
     subsequentRequestsOptions: RequestOptions,
@@ -442,7 +442,7 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: false,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
     customUrl: string,
     subsequentRequestsOptions: RequestOptions,
@@ -452,7 +452,7 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     params: object,
     includeMeta: boolean,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
     customUrl: string,
     subsequentRequestsOptions: RequestOptions,
@@ -462,7 +462,7 @@ export class DatastoreService {
     modelClass: ModelConstructor<T>,
     params: object = {},
     includeMeta: boolean = false,
-    includeRelationships: Array<string> = [],
+    includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
     requestOptions: RequestOptions = {},
     customUrl?: string,
     subsequentRequestsOptions: RequestOptions = {},

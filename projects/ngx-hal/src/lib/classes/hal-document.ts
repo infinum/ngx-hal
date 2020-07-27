@@ -11,6 +11,7 @@ import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
 import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
 import { RequestOptions } from '../types/request-options.type';
+import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
 
 export class HalDocument<T extends HalModel> {
   public models: Array<T>;
@@ -41,7 +42,7 @@ export class HalDocument<T extends HalModel> {
 
   public getPage(
     pageNumber: number,
-    includeRelationships: Array<string> = [],
+    includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
     requestOptions: RequestOptions = {},
     subsequentRequestsOptions: RequestOptions = {}
   ): Observable<HalDocument<T>> {
