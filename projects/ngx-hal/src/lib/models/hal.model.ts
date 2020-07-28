@@ -343,8 +343,8 @@ export abstract class HalModel {
 
       if (attributeProperty.propertyClass) {
         this[attributeProperty.name] = new attributeProperty.propertyClass(rawPropertyValue);
-      } else if (attributeProperty.tranformResponseValue) {
-        this[attributeProperty.name] = attributeProperty.tranformResponseValue(rawPropertyValue);
+      } else if (attributeProperty.transformResponseValue) {
+        this[attributeProperty.name] = attributeProperty.transformResponseValue(rawPropertyValue);
       } else {
         this[attributeProperty.name] = rawPropertyValue;
       }
@@ -357,8 +357,8 @@ export abstract class HalModel {
 
       if (headerAttributeProperty.propertyClass) {
         this[headerAttributeProperty.name] = new headerAttributeProperty.propertyClass(rawPropertyValue);
-      } else if (headerAttributeProperty.tranformResponseValue) {
-        this[headerAttributeProperty.name] = headerAttributeProperty.tranformResponseValue(rawPropertyValue);
+      } else if (headerAttributeProperty.transformResponseValue) {
+        this[headerAttributeProperty.name] = headerAttributeProperty.transformResponseValue(rawPropertyValue);
       } else {
         this[headerAttributeProperty.name] = rawPropertyValue;
       }
