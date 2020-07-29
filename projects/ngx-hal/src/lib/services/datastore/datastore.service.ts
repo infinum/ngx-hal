@@ -31,6 +31,7 @@ import { deepmergeWrapper } from '../../utils/deepmerge-wrapper';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
 import { RelationshipDescriptorMappings } from '../../types/relationship-descriptor-mappings.type';
+import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
 
 @Injectable()
 export class DatastoreService {
@@ -870,5 +871,12 @@ export class DatastoreService {
 
   private defaultTransformPayloadBeforeSaveFunction(payload: object): object {
     return payload;
+  }
+
+  public createModel<T extends HalModel>(modelClass: ModelConstructor<T>, recordData: object = {}): T {
+    const rawRecordData: object = Object.assign({}, recordData);
+    rawRecordData[EMBEDDED_PROPERTY_NAME] = Object.assign({}, recordData, recordData[EMBEDDED_PROPERTY_NAME]);
+    const model: T =  new modelClass(rawRecordData, this);
+    return model;
   }
 }
