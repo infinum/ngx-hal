@@ -18,7 +18,7 @@ export class EtagHalStorage extends HalStorage {
     const identificators: Array<string> = [].concat(alternateUniqueIdentificators);
     identificators.push(model.uniqueModelIdentificator);
 
-    identificators.forEach((identificator: string) => {
+    identificators.filter(Boolean).forEach((identificator: string) => {
       this.internalStorage[identificator] = {
         model,
         etag: this.getEtagFromResponse(response)

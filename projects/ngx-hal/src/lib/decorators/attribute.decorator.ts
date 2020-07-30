@@ -13,7 +13,7 @@ export function Attribute(options: AttributeOptions = {}) {
 
     const attributeProperty: AttributeModelProperty = {
       type: ModelPropertyEnum.Attribute,
-      tranformResponseValue: attributeOptions.transformResponseValue,
+      transformResponseValue: attributeOptions.transformResponseValue,
       transformBeforeSave: attributeOptions.transformBeforeSave,
       name: propertyName,
       externalName: options.externalName || propertyName,

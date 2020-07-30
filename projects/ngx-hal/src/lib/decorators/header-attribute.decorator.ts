@@ -15,7 +15,7 @@ export function HeaderAttribute(options: HeaderAttributeOptions = {}) {
 
     const attributeProperty: HeaderAttributeModelProperty = {
       type: ModelPropertyEnum.HeaderAttribute,
-      tranformResponseValue: headerAttributeOptions.transformResponseValue,
+      transformResponseValue: headerAttributeOptions.transformResponseValue,
       transformBeforeSave: headerAttributeOptions.transformBeforeSave,
       name: propertyName,
       externalName: options.externalName || propertyName

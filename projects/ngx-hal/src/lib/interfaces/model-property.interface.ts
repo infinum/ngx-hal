@@ -9,12 +9,12 @@ export interface ModelProperty {
 
 export interface AttributeModelProperty extends ModelProperty {
   excludeFromPayload?: boolean;
-  tranformResponseValue?: (rawAttribute: any) => any;
+  transformResponseValue?: (rawAttribute: any) => any;
   transformBeforeSave?: (raw: any) => any;
 }
 
 export interface HeaderAttributeModelProperty extends ModelProperty {
-  tranformResponseValue?: (rawAttribute: any) => any;
+  transformResponseValue?: (rawAttribute: any) => any;
   transformBeforeSave?: (raw: any) => any;
 }
 
