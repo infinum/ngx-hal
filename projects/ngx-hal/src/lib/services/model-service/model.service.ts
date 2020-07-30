@@ -6,13 +6,14 @@ import { RequestOptions } from '../../types/request-options.type';
 import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
 import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
+import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 
 export abstract class ModelService<Model extends HalModel> {
   constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
 
   public findOne(
     modelId: string,
-    includeRelationships: Array<string> = [],
+    includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
     requestOptions: RequestOptions = {},
     subsequentRequestsOptions: RequestOptions = {}
   ): Observable<Model> {
@@ -29,24 +30,32 @@ export abstract class ModelService<Model extends HalModel> {
   public find(params: object): Observable<Array<Model>>;
   public find(params: object, includeMeta: false): Observable<Array<Model>>;
   public find(params: object, includeMeta: true): Observable<HalDocument<Model>>;
-  public find(params: object, includeMeta: false, includeRelationships: Array<string>): Observable<Array<Model>>;
-  public find(params: object, includeMeta: true, includeRelationships: Array<string>): Observable<HalDocument<Model>>;
   public find(
     params: object,
     includeMeta: false,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>
+  ): Observable<Array<Model>>;
+  public find(
+    params: object,
+    includeMeta: true,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>
+  ): Observable<HalDocument<Model>>;
+  public find(
+    params: object,
+    includeMeta: false,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<Array<Model>>;
   public find(
     params: object,
     includeMeta: true,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<HalDocument<Model>>;
   public find(
     params: object,
     includeMeta: true,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
     subsequentRequestsOptions: RequestOptions,
     customUrl?: string,
@@ -55,7 +64,7 @@ export abstract class ModelService<Model extends HalModel> {
   public find(
     params: object,
     includeMeta: false,
-    includeRelationships: Array<string>,
+    includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
     subsequentRequestsOptions: RequestOptions,
     customUrl?: string,
@@ -64,7 +73,7 @@ export abstract class ModelService<Model extends HalModel> {
   public find(
     params: object = {},
     includeMeta: boolean = false,
-    includeRelationships: Array<string> = [],
+    includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
     requestOptions: RequestOptions = {},
     subsequentRequestsOptions: RequestOptions = {},
     customUrl?: string,

@@ -15,6 +15,7 @@ import { MockModel2 } from '../../mocks/mock-model-2';
 import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
 import { CarModel } from '../../mocks/car.mock.model';
 import { HalDocument } from '../../classes/hal-document';
+import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -1692,6 +1693,119 @@ describe('DatastoreService', () => {
       );
 
       expect(cars.models.length).toBe(3);
+    });
+  });
+
+  // extractCurrentLevelRelationships is a private method but it has
+  // some logic which I want to test separately from other behavior
+  describe('extractCurrentLevelRelationships method', () => {
+    const requestOptions1 = { params: { quantity: '1' } };
+    const requestOptions2 = { params: { size: '100' } };
+
+    const userRelationshipDescriptor: RelationshipRequestDescriptor = { name: 'user', options: requestOptions1 };
+    const toysRelationshipDescriptor: RelationshipRequestDescriptor = { name: 'toys', options: requestOptions2 };
+    const userAnimalsRelationshipDescriptor: RelationshipRequestDescriptor = { name: 'user.animals', options: requestOptions2 };
+
+    it('should return an empty object if an empty array is passed in', () => {
+      const result = datastoreService['extractCurrentLevelRelationships']([]);
+      expect(result).toEqual({});
+    });
+
+    it('should return an array with one RelationshipRequestDescriptor without children if only top level relationship is passed', () => {
+      const relationshipDescriptors: Array<RelationshipRequestDescriptor> = [
+        userRelationshipDescriptor
+      ];
+
+      const result = datastoreService['extractCurrentLevelRelationships'](relationshipDescriptors);
+
+      const expectedResult = {
+        user: {
+          originalRelationshipDescriptor: userRelationshipDescriptor,
+          childrenRelationships: []
+        }
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return an array with two RelationshipRequestDescriptor without children if two top level relationships are passed', () => {
+      const relationshipDescriptors: Array<RelationshipRequestDescriptor> = [
+        userRelationshipDescriptor,
+        toysRelationshipDescriptor
+      ];
+
+      const result = datastoreService['extractCurrentLevelRelationships'](relationshipDescriptors);
+
+      const expectedResult = {
+        user: {
+          originalRelationshipDescriptor: userRelationshipDescriptor,
+          childrenRelationships: []
+        },
+        toys: {
+          originalRelationshipDescriptor: toysRelationshipDescriptor,
+          childrenRelationships: []
+        }
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should return an array with one RelationshipRequestDescriptor with a single child', () => {
+      const relationshipDescriptors: Array<RelationshipRequestDescriptor> = [
+        userRelationshipDescriptor,
+        userAnimalsRelationshipDescriptor
+      ];
+
+      const result = datastoreService['extractCurrentLevelRelationships'](relationshipDescriptors);
+
+      const expectedResult = {
+        user: {
+          originalRelationshipDescriptor: userRelationshipDescriptor,
+          childrenRelationships: [
+            { name: 'animals', options: requestOptions2 }
+          ]
+        }
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    // tslint:disable-next-line:max-line-length
+    it('should return an array with one RelationshipRequestDescriptor with a single child but without originalRelationshipDescriptor', () => {
+      const relationshipDescriptors: Array<RelationshipRequestDescriptor> = [
+        userAnimalsRelationshipDescriptor
+      ];
+
+      const result = datastoreService['extractCurrentLevelRelationships'](relationshipDescriptors);
+
+      const expectedResult = {
+        user: {
+          childrenRelationships: [
+            { name: 'animals', options: requestOptions2 }
+          ]
+        }
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should group everything inside a single object property if all relationships share the same parent', () => {
+      const relationshipDescriptors: Array<RelationshipRequestDescriptor> = [
+        { name: 'user.animals' },
+        { name: 'user.animals.toys' }
+      ];
+
+      const result = datastoreService['extractCurrentLevelRelationships'](relationshipDescriptors);
+
+      const expectedResult = {
+        user: {
+          childrenRelationships: [
+            { name: 'animals', options: undefined }, { name: 'animals.toys', options: undefined }
+          ]
+        }
+      };
+
+      expect(result).toEqual(expectedResult);
     });
   });
 });
