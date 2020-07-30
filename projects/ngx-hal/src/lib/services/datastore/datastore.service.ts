@@ -174,64 +174,6 @@ export class DatastoreService {
       relationshipCalls.push(relationshipCall$);
     }
 
-    const currentLevelRelationshipsMap = {};
-    const currentLevelRelationships = [];
-
-    for (let i = 0; i < currentLevelRelationships.length; i += 1) {
-      const currentLevelRelationshipName: string = currentLevelRelationships[i];
-      const url: string = model.getRelationshipUrl(currentLevelRelationshipName);
-      const property: ModelProperty = model.getPropertyData(currentLevelRelationshipName);
-
-      if (!property) {
-        continue;
-      }
-
-      const modelClass = property.propertyClass;
-      const isSingleResource: boolean = property.type === ModelPropertyEnum.Attribute || property.type === ModelPropertyEnum.HasOne;
-
-      // Checks if the relationship is already embdedded inside the emdedded property, or
-      // as a part of attribute properties
-      const embeddedRelationship: RawHalResource = model.getEmbeddedResource(currentLevelRelationshipName);
-      let fetchedModels: T | HalDocument<T>;
-
-      if (embeddedRelationship) {
-        fetchedModels = this.processRawResource(embeddedRelationship, modelClass, isSingleResource, model.rawResponse);
-      }
-
-      if (!url || url.startsWith(LOCAL_MODEL_ID_PREFIX) || url.startsWith(LOCAL_DOCUMENT_ID_PREFIX)) {
-        continue;
-      }
-
-      const requestsOptions: RequestsOptions = {
-        mainRequest: requestOptions,
-        subsequentRequests: requestOptions
-      };
-
-      const relationshipCall$: Observable<any> = this.handleGetRequestWithRelationships(
-        url,
-        requestsOptions,
-        modelClass,
-        isSingleResource,
-        currentLevelRelationshipsMap[currentLevelRelationshipName],
-        fetchedModels
-      ).pipe(
-        map((fetchedRelation) => {
-          const actualRelationshipSelfLink: string = fetchedRelation.selfLink;
-          const externalRelationshipName: string = property.externalName;
-
-          if (isHalModelInstance(model)) {
-            // The original relationship URL on the parent model must be replaced because
-            // the actual relationship URL may have some query parameteres attached to it
-            model.links[externalRelationshipName].href = actualRelationshipSelfLink;
-          }
-
-          return fetchedRelation;
-        })
-      );
-
-      relationshipCalls.push(relationshipCall$);
-    }
-
     return relationshipCalls;
   }
 
