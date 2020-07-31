@@ -303,7 +303,7 @@ export abstract class HalModel {
           return this.getHasOneRelationship(property);
         },
         set<T extends HalModel>(value: T) {
-          if (isHalModelInstance(value)) {
+          if (isHalModelInstance(value) || !value) {
             this.replaceRelationshipModel(property.externalName, value);
           } else {
             throw new Error(`Only HalModel instances can be assigned to property: ${property.name}`);
