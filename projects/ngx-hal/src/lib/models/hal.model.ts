@@ -180,6 +180,10 @@ export abstract class HalModel {
     const propertyName: string = property.name;
     const externalPropertyName: string = property.externalName;
 
+    if (!this[propertyName].selfLink) {
+      return payload;
+    }
+
     payload[externalPropertyName] = {
       href: this[propertyName].selfLink
     };
@@ -197,7 +201,7 @@ export abstract class HalModel {
 
     // TODO check if this[propertyName] is an array of models or just a HalDocument
     this[propertyName].forEach((model: HalModel) => {
-      if (model) {
+      if (model && model.selfLink) {
         hasManyPropertyLinks.push({
           href: model.selfLink
         });
