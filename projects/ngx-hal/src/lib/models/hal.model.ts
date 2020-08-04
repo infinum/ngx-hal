@@ -292,6 +292,7 @@ export abstract class HalModel {
   private initializeHasOneProperties(): void {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
+        configurable: true,
         get() {
           return this.getHasOneRelationship(property);
         },
@@ -305,6 +306,7 @@ export abstract class HalModel {
   private initialzieHasManyProperties(): void {
     this.hasManyProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(HalModel.prototype, property.name, {
+        configurable: true,
         get() {
           const halDocument: HalDocument<HalModel> = this.getHasManyRelationship(property);
 
