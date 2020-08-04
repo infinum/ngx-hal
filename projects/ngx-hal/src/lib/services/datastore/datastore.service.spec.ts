@@ -15,6 +15,7 @@ import { MockModel2 } from '../../mocks/mock-model-2';
 import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
 import { CarModel } from '../../mocks/car.mock.model';
 import { HalDocument } from '../../classes/hal-document';
+import { HttpParams } from '@angular/common/http';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -218,6 +219,25 @@ describe('DatastoreService', () => {
       const params = {
         country
       };
+
+      datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `test.com/${country}`;
+
+        expect(request.method).toEqual('GET');
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(simpleHalDocumentJson);
+    });
+
+    it('should make a GET request with templated URL parameters passed as HttpParams', () => {
+      const country = 'cro';
+      const customUrl = 'test.com/{country}';
+
+      const params = new HttpParams().set('country', country);
 
       datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
 
@@ -1353,6 +1373,78 @@ describe('DatastoreService', () => {
 
       req.flush(response);
     });
+
+    it('should take query params into consideration when params are provided as HttpParams instance', () => {
+      const selfLink = 'http://mydomain.com/Eye/123';
+      const response = JSON.parse(JSON.stringify(mockModelResponseJson));
+      response._links.self.href = selfLink;
+      const modelId = '774732';
+      const modelEndpoint = `${BASE_NETWORK_URL}/mock-model-endpoint/${modelId}`;
+      const params = new HttpParams().set('q', 'title');
+
+      const modelEndpointWithParams = `${modelEndpoint}?q=title`;
+
+      datastoreService.findOne(
+        MockModel,
+        modelId,
+        [],
+        {
+          params
+        }
+      ).subscribe(() => {
+        expect(datastoreService.storage.get(modelEndpointWithParams)).toBeTruthy();
+        expect(datastoreService.storage.get(modelEndpoint)).toBeFalsy();
+        expect(datastoreService.storage.get(selfLink)).toBeTruthy();
+      });
+
+      const req: TestRequest = httpTestingController.expectOne(modelEndpointWithParams);
+
+      expect(req.request.method).toEqual('GET');
+
+      req.flush(response);
+    });
+
+    it('should take array query params into consideration when params are provided as HttpParams instance', () => {
+      const selfLink = 'http://mydomain.com/Eye/123';
+      const response = JSON.parse(JSON.stringify(mockModelResponseJson));
+      response._links.self.href = selfLink;
+      const modelId = '774732';
+      const modelEndpoint = `${BASE_NETWORK_URL}/mock-model-endpoint/${modelId}`;
+      const params = new HttpParams().append('q', '1').append('q', '2');
+
+      const modelEndpointWithParams = `${modelEndpoint}?q=1,2`;
+
+      datastoreService.findOne(
+        MockModel,
+        modelId,
+        [],
+        {
+          params
+        }
+      ).subscribe(() => {
+        expect(datastoreService.storage.get(modelEndpointWithParams)).toBeTruthy();
+        expect(datastoreService.storage.get(modelEndpoint)).toBeFalsy();
+        expect(datastoreService.storage.get(selfLink)).toBeTruthy();
+      });
+
+      datastoreService.request('get', modelEndpoint, { params }, MockModel, false, false).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === modelEndpoint;
+
+        expect(request.method).toEqual('GET');
+
+        const qParam = request.params.get('q'); // Not sure why this returns an array
+
+        expect(request.params.keys().length).toEqual(1);
+        expect((qParam as unknown as Array<string>).sort()).toEqual(['1', '2'].sort());
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(response);
+    });
+
 
     it('should use query params alphabetically while using them as a key for the local storage', () => {
       const selfLink = 'http://mydomain.com/Eye/123';
