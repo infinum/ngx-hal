@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
 import { Observable, combineLatest, of, throwError } from 'rxjs';
 import { map, flatMap, tap, catchError } from 'rxjs/operators';
 import * as UriTemplate from 'uri-templates';
@@ -651,6 +651,9 @@ export class DatastoreService {
     singleResource: boolean,
     storePartialModels?: boolean
   ): Observable<HalDocument<T> | T> {
+    const params: object = this.ensureParamsObject(requestOptions.params || {});
+    Object.assign(requestOptions, { params });
+
     const options: any = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
 
     this.storage.enrichRequestOptions(url, options);
@@ -683,6 +686,18 @@ export class DatastoreService {
         return throwError(response);
       })
     );
+  }
+
+  private ensureParamsObject(params: HttpParams | { [param: string]: string | string[]}): { [param: string]: string | string[]} {
+    if (params instanceof HttpParams) {
+      return params.keys().reduce((paramsObject: object, paramName: string) => {
+        const arrayParam = params.getAll(paramName);
+        paramsObject[paramName] = arrayParam.length > 1 ? arrayParam : params.get(paramName);
+        return paramsObject;
+      }, {});
+    }
+
+    return params;
   }
 
   private makePostRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
