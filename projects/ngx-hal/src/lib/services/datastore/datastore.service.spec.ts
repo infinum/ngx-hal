@@ -484,13 +484,18 @@ describe('DatastoreService', () => {
     it('should make a POST request only with the properties which are specified in specifiedFields (links included)', () => {
       const nameModelProperty = 'John';
 
+      const mockModel1: MockModel2 = new MockModel2({ name: '' }, datastoreService);
+      mockModel1.selfLink = '/mockModel2/2';
+      const mockModel2: MockModel2 = new MockModel2({ name: '' }, datastoreService);
+      mockModel2.selfLink = '/mockModel2/3';
+
       const mockModel = new MockModel({
         name: nameModelProperty,
-        mockModel2Connection: new MockModel2({ name: '' }, datastoreService),
-        someResources: [new MockModel2({ name: '' }, datastoreService)]
+        mockModel2Connection: mockModel1,
+        someResources: [mockModel2]
       }, datastoreService);
-      mockModel.mockModel2Connection = new MockModel2({ name: '' }, datastoreService);
-      mockModel.someResources = [new MockModel2({ name: '' }, datastoreService)];
+      mockModel.mockModel2Connection = mockModel1;
+      mockModel.someResources = [mockModel2];
 
       const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
 
@@ -513,13 +518,18 @@ describe('DatastoreService', () => {
     it('should make a POST request only with the properties which are specified in specifiedFields (links excluded if there are no relationships)', () => {
       const nameModelProperty = 'John';
 
+      const mockModel1: MockModel2 = new MockModel2({ name: '' }, datastoreService);
+      mockModel1.selfLink = '/mockModel2/2';
+      const mockModel2: MockModel2 = new MockModel2({ name: '' }, datastoreService);
+      mockModel2.selfLink = '/mockModel2/3';
+
       const mockModel = new MockModel({
         name: nameModelProperty,
-        mockModel2Connection: new MockModel2({ name: '' }, datastoreService),
-        someResources: [new MockModel2({ name: '' }, datastoreService)]
+        mockModel2Connection: mockModel1,
+        someResources: [mockModel2]
       }, datastoreService);
-      mockModel.mockModel2Connection = new MockModel2({ name: '' }, datastoreService);
-      mockModel.someResources = [new MockModel2({ name: '' }, datastoreService)];
+      mockModel.mockModel2Connection = mockModel1;
+      mockModel.someResources = [mockModel2];
 
       const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
 
@@ -543,7 +553,9 @@ describe('DatastoreService', () => {
       const companyName = 'coolCompanyLtd';
 
       const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      companyModel.selfLink = '/mockModel2/2';
       const partsModel = new MockModel2({ name: partName }, datastoreService);
+      partsModel.selfLink = '/mockModel2/3';
 
       const carModel = new CarModel({
         name: carName,
@@ -574,7 +586,9 @@ describe('DatastoreService', () => {
       const companyName = 'coolCompanyLtd';
 
       const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      companyModel.selfLink = '/mockModel2/2';
       const partsModel = new MockModel2({ name: partName }, datastoreService);
+      partsModel.selfLink = '/mockModel2/3';
 
       const carModel = new CarModel({
         name: carName,
@@ -606,7 +620,9 @@ describe('DatastoreService', () => {
       const companyName = 'coolCompanyLtd';
 
       const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      companyModel.selfLink = '/mockModel2/2';
       const partsModel = new MockModel2({ name: partName }, datastoreService);
+      partsModel.selfLink = '/mockModel2/3';
 
       const carModel = new CarModel({
         name: carName,
@@ -637,7 +653,9 @@ describe('DatastoreService', () => {
       const companyName = 'coolCompanyLtd';
 
       const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      companyModel.selfLink = '/mockModel2/2';
       const partsModel = new MockModel2({ name: partName }, datastoreService);
+      partsModel.selfLink = '/mockModel2/3';
 
       const carModel = new CarModel({
         name: carName,
@@ -669,7 +687,9 @@ describe('DatastoreService', () => {
       const companyName = 'coolCompanyLtd';
 
       const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      companyModel.selfLink = '/mockModel2/2';
       const partsModel = new MockModel2({ name: partName }, datastoreService);
+      partsModel.selfLink = '/mockModel2/3';
 
       const carModel = new CarModel({
         name: carName,
@@ -700,7 +720,9 @@ describe('DatastoreService', () => {
       const companyName = 'coolCompanyLtd';
 
       const companyModel = new MockModel2({ name: companyName }, datastoreService);
+      companyModel.selfLink = '/mockModel2/2';
       const partsModel = new MockModel2({ name: partName }, datastoreService);
+      partsModel.selfLink = '/mockModel2/2';
 
       const carModel = new CarModel({
         name: carName,
@@ -1218,6 +1240,72 @@ describe('DatastoreService', () => {
       });
 
       calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should not send unsaved has many relationships in payload', () => {
+      const nameModelProperty = 'John';
+
+      const savedMockModel1: MockModel2 = new MockModel2({ name: '' }, datastoreService);
+      savedMockModel1.selfLink = '/mockModel2/2';
+      const unsavedMockModel2: MockModel2 = new MockModel2({ name: '' }, datastoreService);
+
+      const mockModel = new MockModel({
+        name: nameModelProperty,
+        mockModel2Connection: savedMockModel1,
+        someResources: [unsavedMockModel2]
+      }, datastoreService);
+      mockModel.mockModel2Connection = savedMockModel1;
+      mockModel.someResources = [unsavedMockModel2];
+
+      const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
+
+      mockModel.save({}).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(3);
+      expect(body.name).toEqual(nameModelProperty);
+      expect(body[LINKS_PROPERTY_NAME]).toBeDefined();
+      expect(body[LINKS_PROPERTY_NAME].someResources).toBeUndefined();
+      expect(body[LINKS_PROPERTY_NAME].mockModel2Connection).toBeDefined();
+
+      req.flush(mockModelResponseJson);
+    });
+
+    it('should not send unsaved has one relationships in payload', () => {
+      const nameModelProperty = 'John';
+
+      const savedMockModel1: MockModel2 = new MockModel2({ name: '' }, datastoreService);
+      savedMockModel1.selfLink = '/mockModel2/2';
+      const unsavedMockModel2: MockModel2 = new MockModel2({ name: '' }, datastoreService);
+
+      const mockModel = new MockModel({
+        name: nameModelProperty,
+        mockModel2Connection: unsavedMockModel2,
+        someResources: [savedMockModel1]
+      }, datastoreService);
+      mockModel.mockModel2Connection = unsavedMockModel2;
+      mockModel.someResources = [savedMockModel1];
+
+      const modelUrl = `${BASE_NETWORK_URL}/mock-model-endpoint`;
+
+      mockModel.save({}).subscribe();
+
+      const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+      expect(req.request.method).toEqual('POST');
+      const body = req.request.body;
+
+      expect(Object.keys(body).length).toEqual(3);
+      expect(body.name).toEqual(nameModelProperty);
+      expect(body[LINKS_PROPERTY_NAME]).toBeDefined();
+      expect(body[LINKS_PROPERTY_NAME].someResources).toBeDefined();
+      expect(body[LINKS_PROPERTY_NAME].mockModel2Connection).toBeUndefined();
+
+      req.flush(mockModelResponseJson);
     });
 
     it('should use the provided params instead of the default Datastore params for subsequent requests', () => {
