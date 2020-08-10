@@ -72,7 +72,7 @@ export abstract class HalModel {
     const property: ModelProperty = this.getPropertyData(relationshipName);
 
     if (!property) {
-      console.warn(`Relationship with the name ${relationshipName} is not defined on the model.`);
+      this.datastore.logger.warn(`Relationship with the name ${relationshipName} is not defined on the model.`);
       return;
     }
 
@@ -311,7 +311,7 @@ export abstract class HalModel {
           if (isHalModelInstance(value) || !value) {
             this.replaceRelationshipModel(property.externalName, value);
           } else {
-            console.warn(`Only HalModel instances can be assigned to property: ${property.name}. This will become an error in the next ngx-hal release`);
+            this.datastore.logger.warn(`Only HalModel instances can be assigned to property: ${property.name}. This will become an error in the next ngx-hal release`);
             // throw new Error(`Only HalModel instances can be assigned to property: ${property.name}`);
           }
         }
@@ -402,7 +402,7 @@ export abstract class HalModel {
     const halDocument: HalDocument<T> = this.datastore.storage.get(modelIdentificator) as HalDocument<T>;
 
     if (!halDocument) {
-      console.warn(`Has many relationship ${property.name} is not fetched.`);
+      this.datastore.logger.warn(`Has many relationship ${property.name} is not fetched.`);
       return;
     }
 
