@@ -420,13 +420,13 @@ export class DatastoreService {
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = customUrl || this.buildModelUrl(modelClass);
 
-    const requestParams: object = this.ensureParamsObject(requestOptions.params || {});
     const paramsObject: object = this.ensureParamsObject(params || {});
-    const paramsCombined: object = Object.assign({}, requestParams, paramsObject);
-    Object.assign(requestOptions, { params: paramsCombined });
+    requestOptions.params = {};
+
+    const options: RequestOptions = deepmergeWrapper(requestOptions, { params: paramsObject });
 
     const requestsOptions: RequestsOptions = {
-      mainRequest: requestOptions,
+      mainRequest: options,
       subsequentRequests: subsequentRequestsOptions
     };
 

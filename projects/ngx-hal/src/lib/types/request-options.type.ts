@@ -7,7 +7,7 @@ export type RequestOptions = {
   observe?;
   params?: HttpParams | {
     [param: string]: string | string[];
-  };
+  } | object;
   reportProgress?: boolean;
   responseType?;
   withCredentials?: boolean;
