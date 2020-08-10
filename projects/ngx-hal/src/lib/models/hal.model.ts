@@ -311,7 +311,8 @@ export abstract class HalModel {
           if (isHalModelInstance(value) || !value) {
             this.replaceRelationshipModel(property.externalName, value);
           } else {
-            throw new Error(`Only HalModel instances can be assigned to property: ${property.name}`);
+            console.warn(`Only HalModel instances can be assigned to property: ${property.name}. This will become an error in the next ngx-hal release`);
+            // throw new Error(`Only HalModel instances can be assigned to property: ${property.name}`);
           }
         }
       });

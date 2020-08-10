@@ -1,6 +1,7 @@
 {
   "name": "ngx-hal",
   "version": "2.0.3-beta",
+  "version": "2.0.4-beta",
   "description": "Angular library for supporting HAL format APIs",
   "author": "Infinum <javascript.team@infinum.co>",
   "license": "MIT",
