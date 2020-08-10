@@ -313,35 +313,35 @@ export class DatastoreService {
 
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams
+    params: object | { [param: string]: string | string[] } | HttpParams
   ): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false
   ): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>
   ): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -349,21 +349,21 @@ export class DatastoreService {
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: boolean,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: boolean,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -371,7 +371,7 @@ export class DatastoreService {
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: boolean,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -380,7 +380,7 @@ export class DatastoreService {
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -390,7 +390,7 @@ export class DatastoreService {
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -400,7 +400,7 @@ export class DatastoreService {
   ): Observable<T>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: boolean,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -410,7 +410,7 @@ export class DatastoreService {
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: { [param: string]: string | string[] } | HttpParams = {},
+    params: object | { [param: string]: string | string[] } | HttpParams = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
     requestOptions: RequestOptions = {},
@@ -420,13 +420,13 @@ export class DatastoreService {
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = customUrl || this.buildModelUrl(modelClass);
 
+    const requestParams: object = this.ensureParamsObject(requestOptions.params || {});
     const paramsObject: object = this.ensureParamsObject(params || {});
-    Object.assign(requestOptions, { params: paramsObject });
-
-    const options: RequestOptions = deepmergeWrapper(requestOptions, { params: paramsObject });
+    const paramsCombined: object = Object.assign({}, requestParams, paramsObject);
+    Object.assign(requestOptions, { params: paramsCombined });
 
     const requestsOptions: RequestsOptions = {
-      mainRequest: options,
+      mainRequest: requestOptions,
       subsequentRequests: subsequentRequestsOptions
     };
 
@@ -699,7 +699,9 @@ export class DatastoreService {
     );
   }
 
-  private ensureParamsObject(params: HttpParams | { [param: string]: string | string[]}): { [param: string]: string | string[]} {
+  private ensureParamsObject(
+    params: HttpParams | { [param: string]: string | string[] } | object
+  ): { [param: string]: string | string[]} | object {
     if (params instanceof HttpParams) {
       return params.keys().reduce((paramsObject: object, paramName: string) => {
         const arrayParam = params.getAll(paramName);

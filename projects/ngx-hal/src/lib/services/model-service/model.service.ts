@@ -26,33 +26,33 @@ export abstract class ModelService<Model extends HalModel> {
     );
   }
 
-  public find(params: { [param: string]: string | string[] } | HttpParams): Observable<Array<Model>>;
-  public find(params: { [param: string]: string | string[] } | HttpParams, includeMeta: false): Observable<Array<Model>>;
-  public find(params: { [param: string]: string | string[] } | HttpParams, includeMeta: true): Observable<HalDocument<Model>>;
+  public find(params: object | { [param: string]: string | string[] } | HttpParams): Observable<Array<Model>>;
+  public find(params: object | { [param: string]: string | string[] } | HttpParams, includeMeta: false): Observable<Array<Model>>;
+  public find(params: object | { [param: string]: string | string[] } | HttpParams, includeMeta: true): Observable<HalDocument<Model>>;
   public find(
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>
   ): Observable<Array<Model>>;
   public find(
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>
   ): Observable<HalDocument<Model>>;
   public find(
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<Array<Model>>;
   public find(
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<HalDocument<Model>>;
   public find(
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -61,7 +61,7 @@ export abstract class ModelService<Model extends HalModel> {
     storePartialModels?: boolean
   ): Observable<HalDocument<Model>>;
   public find(
-    params: { [param: string]: string | string[] } | HttpParams,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -70,7 +70,7 @@ export abstract class ModelService<Model extends HalModel> {
     storePartialModels?: boolean
   ): Observable<Array<Model>>;
   public find(
-    params: { [param: string]: string | string[] } | HttpParams = {},
+    params: object | { [param: string]: string | string[] } | HttpParams = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
     requestOptions: RequestOptions = {},
