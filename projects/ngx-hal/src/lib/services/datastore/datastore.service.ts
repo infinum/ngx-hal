@@ -713,31 +713,30 @@ export class DatastoreService {
     return params;
   }
 
+  private enrichRequestOptions(requestOptions: RequestOptions) {
+    const reqOptions: RequestOptions = requestOptions || {};
+    const params: object = this.ensureParamsObject(reqOptions.params || {});
+    Object.assign(reqOptions, { params });
+    return deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, reqOptions);
+  }
+
   private makePostRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions = {}): Observable<any> {
-    const params: object = this.ensureParamsObject(requestOptions.params || {});
-    Object.assign(requestOptions, { params });
-    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = this.enrichRequestOptions(requestOptions);
     return this.http.post<T>(url, payload, options);
   }
 
   private makePutRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions = {}): Observable<any> {
-    const params: object = this.ensureParamsObject(requestOptions.params || {});
-    Object.assign(requestOptions, { params });
-    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = this.enrichRequestOptions(requestOptions);
     return this.http.put<T>(url, payload, options);
   }
 
   private makePatchRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions = {}): Observable<any> {
-    const params: object = this.ensureParamsObject(requestOptions.params || {});
-    Object.assign(requestOptions, { params });
-    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = this.enrichRequestOptions(requestOptions);
     return this.http.patch<T>(url, payload, options);
   }
 
   private makeDeleteRequest<T extends HalModel>(url: string, requestOptions: RequestOptions = {}): Observable<any> {
-    const params: object = this.ensureParamsObject(requestOptions.params || {});
-    Object.assign(requestOptions, { params });
-    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+    const options = this.enrichRequestOptions(requestOptions);
     return this.http.delete<T>(url, options);
   }
 
