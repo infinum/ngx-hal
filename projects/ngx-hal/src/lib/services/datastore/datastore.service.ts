@@ -421,7 +421,8 @@ export class DatastoreService {
     const url: string = customUrl || this.buildModelUrl(modelClass);
 
     const paramsObject: object = this.ensureParamsObject(params || {});
-    requestOptions.params = {};
+    requestOptions.params = this.ensureParamsObject(requestOptions.params || {});
+    requestOptions.params = Object.assign(requestOptions.params, paramsObject);
 
     const options: RequestOptions = deepmergeWrapper(requestOptions, { params: paramsObject });
 
