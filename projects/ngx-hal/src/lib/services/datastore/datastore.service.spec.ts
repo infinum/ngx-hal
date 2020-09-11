@@ -1784,29 +1784,48 @@ describe('DatastoreService', () => {
     });
   });
 
-  xdescribe('find method', () => {
-    it('should fetch embedded list items', () => {
+  describe('find method', () => {
+    xit('should fetch embedded list items', () => {
 
     });
 
-    it('should pass proper request options to the requests for fetching embedded list items', () => {
+    xit('should pass proper request options to the requests for fetching embedded list items', () => {
 
     });
 
-    it('should fetch the relationships of embedded list items', () => {
+    xit('should fetch the relationships of embedded list items', () => {
 
     });
 
-    it('should pass proper request options while fetching the relationships of embedded list items', () => {
+    xit('should pass proper request options while fetching the relationships of embedded list items', () => {
 
     });
 
-    it('should save the embedded items to the local store if the items do not exist in the store already', () => {
+    xit('should save the embedded items to the local store if the items do not exist in the store already', () => {
 
     });
 
-    it('should save the embedded items to the local store if storePartialModels is set to true', () => {
+    xit('should save the embedded items to the local store if storePartialModels is set to true', () => {
 
+    });
+
+    it('should make a GET request with HTTP params', () => {
+      const paramName1 = 'testParam';
+      const paramValue1 = 'paramVal';
+
+      const httpParams = new HttpParams().set(paramName1, paramValue1);
+      datastoreService.find(MockModel, {}, true, [], { params: httpParams }).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
+        expect(request.method).toEqual('GET');
+
+        expect(request.params.get(paramName1)).toEqual(paramValue1);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush('');
     });
   });
 
