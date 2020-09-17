@@ -17,6 +17,7 @@ import { CarModel } from '../../mocks/car.mock.model';
 import { HalDocument } from '../../classes/hal-document';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 import { HttpParams } from '@angular/common/http';
+import { MockTemplatedModel } from '../../mocks/mock-model-templated';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -1821,11 +1822,112 @@ describe('DatastoreService', () => {
         expect(request.method).toEqual('GET');
 
         expect(request.params.get(paramName1)).toEqual(paramValue1);
+        expect(request.params.keys().length).toEqual(1);
 
         return isCorrectUrl;
       });
 
-      calls[0].flush('');
+      calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should make a GET request with HTTP params when a paramater is passed in as an array', () => {
+      const paramName1 = 'testParam';
+      const paramValue1 = 'paramVal';
+
+      const params: object = {
+        [paramName1]: [paramValue1]
+      };
+      datastoreService.find(MockModel, params, true, []).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
+        expect(request.method).toEqual('GET');
+
+        expect(request.params.get(paramName1)).toEqual([paramValue1]);
+        expect(request.params.keys().length).toEqual(1);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should make a GET request with HTTP params when a paramater is passed in as an array with multiple values', () => {
+      const paramName1 = 'testParam';
+      const paramValue1 = 'paramVal';
+      const paramValue2 = 'paramVal2';
+      const paramsArray = [paramValue1, paramValue2];
+
+      const params: object = {
+        [paramName1]: [paramValue1, paramValue2]
+      };
+      datastoreService.find(MockModel, params, true, []).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
+        expect(request.method).toEqual('GET');
+
+        expect(request.params.get(paramName1)).toEqual(paramsArray);
+        expect(request.params.keys().length).toEqual(1);
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should make a GET request with HTTP params and params object', () => {
+      const paramName1 = 'testParam';
+      const paramValue1 = 'paramVal';
+
+      const paramName2 = 'testParam2';
+      const paramValue2 = 'paramVal2';
+
+      const httpParams = new HttpParams().set(paramName1, paramValue1);
+      datastoreService.find(MockModel, { [paramName2]: paramValue2 }, true, [], { params: httpParams }).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
+        expect(request.method).toEqual('GET');
+
+        expect(request.params.get(paramName1)).toEqual(paramValue1);
+        expect(request.params.get(paramName2)).toEqual(paramValue2);
+        expect(request.params.keys().length).toEqual(2);
+
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
+    });
+
+    it('should make a GET request with templated query params passing in HTTP params and params object', () => {
+      const paramName1 = 'testParam';
+      const paramValue1 = 'paramVal';
+
+      const paramName2 = 'testParam2';
+      const paramValue2 = 'paramVal2';
+
+      const templatedValue = 'tmpld';
+
+      const httpParams = new HttpParams().set(paramName1, paramValue1).set('text', templatedValue);
+      const params: object = { [paramName2]: paramValue2, text: templatedValue };
+      datastoreService.find(MockTemplatedModel, params, true, [], { params: httpParams }).subscribe();
+
+      const calls: Array<TestRequest> = httpTestingController.match((request) => {
+        const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-templated-model-endpoint`;
+        expect(request.method).toEqual('GET');
+
+        expect(request.params.get(paramName1)).toEqual(paramValue1);
+        expect(request.params.get(paramName2)).toEqual(paramValue2);
+        expect(request.params.get('text')).toEqual(templatedValue);
+        expect(request.params.keys().length).toEqual(3);
+
+
+        return isCorrectUrl;
+      });
+
+      calls[0].flush(mockModelResponseJson);
     });
   });
 

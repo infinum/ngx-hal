@@ -424,7 +424,7 @@ export class DatastoreService {
     requestOptions.params = this.ensureParamsObject(requestOptions.params || {});
     requestOptions.params = Object.assign(requestOptions.params, paramsObject);
 
-    const options: RequestOptions = deepmergeWrapper(requestOptions, { params: paramsObject });
+    const options: RequestOptions = deepmergeWrapper({}, requestOptions);
 
     const requestsOptions: RequestsOptions = {
       mainRequest: options,

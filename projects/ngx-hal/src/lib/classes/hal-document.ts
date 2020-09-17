@@ -101,7 +101,7 @@ export class HalDocument<T extends HalModel> {
     const embdedded: object = this.rawResource[EMBEDDED_PROPERTY_NAME];
     const fallbackListPropertyName = embdedded ? Object.keys(embdedded)[0] : 'noListPropertyPresent';
 
-    return Object.keys(links).find((propertyName: string) => {
+    return Object.keys(links || {}).find((propertyName: string) => {
       return isArray(links[propertyName]);
     }) || fallbackListPropertyName;
   }
