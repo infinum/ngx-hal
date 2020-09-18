@@ -420,6 +420,8 @@ export class DatastoreService {
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = customUrl || this.buildModelUrl(modelClass);
 
+    const subsequentOptions: RequestOptions = deepmergeWrapper({}, subsequentRequestsOptions);
+
     const paramsObject: object = this.ensureParamsObject(params || {});
     requestOptions.params = this.ensureParamsObject(requestOptions.params || {});
     requestOptions.params = Object.assign(requestOptions.params, paramsObject);
@@ -428,7 +430,7 @@ export class DatastoreService {
 
     const requestsOptions: RequestsOptions = {
       mainRequest: options,
-      subsequentRequests: subsequentRequestsOptions
+      subsequentRequests: subsequentOptions
     };
 
     const relationshipDescriptors: Array<RelationshipRequestDescriptor> = ensureRelationshipRequestDescriptors(includeRelationships);
@@ -443,7 +445,7 @@ export class DatastoreService {
       storePartialModels
     ).pipe(
       flatMap((halDocument: HalDocument<T>) => {
-        return this.fetchEmbeddedListItems(halDocument, modelClass, relationshipDescriptors, subsequentRequestsOptions).pipe(
+        return this.fetchEmbeddedListItems(halDocument, modelClass, relationshipDescriptors, subsequentOptions).pipe(
           map((models: Array<T>) => {
             halDocument.models = models;
             return halDocument;
