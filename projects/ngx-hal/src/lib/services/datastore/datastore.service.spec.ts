@@ -18,6 +18,7 @@ import { HalDocument } from '../../classes/hal-document';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 import { HttpParams } from '@angular/common/http';
 import { MockTemplatedModel } from '../../mocks/mock-model-templated';
+import mockListWithEmbeddedJson from '../../mocks/mock-list-with-embedded.json';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -1827,7 +1828,7 @@ describe('DatastoreService', () => {
         return isCorrectUrl;
       });
 
-      calls[0].flush(mockModelResponseJson);
+      calls[0].flush(mockListWithEmbeddedJson);
     });
 
     it('should make a GET request with HTTP params when a paramater is passed in as an array', () => {
@@ -1849,7 +1850,7 @@ describe('DatastoreService', () => {
         return isCorrectUrl;
       });
 
-      calls[0].flush(mockModelResponseJson);
+      calls[0].flush(mockListWithEmbeddedJson);
     });
 
     it('should make a GET request with HTTP params when a paramater is passed in as an array with multiple values', () => {
@@ -1873,7 +1874,7 @@ describe('DatastoreService', () => {
         return isCorrectUrl;
       });
 
-      calls[0].flush(mockModelResponseJson);
+      calls[0].flush(mockListWithEmbeddedJson);
     });
 
     it('should make a GET request with HTTP params and params object', () => {
@@ -1898,7 +1899,7 @@ describe('DatastoreService', () => {
         return isCorrectUrl;
       });
 
-      calls[0].flush(mockModelResponseJson);
+      calls[0].flush(mockListWithEmbeddedJson);
     });
 
     it('should make a GET request with templated query params passing in HTTP params and params object', () => {
@@ -1927,7 +1928,7 @@ describe('DatastoreService', () => {
         return isCorrectUrl;
       });
 
-      calls[0].flush(mockModelResponseJson);
+      calls[0].flush(mockListWithEmbeddedJson);
     });
   });
 
