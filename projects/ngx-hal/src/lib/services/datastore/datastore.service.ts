@@ -41,7 +41,9 @@ export class DatastoreService {
   protected httpParamsOptions?: object;
   public paginationClass: PaginationConstructor;
 
-  constructor(public http: HttpClient) {}
+  constructor(public http: HttpClient) {
+    console.log('dv1');
+  }
 
   private getHalDocumentClass<T extends HalModel>(): HalDocumentConstructor<T> {
     return Reflect.getMetadata(HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY, this.constructor) || HalDocument;
@@ -159,13 +161,17 @@ export class DatastoreService {
         fetchedModels
       ).pipe(
         map((fetchedRelation) => {
-          const actualRelationshipSelfLink: string = fetchedRelation.selfLink;
           const externalRelationshipName: string = property.externalName;
 
           if (isHalModelInstance(model)) {
             // The original relationship URL on the parent model must be replaced because
             // the actual relationship URL may have some query parameteres attached to it
-            model.links[externalRelationshipName].href = actualRelationshipSelfLink;
+            if (property.type === ModelPropertyEnum.HasOne) {
+              const actualRelationshipSelfLink: string = fetchedRelation.selfLink;
+              model.links[externalRelationshipName].href = actualRelationshipSelfLink;
+            } else {
+              model.updateHasManyDocumentIdentificator(property, fetchedRelation.uniqueModelIdentificator);
+            }
           }
 
           return fetchedRelation;
@@ -779,6 +785,12 @@ export class DatastoreService {
   ): T | HalDocument<T> {
     if (isSingleResource) {
       const model: T = new modelClass(rawResource, this, response);
+
+      const localResource: T = this.storage.get(model.uniqueModelIdentificator);
+      if (localResource) {
+        model.hasManyDocumentIdentificators = localResource.hasManyDocumentIdentificators;
+      }
+
       this.storage.save(model, response, [url]);
       return model;
     }

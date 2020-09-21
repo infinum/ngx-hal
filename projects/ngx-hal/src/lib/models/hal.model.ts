@@ -27,6 +27,7 @@ export abstract class HalModel {
   private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
   private temporarySelfLink: string = null;
   private localModelIdentificator: string;
+  private internalHasManyDocumentIdentificators: { [K: string]: string } = {};
 
   constructor(
     protected resource: RawHalResource = {},
@@ -341,6 +342,7 @@ export abstract class HalModel {
             existingHalDocument.models = value;
           } else {
             const halDocumentRaw = { models: value, uniqueModelIdentificator: `${LOCAL_DOCUMENT_ID_PREFIX}-${generateUUID()}` };
+            this.updateHasManyDocumentIdentificator(property, halDocumentRaw.uniqueModelIdentificator);
             this.datastore.storage.save(halDocumentRaw);
             this.replaceRelationshipModel(property.externalName, halDocumentRaw);
           }
@@ -394,14 +396,13 @@ export abstract class HalModel {
   }
 
   private getHasManyRelationship<T extends HalModel>(property: ModelProperty): HalDocument<T> {
-    const relationshipLink: RawHalLink = this.links[property.externalName];
+    const uniqueRelationshipIdentificator: string = this.hasManyDocumentIdentificators[property.externalName];
 
-    if (!relationshipLink) {
+    if (!uniqueRelationshipIdentificator) {
       return;
     }
 
-    const modelIdentificator: string = this.getModelIdentificator(property.propertyClass, relationshipLink.href);
-    const halDocument: HalDocument<T> = this.datastore.storage.get(modelIdentificator) as HalDocument<T>;
+    const halDocument: HalDocument<T> = this.datastore.storage.get(uniqueRelationshipIdentificator) as HalDocument<T>;
 
     if (!halDocument) {
       console.warn(`Has many relationship ${property.name} is not fetched.`);
@@ -452,5 +453,17 @@ export abstract class HalModel {
 
   private isHasManyProperty(property: ModelOptions): boolean {
     return property.type === ModelPropertyEnum.HasMany;
+  }
+
+  public updateHasManyDocumentIdentificator(property: HasManyModelProperty, identificator: string): void {
+    this.hasManyDocumentIdentificators[property.externalName] = identificator;
+  }
+
+  public set hasManyDocumentIdentificators(hasManyDocumentIdentificators: { [K: string]: string }) {
+    this.internalHasManyDocumentIdentificators = Object.assign({}, hasManyDocumentIdentificators);
+  }
+
+  public get hasManyDocumentIdentificators(): { [K: string]: string } {
+    return this.internalHasManyDocumentIdentificators;
   }
 }
