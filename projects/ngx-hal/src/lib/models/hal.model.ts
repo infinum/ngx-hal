@@ -21,6 +21,7 @@ import { GeneratePayloadOptions } from '../interfaces/generate-payload-options.i
 import { CustomOptions } from '../interfaces/custom-options.interface';
 import { ensureRelationshipRequestDescriptors } from '../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
 import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
+import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
 
 export abstract class HalModel {
   private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -49,7 +50,8 @@ export abstract class HalModel {
       return null;
     }
 
-    return this.selfLink.split('/').pop();
+    const selfLink: string = removeQueryParams(this.selfLink);
+    return selfLink.split('/').pop();
   }
 
   public get endpoint(): string {
