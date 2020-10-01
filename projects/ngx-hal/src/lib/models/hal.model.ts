@@ -43,6 +43,10 @@ export abstract class HalModel {
   }
 
   public get uniqueModelIdentificator(): string {
+    return this.getUniqueModelIdentificator();
+  }
+
+  protected getUniqueModelIdentificator(): string {
     return this.selfLink || this.localModelIdentificator;
   }
 
@@ -387,10 +391,7 @@ export abstract class HalModel {
       return;
     }
 
-    let modelIdentificator: string = relationshipLinks.href;
-    if (isHalModelInstance(property.propertyClass)) {
-      modelIdentificator = this.getModelIdentificator(property.propertyClass, relationshipLinks.href);
-    }
+    const modelIdentificator: string = relationshipLinks.href;
 
     return this.datastore.storage.get(modelIdentificator);
   }

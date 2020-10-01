@@ -162,11 +162,10 @@ export class DatastoreService {
           const externalRelationshipName: string = property.externalName;
 
           if (isHalModelInstance(model)) {
-            // The original relationship URL on the parent model must be replaced because
-            // the actual relationship URL may have some query parameteres attached to it
             if (property.type === ModelPropertyEnum.HasOne) {
-              const actualRelationshipSelfLink: string = fetchedRelation.selfLink;
-              model.links[externalRelationshipName].href = actualRelationshipSelfLink;
+              // The original relationship URL on the parent model must be replaced because
+              // the actual relationship URL may have some query parameteres attached to it
+              model.links[externalRelationshipName].href = fetchedRelation.uniqueModelIdentificator;
             } else {
               model.updateHasManyDocumentIdentificator(property, fetchedRelation.uniqueModelIdentificator);
             }
@@ -783,12 +782,7 @@ export class DatastoreService {
   ): T | HalDocument<T> {
     if (isSingleResource) {
       const model: T = new modelClass(rawResource, this, response);
-
-      const localResource: T = this.storage.get(model.uniqueModelIdentificator);
-      if (localResource) {
-        model.hasManyDocumentIdentificators = localResource.hasManyDocumentIdentificators;
-      }
-
+      this.populateResourceWithRelationshipIndentificators(model);
       this.storage.save(model, response, [url]);
       return model;
     }
@@ -796,6 +790,11 @@ export class DatastoreService {
     const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass, response);
 
     this.storage.saveAll(halDocument.models, savePartialModels);
+
+    halDocument.models.forEach((listModel: T) => {
+      this.populateResourceWithRelationshipIndentificators(listModel);
+    });
+
     this.storage.save(halDocument, response, [url]);
     return halDocument;
   }
@@ -807,6 +806,13 @@ export class DatastoreService {
 
   private extractResourceFromResponse(response: HttpResponse<object>): RawHalResource {
     return response.body;
+  }
+
+  private populateResourceWithRelationshipIndentificators<T extends HalModel>(model: T): void {
+    const localResource: T = this.storage.get(model.uniqueModelIdentificator);
+    if (localResource) {
+      model.hasManyDocumentIdentificators = localResource.hasManyDocumentIdentificators;
+    }
   }
 
   private fetchEmbeddedListItems<T extends HalModel>(
