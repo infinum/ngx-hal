@@ -431,7 +431,7 @@ export abstract class HalModel {
     let relationshipLink = null;
     if (relationshipModel) {
       relationshipLink = {
-        href: relationshipModel.selfLink || relationshipModel.uniqueModelIdentificator
+        href: relationshipModel.uniqueModelIdentificator || relationshipModel.selfLink
       };
     }
 
