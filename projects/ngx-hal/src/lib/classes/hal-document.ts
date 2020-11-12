@@ -9,13 +9,14 @@ import { DatastoreService } from '../services/datastore/datastore.service';
 import { isArray } from '../utils/is-array/is-array.util';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
-import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
 import { RequestOptions } from '../types/request-options.type';
 import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
+import { generateUUID } from '../helpers/uuid/uuid.helper';
 
 export class HalDocument<T extends HalModel> {
   public models: Array<T>;
   public pagination: Pagination;
+  public uniqueModelIdentificator: string;
 
   constructor(
     private rawResource: RawHalResource,
@@ -24,10 +25,7 @@ export class HalDocument<T extends HalModel> {
     private datastore: DatastoreService
   ) {
     this.parseRawResources(rawResource);
-  }
-
-  public get uniqueModelIdentificator(): string {
-    return this.links[SELF_PROPERTY_NAME].href;
+    this.generateUniqueModelIdentificator();
   }
 
   public get hasEmbeddedItems(): boolean {
@@ -112,5 +110,9 @@ export class HalDocument<T extends HalModel> {
 
   private get links(): RawHalLinks {
     return this.rawResource[LINKS_PROPERTY_NAME];
+  }
+
+  private generateUniqueModelIdentificator(): void {
+    this.uniqueModelIdentificator = generateUUID();
   }
 }
