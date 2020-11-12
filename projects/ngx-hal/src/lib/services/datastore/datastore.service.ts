@@ -311,30 +311,37 @@ export class DatastoreService {
     return modelRelationshipCalls;
   }
 
-  public find<T extends HalModel>(modelClass: ModelConstructor<T>, params: object): Observable<Array<T>>;
-  public find<T extends HalModel>(modelClass: ModelConstructor<T>, params: object, includeMeta: false): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams
+  ): Observable<Array<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object | { [param: string]: string | string[] } | HttpParams,
+    includeMeta: false
+  ): Observable<Array<T>>;
+  public find<T extends HalModel>(
+    modelClass: ModelConstructor<T>,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>
   ): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -342,21 +349,21 @@ export class DatastoreService {
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<Array<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: boolean,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: boolean,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -364,7 +371,7 @@ export class DatastoreService {
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: boolean,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -373,7 +380,7 @@ export class DatastoreService {
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: true,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -383,7 +390,7 @@ export class DatastoreService {
   ): Observable<HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: false,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -393,7 +400,7 @@ export class DatastoreService {
   ): Observable<T>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object,
+    params: object | { [param: string]: string | string[] } | HttpParams,
     includeMeta: boolean,
     includeRelationships: Array<string | RelationshipRequestDescriptor>,
     requestOptions: RequestOptions,
@@ -403,7 +410,7 @@ export class DatastoreService {
   ): Observable<Array<T> | HalDocument<T>>;
   public find<T extends HalModel>(
     modelClass: ModelConstructor<T>,
-    params: object = {},
+    params: object | { [param: string]: string | string[] } | HttpParams = {},
     includeMeta: boolean = false,
     includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
     requestOptions: RequestOptions = {},
@@ -412,11 +419,18 @@ export class DatastoreService {
     storePartialModels: boolean = false
   ): Observable<HalDocument<T> | Array<T>> {
     const url: string = customUrl || this.buildModelUrl(modelClass);
-    const options: RequestOptions = deepmergeWrapper(requestOptions, { params });
+
+    const subsequentOptions: RequestOptions = deepmergeWrapper({}, subsequentRequestsOptions);
+
+    const paramsObject: object = this.ensureParamsObject(params || {});
+    requestOptions.params = this.ensureParamsObject(requestOptions.params || {});
+    requestOptions.params = Object.assign(requestOptions.params, paramsObject);
+
+    const options: RequestOptions = deepmergeWrapper({}, requestOptions);
 
     const requestsOptions: RequestsOptions = {
       mainRequest: options,
-      subsequentRequests: subsequentRequestsOptions
+      subsequentRequests: subsequentOptions
     };
 
     const relationshipDescriptors: Array<RelationshipRequestDescriptor> = ensureRelationshipRequestDescriptors(includeRelationships);
@@ -431,7 +445,7 @@ export class DatastoreService {
       storePartialModels
     ).pipe(
       flatMap((halDocument: HalDocument<T>) => {
-        return this.fetchEmbeddedListItems(halDocument, modelClass, relationshipDescriptors, subsequentRequestsOptions).pipe(
+        return this.fetchEmbeddedListItems(halDocument, modelClass, relationshipDescriptors, subsequentOptions).pipe(
           map((models: Array<T>) => {
             halDocument.models = models;
             return halDocument;
@@ -688,7 +702,9 @@ export class DatastoreService {
     );
   }
 
-  private ensureParamsObject(params: HttpParams | { [param: string]: string | string[]}): { [param: string]: string | string[]} {
+  private ensureParamsObject(
+    params: HttpParams | { [param: string]: string | string[] } | object
+  ): { [param: string]: string | string[]} | object {
     if (params instanceof HttpParams) {
       return params.keys().reduce((paramsObject: object, paramName: string) => {
         const arrayParam = params.getAll(paramName);
@@ -700,23 +716,30 @@ export class DatastoreService {
     return params;
   }
 
-  private makePostRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
-    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+  private enrichRequestOptions(requestOptions: RequestOptions) {
+    const reqOptions: RequestOptions = requestOptions || {};
+    const params: object = this.ensureParamsObject(reqOptions.params || {});
+    Object.assign(reqOptions, { params });
+    return deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, reqOptions);
+  }
+
+  private makePostRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions = {}): Observable<any> {
+    const options = this.enrichRequestOptions(requestOptions);
     return this.http.post<T>(url, payload, options);
   }
 
-  private makePutRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
-    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+  private makePutRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions = {}): Observable<any> {
+    const options = this.enrichRequestOptions(requestOptions);
     return this.http.put<T>(url, payload, options);
   }
 
-  private makePatchRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions): Observable<any> {
-    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+  private makePatchRequest<T extends HalModel>(url: string, payload: object, requestOptions: RequestOptions = {}): Observable<any> {
+    const options = this.enrichRequestOptions(requestOptions);
     return this.http.patch<T>(url, payload, options);
   }
 
-  private makeDeleteRequest<T extends HalModel>(url: string, requestOptions: RequestOptions): Observable<any> {
-    const options = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
+  private makeDeleteRequest<T extends HalModel>(url: string, requestOptions: RequestOptions = {}): Observable<any> {
+    const options = this.enrichRequestOptions(requestOptions);
     return this.http.delete<T>(url, options);
   }
 

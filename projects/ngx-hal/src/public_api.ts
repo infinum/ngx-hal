@@ -24,6 +24,8 @@ export * from './lib/interfaces/has-many-options.interface';
 export * from './lib/interfaces/has-one-options.interface';
 export * from './lib/interfaces/custom-options.interface';
 
+export * from './lib/types/relationship-request-descriptor.type';
+
 export * from './lib/services/datastore/datastore.service';
 export * from './lib/services/model-service/model.service';
 
