@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
-import { Observable, combineLatest, of, throwError } from 'rxjs';
-import { map, flatMap, tap, catchError } from 'rxjs/operators';
+import { Observable, combineLatest, of, throwError, from } from 'rxjs';
+import { map, flatMap, tap, catchError, mergeMap, delay } from 'rxjs/operators';
 import * as UriTemplate from 'uri-templates';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
@@ -32,12 +32,15 @@ import { RelationshipRequestDescriptor } from '../../types/relationship-request-
 import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
 import { RelationshipDescriptorMappings } from '../../types/relationship-descriptor-mappings.type';
 import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
+import { HalStorage } from '../../classes/hal-storage/hal-storage';
 
 @Injectable()
 export class DatastoreService {
   public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
   private _cacheStrategy: CacheStrategy;
-  private internalStorage  = createHalStorage(this.cacheStrategy);
+  // tslint:disable-next-line
+  private _storage: HalStorage; // set by Config decorator
+  private internalStorage = createHalStorage(this.cacheStrategy, this.halStorage);
   protected httpParamsOptions?: object;
   public paginationClass: PaginationConstructor;
 
@@ -280,7 +283,7 @@ export class DatastoreService {
       return of(fetchedModels);
     }
 
-    const httpRequest$ = this.makeGetRequest(url, requestsOptions.mainRequest, modelClass, isSingleResource, storePartialModels);
+    const httpRequest$ = this.makeGetRequestWrapper(url, requestsOptions, modelClass, isSingleResource, storePartialModels);
 
     if (includeRelationships.length) {
       return httpRequest$.pipe(
@@ -305,6 +308,37 @@ export class DatastoreService {
     }
 
     return httpRequest$;
+  }
+
+  private makeGetRequestWrapper<T extends HalModel>(
+    url: string,
+    requestsOptions: RequestsOptions,
+    modelClass: ModelConstructor<T>,
+    isSingleResource: boolean,
+    storePartialModels?: boolean
+  ): Observable<HalDocument<T> | T> {
+    const originalGetRequest$: Observable<T | HalDocument<T>> = this.makeGetRequest(
+      url,
+      requestsOptions.mainRequest,
+      modelClass,
+      isSingleResource,
+      storePartialModels
+    );
+
+    if (this.storage.makeGetRequestWrapper) {
+      const { cleanUrl, urlWithParams, requestOptions: options } = this.extractRequestInfo(url, requestsOptions.mainRequest);
+      const cachedResoucesFromUrl = this.storage.get(decodeURIComponent(url)) || this.storage.get(decodeURIComponent(urlWithParams));
+      return this.storage.makeGetRequestWrapper(
+        { cleanUrl, urlWithParams, originalUrl: url },
+        cachedResoucesFromUrl,
+        originalGetRequest$,
+        options,
+        modelClass,
+        storePartialModels
+      );
+    }
+
+    return originalGetRequest$;
   }
 
   private triggerFetchingModelRelationships<T extends HalModel>(
@@ -676,32 +710,16 @@ export class DatastoreService {
     singleResource: boolean,
     storePartialModels?: boolean
   ): Observable<HalDocument<T> | T> {
-    const params: object = this.ensureParamsObject(requestOptions.params || {});
-    Object.assign(requestOptions, { params });
+    const { cleanUrl, requestOptions: options, urlWithParams } = this.extractRequestInfo(url, requestOptions);
 
-    const options: any = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, requestOptions);
-
-    this.storage.enrichRequestOptions(url, options);
-
-    const templatedUrl: string = (new UriTemplate(url)).fill(options.params);
-
-    const urlQueryParams: object = getQueryParams(templatedUrl);
-    options.params = Object.assign(urlQueryParams, options.params);
-
-    const cleanUrl: string = removeQueryParams(templatedUrl);
-    const queryParamsString: string = makeQueryParamsString(options.params, true);
-    const urlWithParams = queryParamsString ? `${cleanUrl}?${queryParamsString}` : cleanUrl;
-
-    options.params = makeHttpParams(options.params, this.httpParamsOptions);
-
-    return this.http.get<T>(cleanUrl, options).pipe(
+    return this.http.get<T>(cleanUrl, options as any).pipe(
       map((response: HttpResponse<T>) => {
         const rawResource: RawHalResource = this.extractResourceFromResponse(response);
         return this.processRawResource(rawResource, modelClass, singleResource, response, urlWithParams, storePartialModels);
       }),
       catchError((response: HttpResponse<T>) => {
         if (response.status === 304) {
-          const cachedModel: T = this.storage.get(url);
+          const cachedModel: T = this.storage.get(url) || this.storage.get(response.url);
 
           if (cachedModel) {
             return of(cachedModel);
@@ -711,6 +729,34 @@ export class DatastoreService {
         return throwError(response);
       })
     );
+  }
+
+  private extractRequestInfo(
+    url: string,
+    options: RequestOptions
+  ): { cleanUrl: string, urlWithParams: string, requestOptions: RequestOptions } {
+    const params: object = this.ensureParamsObject(options.params || {});
+    Object.assign(options, { params });
+    const requestOptions: RequestOptions = deepmergeWrapper(DEFAULT_REQUEST_OPTIONS, this.networkConfig.globalRequestOptions, options);
+
+    this.storage.enrichRequestOptions(url, options);
+
+    const templatedUrl: string = (new UriTemplate(url)).fill(options.params);
+
+    const urlQueryParams: object = getQueryParams(templatedUrl);
+    requestOptions.params = Object.assign(urlQueryParams, requestOptions.params);
+
+    const cleanUrl: string = removeQueryParams(templatedUrl);
+    const queryParamsString: string = makeQueryParamsString(requestOptions.params, true);
+    const urlWithParams = queryParamsString ? `${cleanUrl}?${queryParamsString}` : cleanUrl;
+
+    requestOptions.params = makeHttpParams(requestOptions.params, this.httpParamsOptions);
+
+    return {
+      cleanUrl,
+      urlWithParams,
+      requestOptions
+    };
   }
 
   private ensureParamsObject(
@@ -879,6 +925,10 @@ export class DatastoreService {
 
   private get cacheStrategy(): CacheStrategy {
     return this._cacheStrategy;
+  }
+
+  private get halStorage(): HalStorage {
+    return this._storage;
   }
 
   public createModel<T extends HalModel>(modelClass: ModelConstructor<T>, recordData: object = {}): T {
