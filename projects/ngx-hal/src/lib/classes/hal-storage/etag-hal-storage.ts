@@ -44,7 +44,7 @@ export class EtagHalStorage extends HalStorage {
     }
   }
 
-  private getRawStorageModel<T extends HalModel>(uniqueModelIdentificator: string): StorageModel<T> {
+  protected getRawStorageModel<T extends HalModel>(uniqueModelIdentificator: string): StorageModel<T> {
     return this.internalStorage[uniqueModelIdentificator];
   }
 
