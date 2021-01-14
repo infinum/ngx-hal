@@ -168,6 +168,14 @@ export class DatastoreService {
               model.links[externalRelationshipName].href = fetchedRelation.uniqueModelIdentificator;
             } else {
               model.updateHasManyDocumentIdentificator(property, fetchedRelation.uniqueModelIdentificator);
+
+              // In case of a HalDocument, halDocument.models may contain model instances which are not the same as the models
+              // saved in local storage. That happens if the same models are fetch beforehand through another API call.
+              // In that case, hasManyDocumentIdentificators of the models from HalDocument must be updated as well.
+              const localModel: T = this.storage.get(model.uniqueModelIdentificator);
+              if (localModel !== model) {
+                localModel.updateHasManyDocumentIdentificator(property, fetchedRelation.uniqueModelIdentificator);
+              }
             }
           }
 
