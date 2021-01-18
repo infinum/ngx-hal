@@ -1,4 +1,6 @@
 export enum CacheStrategy {
+  CACHE_FIRST_FETCH_LATER = 'CACHE_FIRST_FETCH_LATER',
+  CUSTOM = 'CUSTOM',
   ETAG = 'ETAG',
   NONE = 'NONE'
 }

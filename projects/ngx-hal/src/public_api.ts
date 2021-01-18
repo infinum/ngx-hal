@@ -13,6 +13,11 @@ export * from './lib/models/hal.model';
 export * from './lib/classes/hal-document';
 export * from './lib/classes/pagination';
 
+export * from './lib/classes/hal-storage/hal-storage';
+export * from './lib/classes/hal-storage/etag-hal-storage';
+export * from './lib/classes/hal-storage/simple-hal-storage';
+export * from './lib/classes/hal-storage/cache-first-fetch-later.storage';
+
 export * from './lib/enums/cache-strategy.enum';
 
 export * from './lib/interfaces/network-config.interface';
