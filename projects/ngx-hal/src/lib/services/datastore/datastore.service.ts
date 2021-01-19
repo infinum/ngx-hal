@@ -32,6 +32,8 @@ import { RelationshipRequestDescriptor } from '../../types/relationship-request-
 import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
 import { RelationshipDescriptorMappings } from '../../types/relationship-descriptor-mappings.type';
 import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
+import { Logger } from '../../classes/logger';
+import { Logger as LoggerEnum } from '../../enums/logger.enum';
 
 @Injectable()
 export class DatastoreService {
@@ -40,6 +42,9 @@ export class DatastoreService {
   private internalStorage  = createHalStorage(this.cacheStrategy);
   protected httpParamsOptions?: object;
   public paginationClass: PaginationConstructor;
+
+  private loggerStrategy: LoggerEnum;
+  public logger = new Logger(this.loggerStrategy);
 
   constructor(public http: HttpClient) {}
 
