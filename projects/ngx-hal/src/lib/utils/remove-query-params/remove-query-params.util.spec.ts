@@ -21,4 +21,10 @@ describe('removeQueryParams', () => {
     const output: string = removeQueryParams(input);
     expect(output).toBe('http://www.test.com');
   });
+
+  it('should remove templated query params', () => {
+    const input = 'http://www.test.com{?country,unitSystem}';
+    const output: string = removeQueryParams(input);
+    expect(output).toBe('http://www.test.com');
+  });
 });
