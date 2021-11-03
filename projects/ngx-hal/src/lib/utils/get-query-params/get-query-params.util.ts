@@ -15,16 +15,25 @@ export function getQueryParams(url: string): object {
     const [key, value] = param.split('=');
 
     if (queryParams[key]) {
-      queryParams[key] = [decodeURIComponent(value)].concat(queryParams[key]);
+      queryParams[key] = [decodeURIComponentWithErrorHandling(value)].concat(queryParams[key]);
     } else {
       const items: Array<string> = value.split(',');
       if (items.length === 1) {
-        queryParams[key] = decodeURIComponent(value);
+        queryParams[key] = decodeURIComponentWithErrorHandling(value);
       } else {
-        queryParams[key] = items.map((urlParam: string) => decodeURIComponent(urlParam));
+        queryParams[key] = items.map((urlParam: string) => decodeURIComponentWithErrorHandling(urlParam));
       }
     }
   });
 
   return queryParams;
+}
+
+function decodeURIComponentWithErrorHandling(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch (e) {
+    console.error(e);
+    return value;
+  }
 }
