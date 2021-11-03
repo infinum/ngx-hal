@@ -1,6 +1,6 @@
 # NgxHal
 
-ngx-hal is a data store with a support for handling [HAL formatted](http://stateless.co/hal_specification.html) HTTP requests.
+ngx-hal is a data store with support for handling [HAL formatted](http://stateless.co/hal_specification.html) HTTP requests.
 
 ## Installation
 
@@ -10,8 +10,8 @@ npm install --save ngx-hal
 
 ## Basic usage
 
-After the initial ngx-hal setup (see [Getting started section](https://github.com/infinum/ngx-hal/wiki/Getting-started)) you have to create a resource model which extends `HalModel` from the `ngx-hal` and a resource service which extends `ModelService` from `ngx-hal`.
-The following example uses `User` resource as an example.
+After the initial ngx-hal setup (see [Getting started section](https://github.com/infinum/ngx-hal/wiki/Getting-started)) a resource model can be created which extends `HalModel` from the `ngx-hal` and a resource service which extends `ModelService` from `ngx-hal`.
+The following example uses the `User` resource as an example.
 
 `user.model.ts`
 ```js
@@ -30,7 +30,7 @@ class UserService extends ModelService<User> {
 }
 ```
 
-And then a few methods are available on an instance of `UserService`:
+A few methods are available on an instance of `UserService`:
 
 #### Fetching a user
 
