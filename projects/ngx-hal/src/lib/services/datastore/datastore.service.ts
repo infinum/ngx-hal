@@ -23,7 +23,7 @@ import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory'
 import { RequestsOptions } from '../../interfaces/requests-options.interface';
 import { makeQueryParamsString } from '../../helpers/make-query-params-string/make-query-params-string.helper';
 import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
-import { getQueryParams } from '../../utils/get-query-params/get-query-params.util';
+import { getQueryParams, decodeURIComponentWithErrorHandling } from '../../utils/get-query-params/get-query-params.util';
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
@@ -327,7 +327,8 @@ export class DatastoreService {
 
     if (this.storage.makeGetRequestWrapper) {
       const { cleanUrl, urlWithParams, requestOptions: options } = this.extractRequestInfo(url, requestsOptions.mainRequest);
-      const cachedResoucesFromUrl = this.storage.get(decodeURIComponent(url)) || this.storage.get(decodeURIComponent(urlWithParams));
+      const cachedResoucesFromUrl = this.storage.get(decodeURIComponentWithErrorHandling(url)) ||
+                                    this.storage.get(decodeURIComponentWithErrorHandling(urlWithParams));
       return this.storage.makeGetRequestWrapper(
         { cleanUrl, urlWithParams, originalUrl: url },
         cachedResoucesFromUrl,
