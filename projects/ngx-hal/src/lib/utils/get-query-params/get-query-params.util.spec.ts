@@ -33,11 +33,17 @@ describe('getQueryParams', () => {
     });
   });
 
-
   it('should properly decode query parameter', () => {
     const result = getQueryParams('test.com?firstParameter=%2Fanimal%2Ffarm');
     expect(result).toEqual({
       firstParameter: '/animal/farm'
+    });
+  });
+
+  it('should fallback to the original value of a query parameter if decoding is not possible', () => {
+    const result = getQueryParams('test.com?firstParameter=%E0%A4%A');
+    expect(result).toEqual({
+      firstParameter: '%E0%A4%A'
     });
   });
 
@@ -68,5 +74,4 @@ describe('getQueryParams', () => {
     expect(Object.keys(result).length).toBe(1);
     expect(result[parameterName].sort()).toEqual(['animal', 'toy/', 'plane'].sort());
   });
-
 });
