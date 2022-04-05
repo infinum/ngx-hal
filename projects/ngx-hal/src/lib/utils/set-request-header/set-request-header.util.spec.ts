@@ -29,4 +29,38 @@ describe('setRequestHeader', () => {
     expect(newHeaders.get('newHeader')).toBeDefined();
     expect(newHeaders.get('oldHeader')).toBeDefined();
   });
+
+  it('should not set a new header on an object if the header value is not defined', () => {
+    const initialHeaders = { oldHeader: 'oldHeader' };
+    const newHeaders: PlainHeaders = setRequestHeader(initialHeaders, 'newHeader', undefined);
+
+    expect(newHeaders.newHeader).not.toBeDefined();
+    expect(newHeaders.oldHeader).toBeDefined();
+  });
+
+  it('should not set a new header on an object if the header value is null', () => {
+    const initialHeaders = { oldHeader: 'oldHeader' };
+    const newHeader = null;
+    const newHeaders: PlainHeaders = setRequestHeader(initialHeaders, 'newHeader', newHeader);
+
+    expect(newHeaders.newHeader).not.toBeDefined();
+    expect(newHeaders.oldHeader).toBeDefined();
+  });
+
+  it('should not set a new header on HttpHeader if the header value is not defined', () => {
+    const initialHeaders = new HttpHeaders({ oldHeader: 'oldHeader' });
+    const newHeaders: HttpHeaders = setRequestHeader(initialHeaders, 'newHeader', undefined);
+
+    expect(newHeaders.has('newHeader')).toBeFalsy();
+    expect(newHeaders.has('oldHeader')).toBeTruthy();
+  });
+
+  it('should not set a new header on HttpHeader if the header value is null', () => {
+    const initialHeaders = new HttpHeaders({ oldHeader: 'oldHeader' });
+    const newHeader = null;
+    const newHeaders: HttpHeaders = setRequestHeader(initialHeaders, 'newHeader', newHeader);
+
+    expect(newHeaders.has('newHeader')).toBeFalsy();
+    expect(newHeaders.has('oldHeader')).toBeTruthy();
+  });
 });

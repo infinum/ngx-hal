@@ -28,7 +28,7 @@ function setHttpRequestHeader(
   headerName: string,
   headerValue: string | Array<string>
 ): HttpHeaders {
-  if (headerValue !== undefined || headerValue !== null) {
+  if (headerValue !== undefined && headerValue !== null) {
     return initialHeaders.append(headerName, headerValue);
   }
 
@@ -44,7 +44,7 @@ function setObjectRequestHeader(
 
   Object.assign(headers, initialHeaders);
 
-  if (headerValue !== undefined || headerValue !== null) {
+  if (headerValue !== undefined && headerValue !== null) {
     headers[headerName] = headerValue;
   }
 
