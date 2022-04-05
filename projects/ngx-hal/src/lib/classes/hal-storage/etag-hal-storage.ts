@@ -3,6 +3,7 @@ import { HalDocument } from './../hal-document';
 import { HttpResponse } from '@angular/common/http';
 import { RequestOptions } from '../../types/request-options.type';
 import { HalStorage } from './hal-storage';
+import { setRequestHeader } from '../../utils/set-request-header/set-request-header.util';
 
 interface StorageModel<T extends HalModel> {
   model: T | HalDocument<T>;
@@ -39,8 +40,7 @@ export class EtagHalStorage extends HalStorage {
     }
 
     if (storageModel.etag) {
-      requestOptions.headers = requestOptions.headers || {};
-      requestOptions.headers['If-None-Match'] = storageModel.etag;
+      requestOptions.headers = setRequestHeader(requestOptions.headers, 'If-None-Match', storageModel.etag);
     }
   }
 

@@ -15,13 +15,14 @@ import { NetworkConfig } from '../interfaces/network-config.interface';
 import { generateUUID } from '../helpers/uuid/uuid.helper';
 import { getResponseHeader } from '../utils/get-response-headers/get-response-header.util';
 import { isHalModelInstance } from '../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
-import { RequestOptions } from '../types/request-options.type';
+import { PlainHeaders, RequestOptions } from '../types/request-options.type';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { GeneratePayloadOptions } from '../interfaces/generate-payload-options.interface';
 import { CustomOptions } from '../interfaces/custom-options.interface';
 import { ensureRelationshipRequestDescriptors } from '../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
 import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
 import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
+import { setRequestHeader } from '../utils/set-request-header/set-request-header.util';
 
 export abstract class HalModel {
   private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -251,12 +252,13 @@ export abstract class HalModel {
       }, {});
   }
 
-  public generateHeaders(): object {
-    return this.headerAttributeProperties.reduce((headers: object, property: HeaderAttributeModelProperty) => {
+  public generateHeaders(): PlainHeaders {
+    return this.headerAttributeProperties.reduce((headers: PlainHeaders, property: HeaderAttributeModelProperty) => {
       const externalPropertyName: string = property.externalName;
       const propertyName: string = property.name;
-      headers[externalPropertyName] = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
-      return headers;
+      const propertyValue = property.transformBeforeSave ? property.transformBeforeSave(this[propertyName]) : this[propertyName];
+
+      return setRequestHeader(headers, externalPropertyName, propertyValue);
     }, {});
   }
 
