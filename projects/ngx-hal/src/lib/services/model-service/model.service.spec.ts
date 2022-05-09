@@ -6,7 +6,7 @@ xdescribe('ModelService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: ModelService<any> = TestBed.get(ModelService);
+    const service: ModelService<any> = TestBed.inject(ModelService);
     expect(service).toBeTruthy();
   });
 });

@@ -32,8 +32,8 @@ describe('DatastoreService', () => {
       providers: [DatastoreService]
     });
 
-    httpTestingController = TestBed.get(HttpTestingController);
-    datastoreService = TestBed.get(DatastoreService);
+    httpTestingController = TestBed.inject(HttpTestingController);
+    datastoreService = TestBed.inject(DatastoreService);
 
     datastoreService.networkConfig.globalRequestOptions = {};
     datastoreService.networkConfig.baseUrl = BASE_NETWORK_URL;
