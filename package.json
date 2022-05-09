@@ -19,7 +19,9 @@
     "ng": "ng",
     "build": "ng build",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "publish": "ng build --configuration production && npm publish dist/ngx-hal",
+    "publish-beta": "ng build --configuration production && npm publish --beta dist/ngx-hal"
   },
   "husky": {
     "hooks": {
