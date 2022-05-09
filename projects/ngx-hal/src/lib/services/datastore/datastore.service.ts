@@ -105,7 +105,7 @@ export class DatastoreService {
       return of(model);
     }
 
-    return combineLatest(...relationships$).pipe(
+    return combineLatest(relationships$).pipe(
       map(() => model)
     );
   }
@@ -297,7 +297,7 @@ export class DatastoreService {
             return of(model);
           }
 
-          return combineLatest(...relationshipCalls).pipe(
+          return combineLatest(relationshipCalls).pipe(
             map(() => model)
           );
         })
@@ -857,7 +857,7 @@ export class DatastoreService {
       return of([]);
     }
 
-    return combineLatest(...modelCalls);
+    return combineLatest(modelCalls);
   }
 
   private buildHostUrl(model?: HalModel): string {
