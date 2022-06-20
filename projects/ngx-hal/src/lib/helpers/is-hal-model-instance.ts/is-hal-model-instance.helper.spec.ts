@@ -14,7 +14,7 @@ describe('isHalModelInstance', () => {
   }));
 
   it('should return true for an instance of a class which extends HalModel', () => {
-    const datastoreService: DatastoreService = TestBed.get(DatastoreService);
+    const datastoreService: DatastoreService = TestBed.inject(DatastoreService);
     const instance: InheritsHal = new InheritsHal({}, datastoreService);
     expect(isHalModelInstance(instance)).toBe(true);
   });

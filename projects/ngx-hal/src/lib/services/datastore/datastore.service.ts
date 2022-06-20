@@ -36,7 +36,7 @@ import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
 @Injectable()
 export class DatastoreService {
   public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
-  private cacheStrategy: CacheStrategy;
+  private _cacheStrategy: CacheStrategy;
   private internalStorage  = createHalStorage(this.cacheStrategy);
   protected httpParamsOptions?: object;
   public paginationClass: PaginationConstructor;
@@ -105,7 +105,7 @@ export class DatastoreService {
       return of(model);
     }
 
-    return combineLatest(...relationships$).pipe(
+    return combineLatest(relationships$).pipe(
       map(() => model)
     );
   }
@@ -297,7 +297,7 @@ export class DatastoreService {
             return of(model);
           }
 
-          return combineLatest(...relationshipCalls).pipe(
+          return combineLatest(relationshipCalls).pipe(
             map(() => model)
           );
         })
@@ -857,7 +857,7 @@ export class DatastoreService {
       return of([]);
     }
 
-    return combineLatest(...modelCalls);
+    return combineLatest(modelCalls);
   }
 
   private buildHostUrl(model?: HalModel): string {
@@ -875,6 +875,10 @@ export class DatastoreService {
 
   private defaultTransformPayloadBeforeSaveFunction(payload: object): object {
     return payload;
+  }
+
+  private get cacheStrategy(): CacheStrategy {
+    return this._cacheStrategy;
   }
 
   public createModel<T extends HalModel>(modelClass: ModelConstructor<T>, recordData: object = {}): T {
