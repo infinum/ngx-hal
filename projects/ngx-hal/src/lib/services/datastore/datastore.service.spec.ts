@@ -1525,10 +1525,10 @@ describe('DatastoreService', () => {
 
         expect(request.method).toEqual('GET');
 
-        const qParam = request.params.get('q'); // Not sure why this returns an array
+        const qParam = request.params.get('q');
 
         expect(request.params.keys().length).toEqual(1);
-        expect((qParam as unknown as Array<string>).sort()).toEqual(['1', '2'].sort());
+        expect(qParam).toEqual(['1', '2'].sort().join(','));
 
         return isCorrectUrl;
       });
@@ -1844,7 +1844,7 @@ describe('DatastoreService', () => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
         expect(request.method).toEqual('GET');
 
-        expect(request.params.get(paramName1)).toEqual([paramValue1]);
+        expect(request.params.get(paramName1)).toEqual(paramValue1);
         expect(request.params.keys().length).toEqual(1);
 
         return isCorrectUrl;
@@ -1868,7 +1868,7 @@ describe('DatastoreService', () => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
         expect(request.method).toEqual('GET');
 
-        expect(request.params.get(paramName1)).toEqual(paramsArray);
+        expect(request.params.get(paramName1)).toEqual(paramsArray.join(','));
         expect(request.params.keys().length).toEqual(1);
 
         return isCorrectUrl;
