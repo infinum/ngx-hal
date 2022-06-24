@@ -33,27 +33,27 @@
     "url": "git+https://github.com/infinum/ngx-hal"
   },
   "dependencies": {
-    "@angular/common": "~11.2.14",
-    "@angular/compiler": "~11.2.14",
-    "@angular/core": "~11.2.14",
-    "@angular/platform-browser": "~11.2.14",
-    "@angular/platform-browser-dynamic": "~11.2.14",
-    "@angular/router": "~11.2.14",
+    "@angular/common": "~12.2.16",
+    "@angular/compiler": "~12.2.16",
+    "@angular/core": "~12.2.16",
+    "@angular/platform-browser": "~12.2.16",
+    "@angular/platform-browser-dynamic": "~12.2.16",
+    "@angular/router": "~12.2.16",
     "core-js": "^3.2.1",
     "deepmerge": "4.2.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.5.3",
     "tslib": "^2.0.0",
     "uri-templates": "^0.2.0",
-    "zone.js": "~0.10.2"
+    "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "~0.1102.19",
-    "@angular-devkit/architect": "0.1102.19",
-    "@angular-devkit/core": "11.2.19",
-    "@angular/cli": "~11.2.19",
-    "@angular/compiler-cli": "~11.2.14",
-    "@angular/language-service": "~11.2.14",
+    "@angular-devkit/build-angular": "~12.2.17",
+    "@angular-devkit/architect": "0.1202.17",
+    "@angular-devkit/core": "12.2.17",
+    "@angular/cli": "~12.2.17",
+    "@angular/compiler-cli": "~12.2.16",
+    "@angular/language-service": "~12.2.16",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.8",
     "@types/node": "^12.11.1",
@@ -66,11 +66,11 @@
     "karma-coverage-istanbul-reporter": "~3.0.2",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
-    "ng-packagr": "^11.2.4",
+    "ng-packagr": "^12.2.7",
     "protractor": "~7.0.0",
     "ts-node": "~8.4.1",
     "tslint": "~6.1.0",
     "tslint-config-airbnb": "^5.11.2",
-    "typescript": "4.0.8"
+    "typescript": "4.3.5"
   }
 }
