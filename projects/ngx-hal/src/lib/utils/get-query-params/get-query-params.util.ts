@@ -29,7 +29,7 @@ export function getQueryParams(url: string): object {
   return queryParams;
 }
 
-function decodeURIComponentWithErrorHandling(value: string): string {
+export function decodeURIComponentWithErrorHandling(value: string): string {
   try {
     return decodeURIComponent(value);
   } catch (e) {

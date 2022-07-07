@@ -26,11 +26,11 @@ import { setRequestHeader } from '../utils/set-request-header/set-request-header
 import { isString } from '../utils/is-string/is-string.util';
 
 export abstract class HalModel {
+  public static readonly modelType: string = DEFAULT_MODEL_TYPE;
   private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
   private temporarySelfLink: string = null;
   private localModelIdentificator: string;
   private internalHasManyDocumentIdentificators: { [K: string]: string } = {};
-  public static readonly modelType: string = DEFAULT_MODEL_TYPE;
 
   constructor(
     protected resource: RawHalResource = {},

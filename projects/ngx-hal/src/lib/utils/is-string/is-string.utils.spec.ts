@@ -12,10 +12,6 @@ describe('isString', () => {
     expect(isString('')).toBeTrue();
   });
 
-  it('should return true if an empty string is passed', () => {
-    expect(isString(new String())).toBeTrue();
-  });
-
   it('should return false if a number is passed', () => {
     expect(isString(3)).toBeFalse();
   });
