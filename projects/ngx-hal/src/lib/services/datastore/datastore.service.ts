@@ -46,10 +46,7 @@ export class DatastoreService {
   public paginationClass: PaginationConstructor;
   public modelTypes: Array<typeof HalModel> = [];
 
-  constructor(public http: HttpClient) {
-    window['x'] = this;
-    console.log('ds');
-  }
+  constructor(public http: HttpClient) {}
 
   private getHalDocumentClass<T extends HalModel>(): HalDocumentConstructor<T> {
     return Reflect.getMetadata(HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY, this.constructor) || HalDocument;
