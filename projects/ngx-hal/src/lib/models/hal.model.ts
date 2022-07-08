@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
-import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
+import { ModelOptions, DEFAULT_MODEL_OPTIONS, DEFAULT_MODEL_TYPE } from '../interfaces/model-options.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import { ATTRIBUTE_PROPERTIES_METADATA_KEY, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, HAS_ONE_PROPERTIES_METADATA_KEY, HAS_MANY_PROPERTIES_METADATA_KEY, HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
@@ -23,12 +23,14 @@ import { ensureRelationshipRequestDescriptors } from '../utils/ensure-relationsh
 import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
 import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
 import { setRequestHeader } from '../utils/set-request-header/set-request-header.util';
+import { isString } from '../utils/is-string/is-string.util';
 
 export abstract class HalModel {
   private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
   private temporarySelfLink: string = null;
   private localModelIdentificator: string;
   private internalHasManyDocumentIdentificators: { [K: string]: string } = {};
+  public static readonly modelType: string = DEFAULT_MODEL_TYPE;
 
   constructor(
     protected resource: RawHalResource = {},
@@ -357,32 +359,29 @@ export abstract class HalModel {
     });
   }
 
-  // TODO refactor those similar parseSomething methods
+  private setProperty(modelProperty: AttributeModelProperty | HeaderAttributeModelProperty, rawPropertyValue: any): void {
+    if (isString(modelProperty.propertyClass)) {
+      this[modelProperty.name] = this.datastore.findModelClassByType(modelProperty.propertyClass);
+    } else if (modelProperty.propertyClass) {
+      this[modelProperty.name] = new modelProperty.propertyClass(rawPropertyValue);
+    } else if (modelProperty.transformResponseValue) {
+      this[modelProperty.name] = modelProperty.transformResponseValue(rawPropertyValue);
+    } else {
+      this[modelProperty.name] = rawPropertyValue;
+    }
+  }
+
   private parseAttributes(resource: RawHalResource): void {
     this.attributeProperties.forEach((attributeProperty: AttributeModelProperty) => {
       const rawPropertyValue: any = resource[attributeProperty.externalName];
-
-      if (attributeProperty.propertyClass) {
-        this[attributeProperty.name] = new attributeProperty.propertyClass(rawPropertyValue);
-      } else if (attributeProperty.transformResponseValue) {
-        this[attributeProperty.name] = attributeProperty.transformResponseValue(rawPropertyValue);
-      } else {
-        this[attributeProperty.name] = rawPropertyValue;
-      }
+      this.setProperty(attributeProperty, rawPropertyValue);
     });
   }
 
   private parseHeaderAttributes(response: HttpResponse<any>): void {
     this.headerAttributeProperties.forEach((headerAttributeProperty: HeaderAttributeModelProperty) => {
       const rawPropertyValue: any = getResponseHeader(response, headerAttributeProperty.externalName);
-
-      if (headerAttributeProperty.propertyClass) {
-        this[headerAttributeProperty.name] = new headerAttributeProperty.propertyClass(rawPropertyValue);
-      } else if (headerAttributeProperty.transformResponseValue) {
-        this[headerAttributeProperty.name] = headerAttributeProperty.transformResponseValue(rawPropertyValue);
-      } else {
-        this[headerAttributeProperty.name] = rawPropertyValue;
-      }
+      this.setProperty(headerAttributeProperty, rawPropertyValue);
     });
   }
 

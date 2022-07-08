@@ -32,6 +32,7 @@ import { RelationshipRequestDescriptor } from '../../types/relationship-request-
 import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
 import { RelationshipDescriptorMappings } from '../../types/relationship-descriptor-mappings.type';
 import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
+import { isString } from '../../utils/is-string/is-string.util';
 
 @Injectable()
 export class DatastoreService {
@@ -40,6 +41,7 @@ export class DatastoreService {
   private internalStorage  = createHalStorage(this.cacheStrategy);
   protected httpParamsOptions?: object;
   public paginationClass: PaginationConstructor;
+  public modelTypes: Array<typeof HalModel> = [];
 
   constructor(public http: HttpClient) {}
 
@@ -127,7 +129,12 @@ export class DatastoreService {
         continue;
       }
 
-      const modelClass = property.propertyClass;
+      let modelClass = property.propertyClass;
+
+      if (isString(modelClass)) {
+        modelClass = this.findModelClassByType(modelClass);
+      }
+
       const isSingleResource: boolean = property.type === ModelPropertyEnum.Attribute || property.type === ModelPropertyEnum.HasOne;
 
       // Checks if the relationship is already embdedded inside the emdedded property, or
@@ -879,6 +886,16 @@ export class DatastoreService {
 
   private get cacheStrategy(): CacheStrategy {
     return this._cacheStrategy;
+  }
+
+  public findModelClassByType(modelType: string): typeof HalModel {
+    const modelClass: typeof HalModel = this.modelTypes.find((modelClass) => modelClass.modelType === modelType);
+
+    if (!modelClass) {
+      throw new Error(`Provided model name "${modelType}" cannot be found in the Datastore. Provide it in DatastoreService.modelTypes`);
+    }
+
+    return modelClass;
   }
 
   public createModel<T extends HalModel>(modelClass: ModelConstructor<T>, recordData: object = {}): T {

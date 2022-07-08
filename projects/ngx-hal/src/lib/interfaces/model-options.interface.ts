@@ -12,3 +12,5 @@ export class ModelOptions {
 export const DEFAULT_MODEL_OPTIONS: ModelOptions = {
   type: ''
 };
+
+export const DEFAULT_MODEL_TYPE = '__DEFAULT_MODEL_TYPE__';
