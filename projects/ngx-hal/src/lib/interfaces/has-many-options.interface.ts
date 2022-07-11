@@ -1,7 +1,7 @@
 import { ModelConstructor } from '../types/model-constructor.type';
 
 export interface HasManyOptions {
-  itemsType: ModelConstructor<any>;
+  itemsType: ModelConstructor<any> | string;
   includeInPayload?: boolean;
   externalName?: string;
 }
