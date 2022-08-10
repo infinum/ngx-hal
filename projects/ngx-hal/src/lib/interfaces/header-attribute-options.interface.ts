@@ -1,5 +1,7 @@
+import { ModelConstructor, ModelConstructorFn } from '../types/model-constructor.type';
+
 export interface HeaderAttributeOptions {
-  useClass?: boolean | { new(...args): any };
+  useClass?: boolean | ModelConstructor<any> | ModelConstructorFn<any>;
   transformResponseValue?: (rawAttribute: any) => any;
   transformBeforeSave?: (raw: any) => any;
   externalName?: string;

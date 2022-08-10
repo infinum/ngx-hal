@@ -17,7 +17,8 @@ export class MockModel extends HalModel {
   prop1: string;
 
   @HasOne({
-    includeInPayload: true
+    includeInPayload: true,
+    propertyClass: MockModel2
   })
   mockModel2Connection: MockModel2;
 

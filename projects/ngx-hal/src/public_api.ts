@@ -9,6 +9,7 @@ export * from './lib/decorators/has-many.decorator';
 export * from './lib/decorators/has-one.decorator';
 
 export * from './lib/models/hal.model';
+export * from './lib/models/simple-hal.model';
 
 export * from './lib/classes/hal-document';
 export * from './lib/classes/pagination';
