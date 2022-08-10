@@ -1,5 +1,7 @@
+import { ModelConstructor, ModelConstructorFn } from '../types/model-constructor.type';
+
 export interface AttributeOptions {
-  useClass?: boolean | { new(...args): any };
+  useClass?: boolean | ModelConstructor<any> | ModelConstructorFn<any>;
   transformResponseValue?: (rawAttribute: any) => any;
   transformBeforeSave?: (raw: any) => any;
   externalName?: string;
@@ -8,5 +10,5 @@ export interface AttributeOptions {
 
 export const DEFAULT_ATTRIBUTE_OPTIONS = {
   excludeFromPayload: false,
-  useClass: false
+  useClass: false,
 };

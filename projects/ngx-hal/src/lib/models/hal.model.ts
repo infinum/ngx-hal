@@ -24,6 +24,7 @@ import { RelationshipRequestDescriptor } from '../types/relationship-request-des
 import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
 import { setRequestHeader } from '../utils/set-request-header/set-request-header.util';
 import { isString } from '../utils/is-string/is-string.util';
+import { isFunction } from '../helpers/is-function/is-function.helper';
 
 export abstract class HalModel {
   private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -305,12 +306,6 @@ export abstract class HalModel {
     return Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, this) || [];
   }
 
-  private getModelIdentificator(modelClass, modelSelfLink: string): string {
-    const model = new modelClass({}, this.datastore);
-    model.selfLink = modelSelfLink;
-    return model.uniqueModelIdentificator;
-  }
-
   private initializeHasOneProperties(): void {
     this.hasOneProperties.forEach((property: ModelProperty) => {
       Object.defineProperty(this, property.name, {
@@ -362,6 +357,9 @@ export abstract class HalModel {
   private setProperty(modelProperty: AttributeModelProperty | HeaderAttributeModelProperty, rawPropertyValue: any): void {
     if (isString(modelProperty.propertyClass)) {
       this[modelProperty.name] = this.datastore.findModelClassByType(modelProperty.propertyClass);
+    } else if (isFunction(modelProperty.propertyClass)) {
+      const propertyClass = modelProperty.propertyClass(rawPropertyValue);
+      this[modelProperty.name] = new propertyClass(rawPropertyValue);
     } else if (modelProperty.propertyClass) {
       this[modelProperty.name] = new modelProperty.propertyClass(rawPropertyValue);
     } else if (modelProperty.transformResponseValue) {
