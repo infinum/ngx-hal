@@ -73,7 +73,9 @@ export class DatastoreService {
     modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
     rawResponse?: HttpResponse<any>
   ): HalDocument<T> {
-    const propertyClass: ModelConstructor<T> = isFunction(modelClass) ? (modelClass as ModelConstructorFn<T>)({}) : modelClass as ModelConstructor<T>;
+    const propertyClass: ModelConstructor<T> = isFunction(modelClass) ?
+      (modelClass as ModelConstructorFn<T>)({}) :
+      modelClass as ModelConstructor<T>;
     const representantiveModel: T = new propertyClass({});
     const halDocumentClass = representantiveModel.getHalDocumentClass() || this.getHalDocumentClass<T>();
     return new halDocumentClass(rawResource, rawResponse, propertyClass, this);
@@ -322,7 +324,7 @@ export class DatastoreService {
   private makeGetRequestWrapper<T extends HalModel>(
     url: string,
     requestsOptions: RequestsOptions,
-    modelClass: ModelConstructor<T>,
+    modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
     isSingleResource: boolean,
     storePartialModels?: boolean
   ): Observable<HalDocument<T> | T> {
@@ -845,7 +847,9 @@ export class DatastoreService {
     savePartialModels?: boolean
   ): T | HalDocument<T> {
     if (isSingleResource) {
-      const propertyClass: ModelConstructor<T> = isFunction(modelClass) ? (modelClass as ModelConstructorFn<T>)(rawResource) : modelClass as ModelConstructor<T>;
+      const propertyClass: ModelConstructor<T> = isFunction(modelClass) ?
+        (modelClass as ModelConstructorFn<T>)(rawResource) :
+        modelClass as ModelConstructor<T>;
       const model: T = new propertyClass(rawResource, this, response);
       this.populateResourceWithRelationshipIndentificators(model);
       this.storage.save(model, response, [url]);
