@@ -3,7 +3,7 @@ import { HalDocument } from './../hal-document';
 import { HttpResponse } from '@angular/common/http';
 import { RequestOptions } from '../../types/request-options.type';
 import { Observable } from 'rxjs';
-import { ModelConstructor } from '../../types/model-constructor.type';
+import { ModelConstructor, ModelConstructorFn } from '../../types/model-constructor.type';
 
 export abstract class HalStorage {
   protected internalStorage: { [K: string]: any } = {};
@@ -37,7 +37,7 @@ export abstract class HalStorage {
     cachedResource: T | HalDocument<T>,
     originalGetRequest$: Observable<T | HalDocument<T>>,
     requestOptions: RequestOptions,
-    modelClass: ModelConstructor<T>,
+    modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
     isSingleResource: boolean,
     storePartialModels?: boolean
   ): Observable<T | HalDocument<T>>;
