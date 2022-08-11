@@ -1,3 +1,3 @@
 export function isArray(item: any): boolean {
-  return Array.isArray(item);
+	return Array.isArray(item);
 }

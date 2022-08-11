@@ -3,14 +3,14 @@ import { HalModel } from '../models/hal.model';
 import { NetworkConfig } from './network-config.interface';
 
 export class ModelOptions {
-  type: string;
-  endpoint?: string;
-  halDocumentClass?: HalDocumentConstructor<HalModel>;
-  networkConfig?: NetworkConfig;
+	type: string;
+	endpoint?: string;
+	halDocumentClass?: HalDocumentConstructor<HalModel>;
+	networkConfig?: NetworkConfig;
 }
 
 export const DEFAULT_MODEL_OPTIONS: ModelOptions = {
-  type: ''
+	type: '',
 };
 
 export const DEFAULT_MODEL_TYPE = '__DEFAULT_MODEL_TYPE__';

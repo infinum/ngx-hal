@@ -1,3 +1,1 @@
-export class ModelServiceOptions {
-
-}
+export class ModelServiceOptions {}

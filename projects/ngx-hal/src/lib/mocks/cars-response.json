@@ -1,52 +1,52 @@
 {
-    "_embedded": {
-        "item": [
-            {
-                "name": "Beatle",
-                "_links": {
-                    "self": {
-                        "href": "backend.example/api/Car/00000001"
-                    }
-                }
-            },
-            {
-                "name": "Sport car",
-                "_links": {
-                    "self": {
-                        "href": "backend.example/api/Car/00000002"
-                    }
-                }
-            },
-            {
-                "name": "Minivan",
-                "_links": {
-                    "self": {
-                        "href": "backend.example/api/Car/00000003"
-                    }
-                }
-            }
-        ]
-    },
-    "_links": {
-        "self": {
-            "href": "backend.example/api/Car?page=1&size=20"
-        },
-        "item": [
-            {
-                "href": "backend.example/api/Car/00000001"
-            },
-            {
-                "href": "backend.example/api/Car/00000002"
-            },
-            {
-                "href": "backend.example/api/Car/00000003"
-            }
-        ]
-    },
-    "page": {
-        "size": 20,
-        "totalElements": 3,
-        "totalPages": 1,
-        "number": 1
-    }
+	"_embedded": {
+		"item": [
+			{
+				"name": "Beatle",
+				"_links": {
+					"self": {
+						"href": "backend.example/api/Car/00000001"
+					}
+				}
+			},
+			{
+				"name": "Sport car",
+				"_links": {
+					"self": {
+						"href": "backend.example/api/Car/00000002"
+					}
+				}
+			},
+			{
+				"name": "Minivan",
+				"_links": {
+					"self": {
+						"href": "backend.example/api/Car/00000003"
+					}
+				}
+			}
+		]
+	},
+	"_links": {
+		"self": {
+			"href": "backend.example/api/Car?page=1&size=20"
+		},
+		"item": [
+			{
+				"href": "backend.example/api/Car/00000001"
+			},
+			{
+				"href": "backend.example/api/Car/00000002"
+			},
+			{
+				"href": "backend.example/api/Car/00000003"
+			}
+		]
+	},
+	"page": {
+		"size": 20,
+		"totalElements": 3,
+		"totalPages": 1,
+		"number": 1
+	}
 }

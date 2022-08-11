@@ -6,9 +6,9 @@ import { CacheStrategy } from '../enums/cache-strategy.enum';
 import { HalStorage } from '../classes/hal-storage/hal-storage';
 
 export interface DatastoreOptions {
-  network?: NetworkConfig;
-  halDocumentClass?: HalDocumentConstructor<HalModel>;
-  paginationClass?: PaginationConstructor;
-  cacheStrategy?: CacheStrategy;
-  storage?: HalStorage;
+	network?: NetworkConfig;
+	halDocumentClass?: HalDocumentConstructor<HalModel>;
+	paginationClass?: PaginationConstructor;
+	cacheStrategy?: CacheStrategy;
+	storage?: HalStorage;
 }
