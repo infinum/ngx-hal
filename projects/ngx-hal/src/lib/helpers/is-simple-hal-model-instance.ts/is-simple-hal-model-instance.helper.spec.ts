@@ -10,36 +10,38 @@ class InheritsSimpleHal extends SimpleHalModel {}
 class DoesNotInherit {}
 
 describe('isSimpleHalModelInstance', () => {
-  beforeEach(() => TestBed.configureTestingModule({
-    imports: [HttpClientTestingModule],
-    providers: [DatastoreService]
-  }));
+	beforeEach(() =>
+		TestBed.configureTestingModule({
+			imports: [HttpClientTestingModule],
+			providers: [DatastoreService],
+		}),
+	);
 
-  it('should return true for an instance of a class which extends SimpleHalModel', () => {
-    const instance: InheritsSimpleHal = new InheritsSimpleHal();
-    expect(isSimpleHalModelInstance(instance)).toBe(true);
-  });
+	it('should return true for an instance of a class which extends SimpleHalModel', () => {
+		const instance: InheritsSimpleHal = new InheritsSimpleHal();
+		expect(isSimpleHalModelInstance(instance)).toBe(true);
+	});
 
-  it('should return false for an instance of a class which extends HalModel', () => {
-    const datastoreService: DatastoreService = TestBed.inject(DatastoreService);
-    const instance: InheritsHal = new InheritsHal({}, datastoreService);
-    expect(isSimpleHalModelInstance(instance)).toBe(false);
-  });
+	it('should return false for an instance of a class which extends HalModel', () => {
+		const datastoreService: DatastoreService = TestBed.inject(DatastoreService);
+		const instance: InheritsHal = new InheritsHal({}, datastoreService);
+		expect(isSimpleHalModelInstance(instance)).toBe(false);
+	});
 
-  it('should return false for an instance of a class which does not extend SimpleHalModel', () => {
-    const instance: DoesNotInherit = new DoesNotInherit();
-    expect(isSimpleHalModelInstance(instance)).toBe(false);
-  });
+	it('should return false for an instance of a class which does not extend SimpleHalModel', () => {
+		const instance: DoesNotInherit = new DoesNotInherit();
+		expect(isSimpleHalModelInstance(instance)).toBe(false);
+	});
 
-  it('should return false for a string', () => {
-    expect(isSimpleHalModelInstance('notHal')).toBe(false);
-  });
+	it('should return false for a string', () => {
+		expect(isSimpleHalModelInstance('notHal')).toBe(false);
+	});
 
-  it('should return false for an object', () => {
-    expect(isSimpleHalModelInstance({})).toBe(false);
-  });
+	it('should return false for an object', () => {
+		expect(isSimpleHalModelInstance({})).toBe(false);
+	});
 
-  it('should return false for a number', () => {
-    expect(isSimpleHalModelInstance(1)).toBe(false);
-  });
+	it('should return false for a number', () => {
+		expect(isSimpleHalModelInstance(1)).toBe(false);
+	});
 });

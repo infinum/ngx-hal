@@ -7,21 +7,26 @@ import { updateModelPropertiesWithTheNewOne } from '../helpers/replace-model-pro
 import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
 
 export function HasOne(options: HasOneOptions = {}) {
-  return (model: HalModel, propertyName: string) => {
-    const hasOneOptions: HasOneOptions = deepmergeWrapper(DEFAULT_HAS_ONE_OPTIONS, options);
+	return (model: HalModel, propertyName: string) => {
+		const hasOneOptions: HasOneOptions = deepmergeWrapper(DEFAULT_HAS_ONE_OPTIONS, options);
 
-    const existingHasOneProperties: Array<HasOneModelProperty> = Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, model) || [];
+		const existingHasOneProperties: Array<HasOneModelProperty> =
+			Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, model) || [];
 
-    const hasOneProperty: HasOneModelProperty = {
-      includeInPayload: hasOneOptions.includeInPayload,
-      name: propertyName,
-      propertyClass: hasOneOptions.propertyClass || Reflect.getMetadata('design:type', model, propertyName),
-      type: ModelProperty.HasOne,
-      externalName: options.externalName || propertyName
-    };
+		const hasOneProperty: HasOneModelProperty = {
+			includeInPayload: hasOneOptions.includeInPayload,
+			name: propertyName,
+			propertyClass:
+				hasOneOptions.propertyClass || Reflect.getMetadata('design:type', model, propertyName),
+			type: ModelProperty.HasOne,
+			externalName: options.externalName || propertyName,
+		};
 
-    const hasOneProperties: Array<HasOneModelProperty> = updateModelPropertiesWithTheNewOne(existingHasOneProperties, hasOneProperty);
+		const hasOneProperties: Array<HasOneModelProperty> = updateModelPropertiesWithTheNewOne(
+			existingHasOneProperties,
+			hasOneProperty,
+		);
 
-    Reflect.defineMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, hasOneProperties, model);
-  };
+		Reflect.defineMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, hasOneProperties, model);
+	};
 }
