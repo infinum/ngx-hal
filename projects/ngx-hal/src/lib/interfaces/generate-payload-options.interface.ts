@@ -1,4 +1,4 @@
 export interface GeneratePayloadOptions {
-  changedPropertiesOnly?: boolean;
-  specificFields?: Array<string>;
+	changedPropertiesOnly?: boolean;
+	specificFields?: Array<string>;
 }

@@ -1,3 +1,3 @@
 export interface RawHalLink {
-  href: string;
+	href: string;
 }

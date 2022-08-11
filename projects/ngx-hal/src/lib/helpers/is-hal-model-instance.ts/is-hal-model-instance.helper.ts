@@ -1,13 +1,13 @@
 import { HalModel } from '../../models/hal.model';
 
 export function isHalModelInstance(classInstance: any): boolean {
-  if (!classInstance) {
-    return false;
-  }
+	if (!classInstance) {
+		return false;
+	}
 
-  if (classInstance instanceof HalModel) {
-    return true;
-  }
+	if (classInstance instanceof HalModel) {
+		return true;
+	}
 
-  return isHalModelInstance(classInstance.prototype);
+	return isHalModelInstance(classInstance.prototype);
 }

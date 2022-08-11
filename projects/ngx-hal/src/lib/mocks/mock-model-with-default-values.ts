@@ -5,15 +5,15 @@ import { MockModel2 } from './mock-model-2';
 import { HasMany } from '../decorators/has-many.decorator';
 
 @ModelConfig({
-  type: 'MockModelWithDefaultValues',
-  endpoint: 'mock-model-with-default-values-endpoint'
+	type: 'MockModelWithDefaultValues',
+	endpoint: 'mock-model-with-default-values-endpoint',
 })
 export class MockModelWithDefaultValues extends HalModel {
-  @Attribute()
-  name = 'test default value';
+	@Attribute()
+	name = 'test default value';
 
-  @HasMany({
-    itemsType: MockModel2
-  })
-  someResources: Array<MockModel2> = [];
+	@HasMany({
+		itemsType: MockModel2,
+	})
+	someResources: Array<MockModel2> = [];
 }

@@ -1,14 +1,14 @@
 {
-  "name": "Mock model name",
-  "_links": {
-    "self": {
-      "href": "http://test.com/Mock/1c5e7b79"
-    },
-    "mockModel2Connection": {
-      "href": "http://test.com/Mock2/nup52clo"
-    },
-    "someResources": {
-      "href": "http://test.com/Mock2?getSomeResources=true"
-    }
-  }
+	"name": "Mock model name",
+	"_links": {
+		"self": {
+			"href": "http://test.com/Mock/1c5e7b79"
+		},
+		"mockModel2Connection": {
+			"href": "http://test.com/Mock2/nup52clo"
+		},
+		"someResources": {
+			"href": "http://test.com/Mock2?getSomeResources=true"
+		}
+	}
 }

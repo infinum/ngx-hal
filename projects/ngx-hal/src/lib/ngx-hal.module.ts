@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import 'reflect-metadata';
 
 @NgModule({
-  declarations: [],
-  imports: [],
-  exports: []
+	declarations: [],
+	imports: [],
+	exports: [],
 })
-export class NgxHalModule { }
+export class NgxHalModule {}

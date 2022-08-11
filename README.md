@@ -14,6 +14,7 @@ After the initial ngx-hal setup (see [Getting started section](https://github.co
 The following example uses the `User` resource as an example.
 
 `user.model.ts`
+
 ```js
 class User extends HalModel {
   @Attribute()
@@ -22,11 +23,12 @@ class User extends HalModel {
 ```
 
 `user.service.ts`
+
 ```js
 class UserService extends ModelService<User> {
-  constructor(datastore: DatastoreService) {
-    super(datastore, User);
-  }
+	constructor(datastore: DatastoreService) {
+		super(datastore, User);
+	}
 }
 ```
 
@@ -36,7 +38,7 @@ A few methods are available on an instance of `UserService`:
 
 ```js
 this.userService.findOne('1').subscribe((user: User) => {
-  console.log('Fetched user', user);
+	console.log('Fetched user', user);
 });
 ```
 
@@ -44,7 +46,7 @@ this.userService.findOne('1').subscribe((user: User) => {
 
 ```js
 this.userService.find().subscribe((users: Array<User>) => {
-  console.log('Fetched users', users);
+	console.log('Fetched users', users);
 });
 ```
 
@@ -52,14 +54,14 @@ this.userService.find().subscribe((users: Array<User>) => {
 
 ```js
 this.userService.find({}, true).subscribe((halDocument: HalDocument<User>) => {
-  console.log('Fetched users', halDocument.models);
-  console.log('Pagination information', halDocument.pagination);
+	console.log('Fetched users', halDocument.models);
+	console.log('Pagination information', halDocument.pagination);
 });
 ```
 
 ## API reference
 
-  * see [wiki](https://github.com/infinum/ngx-hal/wiki)
+- see [wiki](https://github.com/infinum/ngx-hal/wiki)
 
 ## Build
 
@@ -72,4 +74,3 @@ ng build
 ```bash
 ng test
 ```
-
