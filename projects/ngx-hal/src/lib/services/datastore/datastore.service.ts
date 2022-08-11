@@ -843,7 +843,8 @@ export class DatastoreService {
 
 		this.storage.enrichRequestOptions(url, options);
 
-		const templatedUrl: string = new UriTemplate(url).fill(options.params);
+		// prettier-ignore
+		const templatedUrl: string = (new UriTemplate(url)).fill(options.params);
 
 		const urlQueryParams: object = getQueryParams(templatedUrl);
 		requestOptions.params = Object.assign(urlQueryParams, requestOptions.params);
