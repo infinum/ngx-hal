@@ -32,8 +32,8 @@ import { RelationshipRequestDescriptor } from '../../types/relationship-request-
 import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
 import { RelationshipDescriptorMappings } from '../../types/relationship-descriptor-mappings.type';
 import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
-import { isString } from '../../utils/is-string/is-string.util';
 import { HalStorage } from '../../classes/hal-storage/hal-storage';
+import { isString } from '../../utils/is-string/is-string.util';
 import { isFunction } from '../../helpers/is-function/is-function.helper';
 
 @Injectable()
@@ -940,6 +940,10 @@ export class DatastoreService {
 
   private get cacheStrategy(): CacheStrategy {
     return this._cacheStrategy;
+  }
+
+  private get halStorage(): HalStorage {
+    return this._storage;
   }
 
   public findModelClassByType(modelType: string): typeof HalModel {

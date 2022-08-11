@@ -2,7 +2,6 @@ import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { SimpleHalStorage } from '../../classes/hal-storage/simple-hal-storage';
 import { EtagHalStorage } from '../../classes/hal-storage/etag-hal-storage';
 import { HalStorage } from './hal-storage';
-import { CacheFirstFetchLaterStorage } from './cache-first-fetch-later.storage';
 
 export type HalStorageType = SimpleHalStorage | EtagHalStorage;
 
@@ -15,9 +14,6 @@ export function createHalStorage(cacheStrategy: CacheStrategy = CacheStrategy.NO
       break;
     case CacheStrategy.ETAG:
       storage = new EtagHalStorage();
-      break;
-    case CacheStrategy.CACHE_FIRST_FETCH_LATER:
-      storage = new CacheFirstFetchLaterStorage();
       break;
     case CacheStrategy.CUSTOM:
       if (!storageInstance) {
