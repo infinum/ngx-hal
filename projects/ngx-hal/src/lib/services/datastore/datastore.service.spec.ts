@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { DatastoreService } from './datastore.service';
@@ -12,7 +12,7 @@ import mockModelBareMinimumResponseJson from '../../mocks/mock-model-bare-minimu
 import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
 import { MockModel2 } from '../../mocks/mock-model-2';
-import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
+import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
 import { CarModel } from '../../mocks/car.mock.model';
 import { HalDocument } from '../../classes/hal-document';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
@@ -811,6 +811,8 @@ describe('DatastoreService', () => {
 
       const req: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/Mock2/nup52clo`);
       expect(req.request.method).toEqual('GET');
+
+      req.flush(mockModel2ResponseJson);
     });
 
     it('should make a GET request for the original model and another GET request for fetching a HasMany relationship', () => {
@@ -1525,10 +1527,10 @@ describe('DatastoreService', () => {
 
         expect(request.method).toEqual('GET');
 
-        const qParam = request.params.get('q'); // Not sure why this returns an array
+        const qParam = request.params.get('q');
 
         expect(request.params.keys().length).toEqual(1);
-        expect((qParam as unknown as Array<string>).sort()).toEqual(['1', '2'].sort());
+        expect(qParam).toEqual(['1', '2'].sort().join(','));
 
         return isCorrectUrl;
       });
@@ -1844,7 +1846,7 @@ describe('DatastoreService', () => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
         expect(request.method).toEqual('GET');
 
-        expect(request.params.get(paramName1)).toEqual([paramValue1]);
+        expect(request.params.get(paramName1)).toEqual(paramValue1);
         expect(request.params.keys().length).toEqual(1);
 
         return isCorrectUrl;
@@ -1868,7 +1870,7 @@ describe('DatastoreService', () => {
         const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
         expect(request.method).toEqual('GET');
 
-        expect(request.params.get(paramName1)).toEqual(paramsArray);
+        expect(request.params.get(paramName1)).toEqual(paramsArray.join(','));
         expect(request.params.keys().length).toEqual(1);
 
         return isCorrectUrl;
@@ -2111,5 +2113,3 @@ describe('DatastoreService', () => {
     });
   });
 });
-
-
