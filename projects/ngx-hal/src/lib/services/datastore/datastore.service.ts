@@ -185,7 +185,6 @@ export class DatastoreService {
 				continue;
 			}
 
-			// tslint:disable-next-line:max-line-length
 			const relationshipRequestOptions = relationshipMappings[relationshipName]
 				.originalRelationshipDescriptor
 				? relationshipMappings[relationshipName].originalRelationshipDescriptor.options
