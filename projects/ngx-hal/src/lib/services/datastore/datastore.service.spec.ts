@@ -1,28 +1,28 @@
-import { fakeAsync, TestBed } from '@angular/core/testing';
 import {
 	HttpClientTestingModule,
 	HttpTestingController,
 	TestRequest,
 } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 
-import { DatastoreService } from './datastore.service';
-import { MockModel } from '../../mocks/mock-model';
-import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
-import mockModelResponseJson from '../../mocks/mock-model-response.json';
+import { HttpParams } from '@angular/common/http';
+import { HalDocument } from '../../classes/hal-document';
+import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
+import { CustomOptions } from '../../interfaces/custom-options.interface';
+import { CarModel } from '../../mocks/car.mock.model';
 import carsResponseJson from '../../mocks/cars-response.json';
 import listItemsWithDifferentListNamesResponseJson from '../../mocks/list-items-with-different-list-names-response.json';
+import mockListWithEmbeddedJson from '../../mocks/mock-list-with-embedded.json';
+import { MockModel } from '../../mocks/mock-model';
+import { MockModel2 } from '../../mocks/mock-model-2';
 import mockModel2ResponseJson from '../../mocks/mock-model-2-response.json';
 import mockModelBareMinimumResponseJson from '../../mocks/mock-model-bare-minimum-response.json';
-import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
-import { CustomOptions } from '../../interfaces/custom-options.interface';
-import { MockModel2 } from '../../mocks/mock-model-2';
-import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
-import { CarModel } from '../../mocks/car.mock.model';
-import { HalDocument } from '../../classes/hal-document';
-import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
-import { HttpParams } from '@angular/common/http';
+import mockModelResponseJson from '../../mocks/mock-model-response.json';
 import { MockTemplatedModel } from '../../mocks/mock-model-templated';
-import mockListWithEmbeddedJson from '../../mocks/mock-list-with-embedded.json';
+import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
+import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
+import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
+import { DatastoreService } from './datastore.service';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -2036,6 +2036,53 @@ describe('DatastoreService', () => {
 			const req: TestRequest = httpTestingController.expectOne(customUrl);
 
 			req.flush(mockModelResponseJson);
+		});
+	});
+
+	describe('fetchModelRelationships method', () => {
+		let mockModel: MockModel;
+
+		beforeEach(async (done: DoneFn) => {
+			datastoreService.findOne(MockModel, 'mockModelId').subscribe((mockModel1: MockModel) => {
+				mockModel = mockModel1;
+				done();
+			});
+
+			const req: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`,
+			);
+
+			req.flush(mockModelResponseJson);
+		});
+
+		it('should fetch the relationship without fetching the original resource', () => {
+			mockModel.fetchRelationships(['mockModel2Connection']).subscribe();
+
+			const reqRelationship1: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/Mock2/nup52clo`,
+			);
+			expect(reqRelationship1.request.method).toEqual('GET');
+
+			httpTestingController.expectNone(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
+
+			reqRelationship1.flush(mockModel2ResponseJson);
+		});
+
+		it('should fetch nested relationships', () => {
+			mockModel.fetchRelationships(['mockModel2Connection.mockModel3s']).subscribe();
+
+			const reqRelationship1: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/Mock2/nup52clo`,
+			);
+			expect(reqRelationship1.request.method).toEqual('GET');
+			reqRelationship1.flush(mockModel2ResponseJson);
+
+			const nestedRelationship: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/Mock3`,
+			);
+			expect(nestedRelationship.request.method).toEqual('GET');
+
+			nestedRelationship.flush({});
 		});
 	});
 

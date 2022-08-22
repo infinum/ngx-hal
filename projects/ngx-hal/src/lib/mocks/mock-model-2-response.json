@@ -3,6 +3,9 @@
 	"_links": {
 		"self": {
 			"href": "http://test.com/Mock2/nup52clo"
+		},
+		"mockModel3s": {
+			"href": "http://test.com/Mock3"
 		}
 	}
 }

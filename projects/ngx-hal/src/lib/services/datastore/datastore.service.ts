@@ -81,7 +81,7 @@ export class DatastoreService {
 		const propertyClass: ModelConstructor<T> = isFunction(modelClass)
 			? (modelClass as ModelConstructorFn<T>)({})
 			: (modelClass as ModelConstructor<T>);
-		const representantiveModel: T = new propertyClass({});
+		const representantiveModel: T = new propertyClass({}, this);
 		const halDocumentClass =
 			representantiveModel.getHalDocumentClass() || this.getHalDocumentClass<T>();
 		return new halDocumentClass(rawResource, rawResponse, propertyClass, this);
@@ -185,7 +185,6 @@ export class DatastoreService {
 				continue;
 			}
 
-			// tslint:disable-next-line:max-line-length
 			const relationshipRequestOptions = relationshipMappings[relationshipName]
 				.originalRelationshipDescriptor
 				? relationshipMappings[relationshipName].originalRelationshipDescriptor.options
