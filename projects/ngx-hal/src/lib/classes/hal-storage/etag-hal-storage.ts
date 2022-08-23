@@ -5,7 +5,7 @@ import { RequestOptions } from '../../types/request-options.type';
 import { HalStorage } from './hal-storage';
 import { setRequestHeader } from '../../utils/set-request-header/set-request-header.util';
 
-interface StorageModel<T extends HalModel> {
+export interface EtagStorageModel<T extends HalModel> {
 	model: T | HalDocument<T>;
 	etag: string;
 }
@@ -15,20 +15,26 @@ export class EtagHalStorage extends HalStorage {
 		model: T | HalDocument<T>,
 		response?: HttpResponse<T>,
 		alternateUniqueIdentificators: Array<string> = [],
-	): void {
+	): Array<EtagStorageModel<T>> {
+		const storedModels: Array<EtagStorageModel<T>> = [];
+
 		const identificators: Array<string> = [].concat(alternateUniqueIdentificators);
 		identificators.push(model.uniqueModelIdentificator);
 
 		identificators.filter(Boolean).forEach((identificator: string) => {
-			this.internalStorage[identificator] = {
+			const storedModel = {
 				model,
 				etag: this.getEtagFromResponse(response),
 			};
+			this.internalStorage[identificator] = storedModel;
+			storedModels.push(storedModel);
 		});
+
+		return storedModels;
 	}
 
 	public get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T> {
-		const localModel: StorageModel<T> = this.getRawStorageModel(uniqueModelIdentificator);
+		const localModel: EtagStorageModel<T> = this.getRawStorageModel(uniqueModelIdentificator);
 		return localModel ? localModel.model : undefined;
 	}
 
@@ -36,7 +42,7 @@ export class EtagHalStorage extends HalStorage {
 		uniqueModelIdentificator: string,
 		requestOptions: RequestOptions,
 	): void {
-		const storageModel: StorageModel<any> = this.getRawStorageModel(uniqueModelIdentificator);
+		const storageModel: EtagStorageModel<any> = this.getRawStorageModel(uniqueModelIdentificator);
 
 		if (!storageModel) {
 			return;
@@ -53,7 +59,7 @@ export class EtagHalStorage extends HalStorage {
 
 	protected getRawStorageModel<T extends HalModel>(
 		uniqueModelIdentificator: string,
-	): StorageModel<T> {
+	): EtagStorageModel<T> {
 		return this.internalStorage[uniqueModelIdentificator];
 	}
 
