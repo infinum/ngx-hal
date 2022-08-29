@@ -79,7 +79,7 @@ export class DatastoreService {
 		rawResponse?: HttpResponse<any>,
 	): HalDocument<T> {
 		const propertyClass: ModelConstructor<T> = isFunction(modelClass)
-			? (modelClass as ModelConstructorFn<T>)({})
+			? (modelClass as ModelConstructorFn<T>)(rawResource)
 			: (modelClass as ModelConstructor<T>);
 		const representantiveModel: T = new propertyClass({}, this);
 		const halDocumentClass =
