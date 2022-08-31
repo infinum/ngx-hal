@@ -28,6 +28,7 @@ export * from './lib/decorators/header-attribute.decorator';
 export * from './lib/interfaces/has-many-options.interface';
 export * from './lib/interfaces/has-one-options.interface';
 export * from './lib/interfaces/custom-options.interface';
+export * from './lib/interfaces/model-endpoints.interface';
 
 export * from './lib/types/relationship-request-descriptor.type';
 
