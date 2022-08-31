@@ -13,6 +13,9 @@ export type RequestOptions = {
 				[param: string]: string | string[];
 		  }
 		| object;
+	routeParams?: {
+		[param: string]: string | string[];
+	};
 	reportProgress?: boolean;
 	responseType?;
 	withCredentials?: boolean;

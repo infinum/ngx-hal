@@ -591,6 +591,7 @@ export class DatastoreService {
 		const options: CustomOptions<T> = deepmergeWrapper(defaultSaveOptions, saveOptions);
 
 		const url: string = options.buildUrlFunction(model, this.buildUrl(model));
+
 		const payload: object = model.generatePayload({
 			specificFields: options.specificFields,
 			changedPropertiesOnly: false,
@@ -844,7 +845,8 @@ export class DatastoreService {
 
 		this.storage.enrichRequestOptions(url, options);
 
-		const templatedUrl: string = new UriTemplate(url).fill(options.params);
+		const fillParams = Object.assign({}, options.params, options.routeParams);
+		const templatedUrl: string = new UriTemplate(url).fill(fillParams);
 
 		const urlQueryParams: object = getQueryParams(templatedUrl);
 		requestOptions.params = Object.assign(urlQueryParams, requestOptions.params);
@@ -876,24 +878,13 @@ export class DatastoreService {
 		return params;
 	}
 
-	private enrichRequestOptions(requestOptions: RequestOptions) {
-		const reqOptions: RequestOptions = requestOptions || {};
-		const params: object = this.ensureParamsObject(reqOptions.params || {});
-		Object.assign(reqOptions, { params });
-		return deepmergeWrapper(
-			DEFAULT_REQUEST_OPTIONS,
-			this.networkConfig.globalRequestOptions,
-			reqOptions,
-		);
-	}
-
 	private makePostRequest<T extends HalModel>(
 		url: string,
 		payload: object,
 		requestOptions: RequestOptions = {},
 	): Observable<any> {
-		const options = this.enrichRequestOptions(requestOptions);
-		return this.http.post<T>(url, payload, options);
+		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(url, requestOptions);
+		return this.http.post<T>(cleanUrl, payload, options as { [K: string]: any });
 	}
 
 	private makePutRequest<T extends HalModel>(
@@ -901,8 +892,8 @@ export class DatastoreService {
 		payload: object,
 		requestOptions: RequestOptions = {},
 	): Observable<any> {
-		const options = this.enrichRequestOptions(requestOptions);
-		return this.http.put<T>(url, payload, options);
+		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(url, requestOptions);
+		return this.http.put<T>(url, payload, options as { [K: string]: any });
 	}
 
 	private makePatchRequest<T extends HalModel>(
@@ -910,16 +901,16 @@ export class DatastoreService {
 		payload: object,
 		requestOptions: RequestOptions = {},
 	): Observable<any> {
-		const options = this.enrichRequestOptions(requestOptions);
-		return this.http.patch<T>(url, payload, options);
+		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(url, requestOptions);
+		return this.http.patch<T>(url, payload, options as { [K: string]: any });
 	}
 
 	private makeDeleteRequest<T extends HalModel>(
 		url: string,
 		requestOptions: RequestOptions = {},
 	): Observable<any> {
-		const options = this.enrichRequestOptions(requestOptions);
-		return this.http.delete<T>(url, options);
+		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(url, requestOptions);
+		return this.http.delete<T>(url, options as { [K: string]: any });
 	}
 
 	private processRawResource<T extends HalModel>(
@@ -979,7 +970,15 @@ export class DatastoreService {
 	}
 
 	private buildModelUrl(modelClass: ModelConstructor<HalModel>, modelId?: string): string {
-		const modelUrl: string = this.buildUrl(new modelClass({}, this));
+		const model = new modelClass({}, this);
+
+		if (modelId && model.modelEndpoints?.singleResourceEndpoint) {
+			return model.modelEndpoints.singleResourceEndpoint;
+		} else if (!modelId && model.modelEndpoints?.collectionEndpoint) {
+			return model.modelEndpoints.collectionEndpoint;
+		}
+
+		const modelUrl: string = this.buildUrl(model);
 		return modelId ? `${modelUrl}/${modelId}` : modelUrl;
 	}
 
@@ -1060,6 +1059,12 @@ export class DatastoreService {
 	}
 
 	private defaultUrlBuildFunction<T extends HalModel>(model: T, urlFromModel: string): string {
+		if (model.id && model.modelEndpoints?.singleResourceEndpoint) {
+			return model.modelEndpoints.singleResourceEndpoint;
+		} else if (!model.id && model.modelEndpoints?.collectionEndpoint) {
+			return model.modelEndpoints.collectionEndpoint;
+		}
+
 		return urlFromModel;
 	}
 
