@@ -893,7 +893,7 @@ export class DatastoreService {
 		requestOptions: RequestOptions = {},
 	): Observable<any> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(url, requestOptions);
-		return this.http.put<T>(url, payload, options as { [K: string]: any });
+		return this.http.put<T>(cleanUrl, payload, options as { [K: string]: any });
 	}
 
 	private makePatchRequest<T extends HalModel>(
@@ -902,7 +902,7 @@ export class DatastoreService {
 		requestOptions: RequestOptions = {},
 	): Observable<any> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(url, requestOptions);
-		return this.http.patch<T>(url, payload, options as { [K: string]: any });
+		return this.http.patch<T>(cleanUrl, payload, options as { [K: string]: any });
 	}
 
 	private makeDeleteRequest<T extends HalModel>(
@@ -910,7 +910,7 @@ export class DatastoreService {
 		requestOptions: RequestOptions = {},
 	): Observable<any> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(url, requestOptions);
-		return this.http.delete<T>(url, options as { [K: string]: any });
+		return this.http.delete<T>(cleanUrl, options as { [K: string]: any });
 	}
 
 	private processRawResource<T extends HalModel>(
