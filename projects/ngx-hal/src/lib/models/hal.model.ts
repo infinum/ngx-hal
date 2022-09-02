@@ -45,6 +45,7 @@ import { removeQueryParams } from '../utils/remove-query-params/remove-query-par
 import { setRequestHeader } from '../utils/set-request-header/set-request-header.util';
 import { isString } from '../utils/is-string/is-string.util';
 import { isFunction } from '../helpers/is-function/is-function.helper';
+import { ModelEndpoints } from '../interfaces/model-endpoints.interface';
 
 export abstract class HalModel {
 	private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -85,6 +86,10 @@ export abstract class HalModel {
 
 	public get endpoint(): string {
 		return this.config.endpoint || 'unknownModelEndpoint';
+	}
+
+	public get modelEndpoints(): ModelEndpoints {
+		return null;
 	}
 
 	public get networkConfig(): NetworkConfig {
