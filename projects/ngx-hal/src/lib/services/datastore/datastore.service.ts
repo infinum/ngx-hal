@@ -827,6 +827,12 @@ export class DatastoreService {
 		);
 	}
 
+	public head<T extends HalModel>(url: string, requestOptions: RequestOptions): Observable<any> {
+		const { cleanUrl, requestOptions: options } = this.extractRequestInfo(url, requestOptions);
+
+		return this.http.head<T>(cleanUrl, options as any);
+	}
+
 	private extractRequestInfo(
 		url: string,
 		options: RequestOptions,
