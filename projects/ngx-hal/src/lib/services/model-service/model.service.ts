@@ -15,13 +15,14 @@ export abstract class ModelService<Model extends HalModel> {
 		includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
 		requestOptions: RequestOptions = {},
 		subsequentRequestsOptions: RequestOptions = {},
+		customUrl?: string,
 	): Observable<Model> {
 		return this.datastore.findOne<Model>(
 			this.modelClass,
 			modelId,
 			includeRelationships,
 			requestOptions,
-			undefined,
+			customUrl,
 			subsequentRequestsOptions,
 		);
 	}
