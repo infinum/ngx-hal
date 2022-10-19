@@ -7,8 +7,11 @@ import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 
-export abstract class ModelService<Model extends HalModel> {
-	constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
+export abstract class ModelService<
+	Model extends HalModel,
+	Datastore extends DatastoreService = DatastoreService,
+> {
+	constructor(protected datastore: Datastore, private modelClass: ModelConstructor<Model>) {}
 
 	public findOne(
 		modelId: string,

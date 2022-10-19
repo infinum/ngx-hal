@@ -47,7 +47,7 @@ import { isString } from '../utils/is-string/is-string.util';
 import { isFunction } from '../helpers/is-function/is-function.helper';
 import { ModelEndpoints } from '../interfaces/model-endpoints.interface';
 
-export abstract class HalModel {
+export abstract class HalModel<Datastore extends DatastoreService = DatastoreService> {
 	private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
 	private temporarySelfLink: string = null;
 	private localModelIdentificator: string;
@@ -56,7 +56,7 @@ export abstract class HalModel {
 
 	constructor(
 		protected resource: RawHalResource = {},
-		protected datastore: DatastoreService,
+		protected datastore: Datastore,
 		public rawResponse?: HttpResponse<any>,
 	) {
 		this.setLocalModelIdentificator();
