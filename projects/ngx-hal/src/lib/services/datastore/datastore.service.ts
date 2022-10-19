@@ -50,7 +50,7 @@ export class DatastoreService {
 	private internalStorage = createHalStorage(this.cacheStrategy, this.halStorage);
 	protected httpParamsOptions?: object;
 	public paginationClass: PaginationConstructor;
-	public modelTypes: Array<typeof HalModel> = [];
+	public modelTypes = [];
 
 	constructor(public http: HttpClient) {}
 
