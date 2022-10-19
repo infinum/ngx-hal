@@ -1071,6 +1071,10 @@ export class DatastoreService {
 	}
 
 	private defaultUrlBuildFunction<T extends HalModel>(model: T, urlFromModel: string): string {
+		if (model.isSaved && model.selfLink) {
+			return model.selfLink;
+		}
+
 		if (model.id && model.modelEndpoints?.singleResourceEndpoint) {
 			return model.modelEndpoints.singleResourceEndpoint;
 		} else if (!model.id && model.modelEndpoints?.collectionEndpoint) {
