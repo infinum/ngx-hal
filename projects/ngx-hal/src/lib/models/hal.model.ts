@@ -539,6 +539,10 @@ export abstract class HalModel {
 		return property.type === ModelPropertyEnum.HasMany;
 	}
 
+	public populateModelMetadata<K extends HalModel>(sourceModel: K) {
+		this.resource = sourceModel.resource;
+	}
+
 	public updateHasManyDocumentIdentificator(
 		property: HasManyModelProperty,
 		identificator: string,
