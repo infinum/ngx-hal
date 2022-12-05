@@ -175,11 +175,7 @@ export class DatastoreService {
 				);
 			}
 
-			if (
-				!url ||
-				url.startsWith(LOCAL_MODEL_ID_PREFIX) ||
-				url.startsWith(LOCAL_DOCUMENT_ID_PREFIX)
-			) {
+			if (!url) {
 				continue;
 			}
 
