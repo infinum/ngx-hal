@@ -174,7 +174,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 
 	public refetch(): Observable<this> {
 		const modelClass = Object.getPrototypeOf(this).constructor;
-		return this.datastore.findOne(modelClass, null, null, null, this.selfLink).pipe(
+		return this.datastore.findOne(modelClass, undefined, undefined, undefined, this.selfLink).pipe(
 			map((fetchedModel: this) => {
 				this.populateModelMetadata(fetchedModel);
 				return this;
