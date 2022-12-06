@@ -1,43 +1,44 @@
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
-import { Observable, combineLatest, of, throwError, from } from 'rxjs';
-import { map, flatMap, tap, catchError, mergeMap, delay } from 'rxjs/operators';
-import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
-import { HalModel } from '../../models/hal.model';
+import { combineLatest, Observable, of, throwError } from 'rxjs';
+import { catchError, flatMap, map, tap } from 'rxjs/operators';
+import * as UriTemplates from 'uri-templates';
 import { HalDocument } from '../../classes/hal-document';
-import { ModelConstructor, ModelConstructorFn } from '../../types/model-constructor.type';
-import { HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY } from '../../constants/metadata.constant';
-import { LOCAL_MODEL_ID_PREFIX, LOCAL_DOCUMENT_ID_PREFIX } from '../../constants/general.constant';
-import { HalDocumentConstructor } from '../../types/hal-document-construtor.type';
-import { RequestOptions } from '../../types/request-options.type';
-import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
-import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
-import { ModelProperty, AttributeModelProperty } from '../../interfaces/model-property.interface';
-import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
-import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
-import { PaginationConstructor } from '../../types/pagination.type';
-import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
-import { CacheStrategy } from '../../enums/cache-strategy.enum';
+import { HalStorage } from '../../classes/hal-storage/hal-storage';
 import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory';
-import { RequestsOptions } from '../../interfaces/requests-options.interface';
-import { makeQueryParamsString } from '../../helpers/make-query-params-string/make-query-params-string.helper';
-import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
-import {
-	getQueryParams,
-	decodeURIComponentWithErrorHandling,
-} from '../../utils/get-query-params/get-query-params.util';
+import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
+import { HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY } from '../../constants/metadata.constant';
+import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
+import { CacheStrategy } from '../../enums/cache-strategy.enum';
+import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
+import { isFunction } from '../../helpers/is-function/is-function.helper';
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
+import { makeQueryParamsString } from '../../helpers/make-query-params-string/make-query-params-string.helper';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
-import { deepmergeWrapper } from '../../utils/deepmerge-wrapper';
-import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
-import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
+import { AttributeModelProperty, ModelProperty } from '../../interfaces/model-property.interface';
+import { DEFAULT_NETWORK_CONFIG, NetworkConfig } from '../../interfaces/network-config.interface';
+import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
+import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
+import { RequestsOptions } from '../../interfaces/requests-options.interface';
+import { HalModel } from '../../models/hal.model';
+import { HalDocumentConstructor } from '../../types/hal-document-construtor.type';
+import { ModelConstructor, ModelConstructorFn } from '../../types/model-constructor.type';
+import { PaginationConstructor } from '../../types/pagination.type';
 import { RelationshipDescriptorMappings } from '../../types/relationship-descriptor-mappings.type';
-import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
-import { HalStorage } from '../../classes/hal-storage/hal-storage';
+import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
+import { RequestOptions } from '../../types/request-options.type';
+import { deepmergeWrapper } from '../../utils/deepmerge-wrapper';
+import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
+import {
+	decodeURIComponentWithErrorHandling,
+	getQueryParams,
+} from '../../utils/get-query-params/get-query-params.util';
+import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
 import { isString } from '../../utils/is-string/is-string.util';
-import { isFunction } from '../../helpers/is-function/is-function.helper';
-import { populateTemplatedUrl } from '../../helpers/populate-templated-url/populate-templated-url.helper';
+import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
+
+const UriTemplate = UriTemplates.default || UriTemplates;
 
 @Injectable()
 export class DatastoreService {
@@ -846,7 +847,7 @@ export class DatastoreService {
 		this.storage.enrichRequestOptions(url, options);
 
 		const fillParams = Object.assign({}, options.params, options.routeParams);
-		const templatedUrl: string = populateTemplatedUrl(url, fillParams);
+		const templatedUrl: string = this.populateTemplatedUrl(url, fillParams);
 
 		const urlQueryParams: object = getQueryParams(templatedUrl);
 		requestOptions.params = Object.assign(urlQueryParams, requestOptions.params);
@@ -1122,5 +1123,9 @@ export class DatastoreService {
 		);
 		const model: T = new modelClass(rawRecordData, this);
 		return model;
+	}
+
+	private populateTemplatedUrl(url: string, params?: object): string {
+		return new UriTemplate(url).fill(params);
 	}
 }
