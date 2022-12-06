@@ -37,4 +37,3 @@ export * from './lib/services/datastore/datastore.service';
 export * from './lib/services/model-service/model.service';
 
 export * from './lib/helpers/array-attribute-class/array-attribute-class';
-export * from './lib/helpers/populate-templated-url/populate-templated-url.helper';
