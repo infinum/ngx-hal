@@ -847,7 +847,7 @@ export class DatastoreService {
 		this.storage.enrichRequestOptions(url, options);
 
 		const fillParams = Object.assign({}, options.params, options.routeParams);
-		const templatedUrl: string = this.populateTemplatedUrl(url, fillParams);
+		const templatedUrl: string = new UriTemplate(url).fill(fillParams);
 
 		const urlQueryParams: object = getQueryParams(templatedUrl);
 		requestOptions.params = Object.assign(urlQueryParams, requestOptions.params);
@@ -1123,9 +1123,5 @@ export class DatastoreService {
 		);
 		const model: T = new modelClass(rawRecordData, this);
 		return model;
-	}
-
-	private populateTemplatedUrl(url: string, params?: object): string {
-		return new UriTemplate(url).fill(params);
 	}
 }
