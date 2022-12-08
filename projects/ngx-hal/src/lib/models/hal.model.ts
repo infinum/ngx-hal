@@ -46,6 +46,7 @@ import { setRequestHeader } from '../utils/set-request-header/set-request-header
 import { isString } from '../utils/is-string/is-string.util';
 import { isFunction } from '../helpers/is-function/is-function.helper';
 import { ModelEndpoints } from '../interfaces/model-endpoints.interface';
+import { map } from 'rxjs/operators';
 
 export abstract class HalModel<Datastore extends DatastoreService = DatastoreService> {
 	private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -169,6 +170,21 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		options: CustomOptions<this> = {},
 	): Observable<void> {
 		return this.datastore.delete(this, requestOptions, options);
+	}
+
+	public refetch(
+		includeRelationships?: Array<string | RelationshipRequestDescriptor>,
+		requestOptions?: RequestOptions,
+	): Observable<this> {
+		const modelClass = Object.getPrototypeOf(this).constructor;
+		return this.datastore
+			.findOne(modelClass, undefined, includeRelationships, requestOptions, this.selfLink)
+			.pipe(
+				map((fetchedModel: this) => {
+					this.populateModelMetadata(fetchedModel);
+					return this;
+				}),
+			);
 	}
 
 	public generatePayload(options: GeneratePayloadOptions = {}): object {
@@ -546,6 +562,10 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 
 	public populateModelMetadata<K extends HalModel>(sourceModel: K) {
 		this.resource = sourceModel.resource;
+		this.rawResponse = sourceModel.rawResponse;
+		this.parseAttributes(this.resource);
+		this.parseHeaderAttributes(this.rawResponse);
+		this.extractEmbeddedProperties(this.resource);
 	}
 
 	public updateHasManyDocumentIdentificator(
