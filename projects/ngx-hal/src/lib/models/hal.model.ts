@@ -166,14 +166,19 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		return this.datastore.delete(this, requestOptions, options);
 	}
 
-	public refetch(): Observable<this> {
+	public refetch(
+		includeRelationships?: Array<string | RelationshipRequestDescriptor>,
+		requestOptions?: RequestOptions,
+	): Observable<this> {
 		const modelClass = Object.getPrototypeOf(this).constructor;
-		return this.datastore.findOne(modelClass, undefined, undefined, undefined, this.selfLink).pipe(
-			map((fetchedModel: this) => {
-				this.populateModelMetadata(fetchedModel);
-				return this;
-			}),
-		);
+		return this.datastore
+			.findOne(modelClass, undefined, includeRelationships, requestOptions, this.selfLink)
+			.pipe(
+				map((fetchedModel: this) => {
+					this.populateModelMetadata(fetchedModel);
+					return this;
+				}),
+			);
 	}
 
 	public generatePayload(options: GeneratePayloadOptions = {}): object {
