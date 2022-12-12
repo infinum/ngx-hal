@@ -1,0 +1,27 @@
+{
+	"name": "Mock model name",
+	"_embedded": {
+		"mockModel2Connection": {
+			"name": "Mock model 2 name",
+			"_links": {
+				"self": {
+					"href": "http://test.com/Mock2/nup52clo"
+				},
+				"mockModel3s": {
+					"href": "http://test.com/Mock3"
+				}
+			}
+		}
+	},
+	"_links": {
+		"self": {
+			"href": "http://test.com/Mock/1c5e7b79"
+		},
+		"mockModel2Connection": {
+			"href": "http://test.com/Mock2/nup52clo"
+		},
+		"someResources": {
+			"href": "http://test.com/Mock2?getSomeResources=true"
+		}
+	}
+}

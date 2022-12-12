@@ -18,6 +18,7 @@ import { MockModel2 } from '../../mocks/mock-model-2';
 import mockModel2ResponseJson from '../../mocks/mock-model-2-response.json';
 import mockModelBareMinimumResponseJson from '../../mocks/mock-model-bare-minimum-response.json';
 import mockModelResponseJson from '../../mocks/mock-model-response.json';
+import mockModelResponseWithEmbeddedRelationshipJson from '../../mocks/mock-model-response-with-embedded-relationship.json';
 import { MockTemplatedModel } from '../../mocks/mock-model-templated';
 import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
 import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
@@ -871,6 +872,47 @@ describe('DatastoreService', () => {
 				`${BASE_NETWORK_URL}/Mock2?getSomeResources=true`,
 			);
 			expect(req.request.method).toEqual('GET');
+		});
+
+		it('should make a GET request for the original model, a request for hasOne relationship, and a request for a hasOne relationship of that relationship', () => {
+			datastoreService
+				.findOne(MockModel, 'mockModelId', ['mockModel2Connection.mockModel3s'])
+				.subscribe();
+
+			const originalReq: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`,
+			);
+			expect(originalReq.request.method).toEqual('GET');
+
+			originalReq.flush(mockModelResponseJson);
+
+			const req: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/Mock2/nup52clo`,
+			);
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModel2ResponseJson);
+
+			const req2: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/Mock3`);
+			expect(req2.request.method).toEqual('GET');
+		});
+
+		it('should make a GET request for the original model, skip the request for embedded hasOne relationship, and make a request for a hasOne relationship of that embedded relationship', () => {
+			datastoreService
+				.findOne(MockModel, 'mockModelId', ['mockModel2Connection.mockModel3s'])
+				.subscribe();
+
+			const originalReq: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`,
+			);
+			expect(originalReq.request.method).toEqual('GET');
+
+			originalReq.flush(mockModelResponseWithEmbeddedRelationshipJson);
+
+			httpTestingController.expectNone(`${BASE_NETWORK_URL}/Mock2/nup52clo`);
+
+			const req2: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/Mock3`);
+			expect(req2.request.method).toEqual('GET');
 		});
 
 		it('should make a GET request for the original model and skip fetching HasMany relationship if there is no URL', () => {
