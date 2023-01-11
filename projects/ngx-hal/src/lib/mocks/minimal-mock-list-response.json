@@ -1,0 +1,18 @@
+{
+	"_links": {
+		"self": {
+			"href": "minimal-mock-list-resources"
+		},
+		"item": [
+			{
+				"href": "http://test.com/Mock/1c5e7b79"
+			}
+		]
+	},
+	"page": {
+		"size": 20,
+		"totalElements": 1,
+		"totalPages": 0,
+		"number": 1
+	}
+}

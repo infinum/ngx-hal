@@ -1,0 +1,35 @@
+{
+	"_embedded": {
+		"item": [
+			{
+				"name": "Mock model 2 name",
+				"_links": {
+					"self": {
+						"href": "http://test.com/Mock2/nup52clo"
+					},
+					"mockModel3s": {
+						"href": "http://test.com/Mock3"
+					}
+				}
+			}
+		]
+	},
+	"_links": {
+		"self": {
+			"href": "http://test.com/Mock2?getSomeResources=true"
+		},
+		"item": [
+			{
+				"self": {
+					"href": "http://test.com/Mock/nup52clo"
+				}
+			}
+		]
+	},
+	"page": {
+		"size": 20,
+		"totalElements": 1,
+		"totalPages": 0,
+		"number": 1
+	}
+}
