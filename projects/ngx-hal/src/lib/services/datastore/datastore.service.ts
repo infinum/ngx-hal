@@ -562,6 +562,9 @@ export class DatastoreService {
 			storePartialModels,
 		).pipe(
 			flatMap((halDocument: HalDocument<T>) => {
+				if (relationshipDescriptors.length) {
+					return of(halDocument);
+				}
 				return this.fetchEmbeddedListItems(
 					halDocument,
 					modelClass,
