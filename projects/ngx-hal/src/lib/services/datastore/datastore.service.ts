@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
 import { Observable, combineLatest, of, throwError, from } from 'rxjs';
 import { map, flatMap, tap, catchError, mergeMap, delay } from 'rxjs/operators';
-import * as UriTemplates from 'uri-templates';
 import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from '../../classes/hal-document';
@@ -38,8 +37,7 @@ import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
 import { HalStorage } from '../../classes/hal-storage/hal-storage';
 import { isString } from '../../utils/is-string/is-string.util';
 import { isFunction } from '../../helpers/is-function/is-function.helper';
-
-const UriTemplate = UriTemplates.default || UriTemplates;
+import { populateTemplatedUrl } from '../../helpers/populate-templated-url/populate-templated-url.helper';
 
 @Injectable()
 export class DatastoreService {
@@ -852,7 +850,7 @@ export class DatastoreService {
 		this.storage.enrichRequestOptions(url, options);
 
 		const fillParams = Object.assign({}, options.params, options.routeParams);
-		const templatedUrl: string = new UriTemplate(url).fill(fillParams);
+		const templatedUrl: string = populateTemplatedUrl(url, fillParams);
 
 		const urlQueryParams: object = getQueryParams(templatedUrl);
 		requestOptions.params = Object.assign(urlQueryParams, requestOptions.params);
