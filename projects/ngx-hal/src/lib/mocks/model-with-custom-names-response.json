@@ -1,0 +1,17 @@
+{
+	"name": "Mock model with custom names",
+	"_links": {
+		"self": {
+			"href": "http://test.com/external-names-mock-model-endpoint/jf7s90"
+		},
+		"customNameOfMockModel2": {
+			"href": "http://test.com/Mock2/nup52clo"
+		},
+		"customNameOfSomeEmptyResources": {
+			"href": "http://test.com/Mock2?getSomeResources=true"
+		},
+		"customNameOfSimpleLinkRelationship": {
+			"href": "http://test.com/simpleLinkRelationship123"
+		}
+	}
+}
