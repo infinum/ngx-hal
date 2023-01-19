@@ -12,6 +12,7 @@ import {
 	HAS_ONE_PROPERTIES_METADATA_KEY,
 	HAS_MANY_PROPERTIES_METADATA_KEY,
 	HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY,
+	LINK_PROPERTIES_METADATA_KEY,
 } from '../constants/metadata.constant';
 import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
 import {
@@ -20,6 +21,7 @@ import {
 	HasOneModelProperty,
 	HasManyModelProperty,
 	HeaderAttributeModelProperty,
+	LinkProperty,
 } from '../interfaces/model-property.interface';
 import {
 	LINKS_PROPERTY_NAME,
@@ -127,7 +129,10 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		const hasManyProperty = this.hasManyProperties.find(
 			(property: ModelProperty) => property.name === propertyName,
 		);
-		return attributeProperty || hasOneProperty || hasManyProperty;
+		const linkProperty = this.linkProperties.find(
+			(property: ModelProperty) => property.name === propertyName,
+		);
+		return attributeProperty || hasOneProperty || hasManyProperty || linkProperty;
 	}
 
 	public getEmbeddedResource(resourceName: string): RawHalResource | undefined {
@@ -359,9 +364,9 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 
 		if (isHasOneProperty) {
 			return this.getHasOneRelationship(property) as T;
+		} else if (this.isHasManyProperty) {
+			return this.getHasManyRelationship(property);
 		}
-
-		return this.getHasManyRelationship(property);
 	}
 
 	private get attributeProperties(): Array<AttributeModelProperty> {
@@ -378,6 +383,10 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 
 	private get hasManyProperties(): Array<HasManyModelProperty> {
 		return Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, this) || [];
+	}
+
+	private get linkProperties(): Array<LinkProperty> {
+		return Reflect.getMetadata(LINK_PROPERTIES_METADATA_KEY, this) || [];
 	}
 
 	private initializeHasOneProperties(): void {

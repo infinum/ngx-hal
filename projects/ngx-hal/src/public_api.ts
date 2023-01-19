@@ -7,6 +7,7 @@ export * from './lib/decorators/attribute.decorator';
 export * from './lib/decorators/header-attribute.decorator';
 export * from './lib/decorators/has-many.decorator';
 export * from './lib/decorators/has-one.decorator';
+export * from './lib/decorators/link.decorator';
 
 export * from './lib/models/hal.model';
 export * from './lib/models/simple-hal.model';
@@ -27,6 +28,7 @@ export * from './lib/interfaces/attribute-options.interface';
 export * from './lib/decorators/header-attribute.decorator';
 export * from './lib/interfaces/has-many-options.interface';
 export * from './lib/interfaces/has-one-options.interface';
+export * from './lib/interfaces/link-relationship-options.interface';
 export * from './lib/interfaces/custom-options.interface';
 export * from './lib/interfaces/model-endpoints.interface';
 

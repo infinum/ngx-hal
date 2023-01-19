@@ -4,6 +4,7 @@ import { Attribute } from '../decorators/attribute.decorator';
 import { MockModel2 } from './mock-model-2';
 import { HasOne } from '../decorators/has-one.decorator';
 import { HasMany } from '../decorators/has-many.decorator';
+import { Link } from '../decorators/link.decorator';
 
 @ModelConfig({
 	type: 'Mock',
@@ -33,4 +34,7 @@ export class MockModel extends HalModel {
 		includeInPayload: true,
 	})
 	someResources: Array<MockModel2>;
+
+	@Link()
+	simpleLinkRelationship: string;
 }
