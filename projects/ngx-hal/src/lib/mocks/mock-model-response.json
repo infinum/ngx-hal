@@ -12,6 +12,9 @@
 		},
 		"simpleLinkRelationship": {
 			"href": "http://test.com/simpleLinkRelationship123"
+		},
+		"config": {
+			"href": "http://test.com/Mock2/nup52clo"
 		}
 	}
 }

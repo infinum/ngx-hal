@@ -2070,6 +2070,22 @@ describe('DatastoreService', () => {
 			reqRelationship1.flush(mockModel2ResponseJson);
 		});
 
+		it('should fetch the relationship with custom relationship name', () => {
+			mockModel.fetchRelationships(['mockModel3Connection']).subscribe((mockModel: MockModel) => {
+				expect(mockModel.mockModel3Connection).toBeTruthy();
+				expect(mockModel.mockModel3Connection instanceof MockModel2).toBeTrue();
+			});
+
+			const reqRelationship1: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/Mock2/nup52clo`,
+			);
+			expect(reqRelationship1.request.method).toEqual('GET');
+
+			httpTestingController.expectNone(`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`);
+
+			reqRelationship1.flush(mockModel2ResponseJson);
+		});
+
 		it('should fetch nested relationships', () => {
 			mockModel.fetchRelationships(['mockModel2Connection.mockModel3s']).subscribe();
 

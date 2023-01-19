@@ -23,6 +23,12 @@ export class MockModel extends HalModel {
 	})
 	mockModel2Connection: MockModel2;
 
+	@HasOne({
+		propertyClass: MockModel2,
+		externalName: 'config',
+	})
+	mockModel3Connection: MockModel2;
+
 	@HasMany({
 		itemsType: MockModel2,
 		includeInPayload: true,
