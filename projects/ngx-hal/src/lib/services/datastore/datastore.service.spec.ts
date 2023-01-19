@@ -11,6 +11,7 @@ import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
 import { CarModel } from '../../mocks/car.mock.model';
 import carsResponseJson from '../../mocks/cars-response.json';
+import modelWithCustomNamesResponseJson from '../../mocks/model-with-custom-names-response.json';
 import listItemsWithDifferentListNamesResponseJson from '../../mocks/list-items-with-different-list-names-response.json';
 import mockListWithEmbeddedJson from '../../mocks/mock-list-with-embedded.json';
 import { MockModel } from '../../mocks/mock-model';
@@ -23,6 +24,7 @@ import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-
 import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 import { DatastoreService } from './datastore.service';
+import { MockModelWithCustomNames } from '../../mocks/mock-model-with-custom-names';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -2255,6 +2257,62 @@ describe('DatastoreService', () => {
 			);
 
 			req.flush(mockModelResponseJson);
+		});
+	});
+
+	describe('externalName of model relationships', () => {
+		it('should get a URL from a link relationship with a custom name', () => {
+			datastoreService
+				.findOne(MockModelWithCustomNames, 'jf7s90')
+				.subscribe((model: MockModelWithCustomNames) => {
+					expect(model.getRelationshipUrl('simpleLinkRelationship')).toEqual(
+						`${BASE_NETWORK_URL}/simpleLinkRelationship123`,
+					);
+
+					expect(model.getRelationshipUrl('customNameOfSimpleLinkRelationship')).toBeUndefined();
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/external-names-mock-model-endpoint/jf7s90`,
+			);
+
+			req.flush(modelWithCustomNamesResponseJson);
+		});
+
+		it('should get a URL from a hasOne relationship with a custom name', () => {
+			datastoreService
+				.findOne(MockModelWithCustomNames, 'jf7s90')
+				.subscribe((model: MockModelWithCustomNames) => {
+					expect(model.getRelationshipUrl('mockModel2Connection')).toEqual(
+						`${BASE_NETWORK_URL}/Mock2/nup52clo`,
+					);
+
+					expect(model.getRelationshipUrl('customNameOfMockModel2')).toBeUndefined();
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/external-names-mock-model-endpoint/jf7s90`,
+			);
+
+			req.flush(modelWithCustomNamesResponseJson);
+		});
+
+		it('should get a URL from a hasMany relationship with a custom name', () => {
+			datastoreService
+				.findOne(MockModelWithCustomNames, 'jf7s90')
+				.subscribe((model: MockModelWithCustomNames) => {
+					expect(model.getRelationshipUrl('someEmptyResources')).toEqual(
+						`${BASE_NETWORK_URL}/Mock2?getSomeResources=true`,
+					);
+
+					expect(model.getRelationshipUrl('customNameOfSomeEmptyResources')).toBeUndefined();
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/external-names-mock-model-endpoint/jf7s90`,
+			);
+
+			req.flush(modelWithCustomNamesResponseJson);
 		});
 	});
 });
