@@ -3,4 +3,5 @@ export enum ModelProperty {
 	HasMany = 'HasMany',
 	HasOne = 'HasOne',
 	HeaderAttribute = 'HeaderAttribute',
+	Link = 'Link',
 }
