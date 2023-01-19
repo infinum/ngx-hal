@@ -2241,4 +2241,20 @@ describe('DatastoreService', () => {
 			expect(result).toEqual(expectedResult);
 		});
 	});
+
+	describe('LinkRelationship property', () => {
+		it('should get URL from a link relationship', () => {
+			datastoreService.findOne(MockModel, 'mockModelId').subscribe((model: MockModel) => {
+				expect(model.getRelationshipUrl('simpleLinkRelationship')).toEqual(
+					`${BASE_NETWORK_URL}/simpleLinkRelationship123`,
+				);
+			});
+
+			const req: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`,
+			);
+
+			req.flush(mockModelResponseJson);
+		});
+	});
 });

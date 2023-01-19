@@ -25,3 +25,9 @@ export interface HasOneModelProperty extends ModelProperty {
 export interface HasManyModelProperty extends ModelProperty {
 	includeInPayload?: boolean;
 }
+
+export interface LinkProperty extends ModelProperty {
+	type: ModelPropertyEnum;
+	externalName?: string;
+	name: string;
+}

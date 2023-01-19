@@ -208,7 +208,7 @@ export class DatastoreService {
 							// The original relationship URL on the parent model must be replaced because
 							// the actual relationship URL may have some query parameteres attached to it
 							model.links[externalRelationshipName].href = fetchedRelation.uniqueModelIdentificator;
-						} else {
+						} else if (property.type === ModelPropertyEnum.HasMany) {
 							model.updateHasManyDocumentIdentificator(
 								property,
 								fetchedRelation.uniqueModelIdentificator,
@@ -631,7 +631,6 @@ export class DatastoreService {
 		);
 	}
 
-	// TODO this updated Attribute properties only, implement HasOne and HasMany properties
 	private updateModelWithChangedProperties<T extends HalModel>(model: T, payload: object) {
 		Object.keys(payload).forEach((externalPropertyName: string) => {
 			const property: AttributeModelProperty = model.getPropertyData(externalPropertyName);
