@@ -2243,7 +2243,7 @@ describe('DatastoreService', () => {
 	});
 
 	describe('LinkRelationship property', () => {
-		it('should ///', () => {
+		it('should get URL from a link relationship', () => {
 			datastoreService.findOne(MockModel, 'mockModelId').subscribe((model: MockModel) => {
 				expect(model.getRelationshipUrl('simpleLinkRelationship')).toEqual(
 					`${BASE_NETWORK_URL}/simpleLinkRelationship123`,
