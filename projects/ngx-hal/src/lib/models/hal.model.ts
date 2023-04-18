@@ -450,10 +450,10 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		modelProperty: AttributeModelProperty | HeaderAttributeModelProperty,
 		rawPropertyValue: any,
 	): void {
-		let propertyValue = rawPropertyValue;
-		if (modelProperty.transformResponseValue) {
-			propertyValue = modelProperty.transformResponseValue(rawPropertyValue);
-		}
+		const propertyValue = modelProperty.transformResponseValue
+			? modelProperty.transformResponseValue(rawPropertyValue)
+			: rawPropertyValue;
+
 		if (isString(modelProperty.propertyClass)) {
 			this[modelProperty.name] = this.datastore.findModelClassByType(modelProperty.propertyClass);
 		} else if (isFunction(modelProperty.propertyClass)) {
