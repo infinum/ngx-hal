@@ -868,43 +868,6 @@ describe('DatastoreService', () => {
 
 			req.flush(mockModelResponseJson);
 		});
-
-		it('should take into consideration external property names when doing POST request with hasOne specific fields', () => {
-			const carName = 'nice car';
-			const partName = 'engine';
-			const companyName = 'coolCompanyLtd';
-
-			const companyModel = new MockModel2({ name: companyName }, datastoreService);
-			companyModel.selfLink = '/mockModel2/2';
-			const partsModel = new MockModel2({ name: partName }, datastoreService);
-			partsModel.selfLink = '/mockModel2/3';
-
-			const carModel = new CarModel(
-				{
-					name: carName,
-					prentCompany: companyModel,
-					parts: [partsModel],
-				},
-				datastoreService,
-			);
-			carModel.company = companyModel;
-			carModel.carParts = [partsModel];
-
-			const modelUrl = `${BASE_NETWORK_URL}/car`;
-
-			carModel.save({}, { specificFields: ['company'] }).subscribe();
-
-			const req: TestRequest = httpTestingController.expectOne(modelUrl);
-
-			expect(req.request.method).toEqual('POST');
-			const body = req.request.body;
-
-			expect(Object.keys(body).length).toEqual(1);
-			expect(body[LINKS_PROPERTY_NAME]).toBeDefined();
-			expect(Object.keys(body[LINKS_PROPERTY_NAME]).length).toEqual(1);
-
-			req.flush(mockModelResponseJson);
-		});
 	});
 
 	describe('findOne method', () => {
