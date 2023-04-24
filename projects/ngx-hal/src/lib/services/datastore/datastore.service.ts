@@ -38,6 +38,7 @@ import { HalStorage } from '../../classes/hal-storage/hal-storage';
 import { isString } from '../../utils/is-string/is-string.util';
 import { isFunction } from '../../helpers/is-function/is-function.helper';
 import { populateTemplatedUrl } from '../../helpers/populate-templated-url/populate-templated-url.helper';
+import { getObjProperty } from '../../helpers/metadata/metadata.helper';
 
 @Injectable()
 export class DatastoreService {
@@ -53,10 +54,7 @@ export class DatastoreService {
 	constructor(public http: HttpClient) {}
 
 	private getHalDocumentClass<T extends HalModel>(): HalDocumentConstructor<T> {
-		return (
-			Reflect.getMetadata(HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY, this.constructor) ||
-			HalDocument
-		);
+		return getObjProperty(this, HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY, null) || HalDocument;
 	}
 
 	public buildUrl(model?: HalModel): string {
