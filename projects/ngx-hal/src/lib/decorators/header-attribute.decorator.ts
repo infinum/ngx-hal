@@ -1,6 +1,7 @@
 import { HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { getObjProperty } from '../helpers/metadata/metadata.helper';
+import { updatePropertyMetadata } from '../helpers/update-property-metadata/update-property-metadata.helper';
 import {
 	DEFAULT_HEADER_ATTRIBUTE_OPTIONS,
 	HeaderAttributeOptions,
@@ -37,6 +38,6 @@ export function HeaderAttribute(options: HeaderAttributeOptions = {}) {
 			attributeProperty.propertyClass = headerAttributeOptions.useClass;
 		}
 
-		existingHeaderAttributeProperties.push(attributeProperty);
+		updatePropertyMetadata(existingHeaderAttributeProperties, attributeProperty);
 	};
 }

@@ -1,6 +1,7 @@
 import { HAS_MANY_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { ModelProperty } from '../enums/model-property.enum';
 import { getObjProperty } from '../helpers/metadata/metadata.helper';
+import { updatePropertyMetadata } from '../helpers/update-property-metadata/update-property-metadata.helper';
 import { DEFAULT_HAS_MANY_OPTIONS, HasManyOptions } from '../interfaces/has-many-options.interface';
 import { HasManyModelProperty } from '../interfaces/model-property.interface';
 import { HalModel } from '../models/hal.model';
@@ -24,6 +25,6 @@ export function HasMany(options: HasManyOptions) {
 			externalName: options.externalName || propertyName,
 		};
 
-		existingHasManyProperties.push(hasManyProperty);
+		updatePropertyMetadata(existingHasManyProperties, hasManyProperty);
 	};
 }

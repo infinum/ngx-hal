@@ -1,6 +1,7 @@
 import { ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { getObjProperty } from '../helpers/metadata/metadata.helper';
+import { updatePropertyMetadata } from '../helpers/update-property-metadata/update-property-metadata.helper';
 import {
 	AttributeOptions,
 	DEFAULT_ATTRIBUTE_OPTIONS,
@@ -31,6 +32,6 @@ export function Attribute(options: AttributeOptions = {}) {
 			attributeProperty.propertyClass = attributeOptions.useClass;
 		}
 
-		existingAttributeProperties.push(attributeProperty);
+		updatePropertyMetadata(existingAttributeProperties, attributeProperty);
 	};
 }
