@@ -1097,8 +1097,8 @@ export class DatastoreService {
 		return this._storage;
 	}
 
-	public findModelClassByType(modelType: string): typeof HalModel {
-		const modelClass: typeof HalModel = this.modelTypes.find(
+	public findModelClassByType<T extends HalModel>(modelType: string): ModelConstructor<T> {
+		const modelClass: ModelConstructor<T> = this.modelTypes.find(
 			(modelClass) => modelClass.modelType === modelType,
 		);
 

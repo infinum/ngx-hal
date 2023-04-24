@@ -450,17 +450,20 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		modelProperty: AttributeModelProperty | HeaderAttributeModelProperty,
 		rawPropertyValue: any,
 	): void {
+		const propertyValue = modelProperty.transformResponseValue
+			? modelProperty.transformResponseValue(rawPropertyValue)
+			: rawPropertyValue;
+
 		if (isString(modelProperty.propertyClass)) {
-			this[modelProperty.name] = this.datastore.findModelClassByType(modelProperty.propertyClass);
+			const propertyClass = this.datastore.findModelClassByType(modelProperty.propertyClass);
+			this[modelProperty.name] = new propertyClass(propertyValue);
 		} else if (isFunction(modelProperty.propertyClass)) {
-			const propertyClass = modelProperty.propertyClass(rawPropertyValue);
-			this[modelProperty.name] = new propertyClass(rawPropertyValue);
+			const propertyClass = modelProperty.propertyClass(propertyValue);
+			this[modelProperty.name] = new propertyClass(propertyValue);
 		} else if (modelProperty.propertyClass) {
-			this[modelProperty.name] = new modelProperty.propertyClass(rawPropertyValue);
-		} else if (modelProperty.transformResponseValue) {
-			this[modelProperty.name] = modelProperty.transformResponseValue(rawPropertyValue);
+			this[modelProperty.name] = new modelProperty.propertyClass(propertyValue);
 		} else {
-			this[modelProperty.name] = rawPropertyValue;
+			this[modelProperty.name] = propertyValue;
 		}
 	}
 
