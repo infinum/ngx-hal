@@ -372,6 +372,57 @@ describe('DatastoreService', () => {
 		});
 	});
 
+	describe('Attribute decorator', () => {
+		it('should create an instance of a class provided via useClass property', () => {
+			const customUrl = 'model-endpoint-2';
+
+			datastoreService
+				.request('get', customUrl, {}, MockModel, true, false)
+				.subscribe((model: MockModel) => {
+					expect(model.prop2 instanceof MockModel2).toBeTruthy();
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModelResponseJson);
+		});
+
+		it('should transform a value of property before creating a model instance', () => {
+			const customUrl = 'model-endpoint-2';
+
+			datastoreService
+				.request('get', customUrl, {}, MockModel, true, false)
+				.subscribe((model: MockModel) => {
+					expect(model.prop3).toBe('transformed name');
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModelResponseJson);
+		});
+
+		it('should create an instance of a class provided via useClass property and transform response value before using it', () => {
+			const customUrl = 'model-endpoint-2';
+
+			datastoreService
+				.request('get', customUrl, {}, MockModel, true, false)
+				.subscribe((model: MockModel) => {
+					expect(model.prop4 instanceof MockModel2).toBeTruthy();
+					expect(model.prop4.name).toBe('transformed name');
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModelResponseJson);
+		});
+	});
+
 	describe('save method', () => {
 		it('should make a POST request if saving newly created model', () => {
 			const mockModel = new MockModel({}, datastoreService);
@@ -805,6 +856,43 @@ describe('DatastoreService', () => {
 			const modelUrl = `${BASE_NETWORK_URL}/car`;
 
 			carModel.save({}, { specificFields: ['carParts'] }).subscribe();
+
+			const req: TestRequest = httpTestingController.expectOne(modelUrl);
+
+			expect(req.request.method).toEqual('POST');
+			const body = req.request.body;
+
+			expect(Object.keys(body).length).toEqual(1);
+			expect(body[LINKS_PROPERTY_NAME]).toBeDefined();
+			expect(Object.keys(body[LINKS_PROPERTY_NAME]).length).toEqual(1);
+
+			req.flush(mockModelResponseJson);
+		});
+
+		it('should take into consideration external property names when doing POST request with hasOne specific fields', () => {
+			const carName = 'nice car';
+			const partName = 'engine';
+			const companyName = 'coolCompanyLtd';
+
+			const companyModel = new MockModel2({ name: companyName }, datastoreService);
+			companyModel.selfLink = '/mockModel2/2';
+			const partsModel = new MockModel2({ name: partName }, datastoreService);
+			partsModel.selfLink = '/mockModel2/3';
+
+			const carModel = new CarModel(
+				{
+					name: carName,
+					prentCompany: companyModel,
+					parts: [partsModel],
+				},
+				datastoreService,
+			);
+			carModel.company = companyModel;
+			carModel.carParts = [partsModel];
+
+			const modelUrl = `${BASE_NETWORK_URL}/car`;
+
+			carModel.save({}, { specificFields: ['company'] }).subscribe();
 
 			const req: TestRequest = httpTestingController.expectOne(modelUrl);
 
