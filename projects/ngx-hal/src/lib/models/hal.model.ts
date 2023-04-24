@@ -49,6 +49,7 @@ import { isString } from '../utils/is-string/is-string.util';
 import { isFunction } from '../helpers/is-function/is-function.helper';
 import { ModelEndpoints } from '../interfaces/model-endpoints.interface';
 import { map } from 'rxjs/operators';
+import { getArrayObjProperty, getObjProperty } from '../helpers/metadata/metadata.helper';
 
 export abstract class HalModel<Datastore extends DatastoreService = DatastoreService> {
 	private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -104,7 +105,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 	}
 
 	public getHalDocumentClass<T extends this>(): HalDocumentConstructor<T> {
-		return Reflect.getMetadata(HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, this.constructor);
+		return getObjProperty(this, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY);
 	}
 
 	public getRelationshipUrl(relationshipName: string): string {
@@ -370,23 +371,23 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 	}
 
 	private get attributeProperties(): Array<AttributeModelProperty> {
-		return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
+		return getArrayObjProperty(this, ATTRIBUTE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get headerAttributeProperties(): Array<HeaderAttributeModelProperty> {
-		return Reflect.getMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
+		return getArrayObjProperty(this, HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get hasOneProperties(): Array<HasOneModelProperty> {
-		return Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, this) || [];
+		return getArrayObjProperty(this, HAS_ONE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get hasManyProperties(): Array<HasManyModelProperty> {
-		return Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, this) || [];
+		return getArrayObjProperty(this, HAS_MANY_PROPERTIES_METADATA_KEY);
 	}
 
 	private get linkProperties(): Array<LinkProperty> {
-		return Reflect.getMetadata(LINK_PROPERTIES_METADATA_KEY, this) || [];
+		return getArrayObjProperty(this, LINK_PROPERTIES_METADATA_KEY);
 	}
 
 	private initializeHasOneProperties(): void {
