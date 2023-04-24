@@ -25,6 +25,7 @@ import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 import { DatastoreService } from './datastore.service';
 import { MockModelWithCustomNames } from '../../mocks/mock-model-with-custom-names';
+import { MockModelAttributes } from '../../mocks/mock-model-attributes';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -377,8 +378,8 @@ describe('DatastoreService', () => {
 			const customUrl = 'model-endpoint-2';
 
 			datastoreService
-				.request('get', customUrl, {}, MockModel, true, false)
-				.subscribe((model: MockModel) => {
+				.request('get', customUrl, {}, MockModelAttributes, true, false)
+				.subscribe((model: MockModelAttributes) => {
 					expect(model.prop2 instanceof MockModel2).toBeTruthy();
 				});
 
@@ -393,8 +394,8 @@ describe('DatastoreService', () => {
 			const customUrl = 'model-endpoint-2';
 
 			datastoreService
-				.request('get', customUrl, {}, MockModel, true, false)
-				.subscribe((model: MockModel) => {
+				.request('get', customUrl, {}, MockModelAttributes, true, false)
+				.subscribe((model: MockModelAttributes) => {
 					expect(model.prop3).toBe('transformed name');
 				});
 
@@ -409,8 +410,8 @@ describe('DatastoreService', () => {
 			const customUrl = 'model-endpoint-2';
 
 			datastoreService
-				.request('get', customUrl, {}, MockModel, true, false)
-				.subscribe((model: MockModel) => {
+				.request('get', customUrl, {}, MockModelAttributes, true, false)
+				.subscribe((model: MockModelAttributes) => {
 					expect(model.prop4 instanceof MockModel2).toBeTruthy();
 					expect(model.prop4.name).toBe('transformed name');
 				});

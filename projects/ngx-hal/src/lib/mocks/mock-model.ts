@@ -17,26 +17,6 @@ export class MockModel extends HalModel {
 	@Attribute()
 	prop1: string;
 
-	@Attribute({
-		useClass: MockModel2,
-	})
-	prop2: MockModel2;
-
-	@Attribute({
-		transformResponseValue: (value: any) => {
-			return 'transformed name';
-		},
-	})
-	prop3: string;
-
-	@Attribute({
-		useClass: MockModel2,
-		transformResponseValue: (value: any) => {
-			return Object.assign({ name: 'transformed name' }, value);
-		},
-	})
-	prop4: MockModel2;
-
 	@HasOne({
 		includeInPayload: true,
 		propertyClass: MockModel2,
