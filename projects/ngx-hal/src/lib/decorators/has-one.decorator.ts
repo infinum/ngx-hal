@@ -6,7 +6,7 @@ import { HasOneModelProperty } from '../interfaces/model-property.interface';
 import { HalModel } from '../models/hal.model';
 import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
 
-export function HasOne(options: HasOneOptions = {}) {
+export function HasOne(options: HasOneOptions) {
 	return (model: HalModel, propertyName: string) => {
 		const hasOneOptions: HasOneOptions = deepmergeWrapper(DEFAULT_HAS_ONE_OPTIONS, options);
 

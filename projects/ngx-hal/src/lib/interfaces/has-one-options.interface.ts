@@ -3,7 +3,7 @@ import { ModelConstructor, ModelConstructorFn } from '../types/model-constructor
 export interface HasOneOptions {
 	externalName?: string;
 	includeInPayload?: boolean;
-	propertyClass?: string | ModelConstructor<any> | ModelConstructorFn<any>;
+	propertyClass: string | ModelConstructor<any> | ModelConstructorFn<any>;
 }
 
 export const DEFAULT_HAS_ONE_OPTIONS = {
