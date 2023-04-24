@@ -2,6 +2,7 @@ import { Attribute } from '../decorators/attribute.decorator';
 import { ModelConfig } from '../decorators/model-config.decorator';
 import { HalModel } from '../models/hal.model';
 import { MockModel2 } from './mock-model-2';
+import { MockAttributesRel } from './mock-model-attributes-rel';
 
 @ModelConfig({
 	type: 'MockAttributes',
@@ -33,4 +34,9 @@ export class MockModelAttributes extends HalModel {
 		},
 	})
 	prop4: MockModel2;
+
+	@Attribute({
+		useClass: 'MockAttributesRel',
+	})
+	prop5: MockAttributesRel;
 }

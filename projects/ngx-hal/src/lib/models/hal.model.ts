@@ -455,7 +455,8 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 			: rawPropertyValue;
 
 		if (isString(modelProperty.propertyClass)) {
-			this[modelProperty.name] = this.datastore.findModelClassByType(modelProperty.propertyClass);
+			const propertyClass = this.datastore.findModelClassByType(modelProperty.propertyClass);
+			this[modelProperty.name] = new propertyClass(propertyValue);
 		} else if (isFunction(modelProperty.propertyClass)) {
 			const propertyClass = modelProperty.propertyClass(propertyValue);
 			this[modelProperty.name] = new propertyClass(propertyValue);

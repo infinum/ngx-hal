@@ -26,6 +26,7 @@ import { RelationshipRequestDescriptor } from '../../types/relationship-request-
 import { DatastoreService } from './datastore.service';
 import { MockModelWithCustomNames } from '../../mocks/mock-model-with-custom-names';
 import { MockModelAttributes } from '../../mocks/mock-model-attributes';
+import { MockAttributesRel } from '../../mocks/mock-model-attributes-rel';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -374,6 +375,10 @@ describe('DatastoreService', () => {
 	});
 
 	describe('Attribute decorator', () => {
+		beforeEach(() => {
+			datastoreService.modelTypes = [MockAttributesRel];
+		});
+
 		it('should create an instance of a class provided via useClass property', () => {
 			const customUrl = 'model-endpoint-2';
 
@@ -414,6 +419,22 @@ describe('DatastoreService', () => {
 				.subscribe((model: MockModelAttributes) => {
 					expect(model.prop4 instanceof MockModel2).toBeTruthy();
 					expect(model.prop4.name).toBe('transformed name');
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModelResponseJson);
+		});
+
+		it('should create an instance of a class provided via useClass property provided as a string', () => {
+			const customUrl = 'model-endpoint-2';
+
+			datastoreService
+				.request('get', customUrl, {}, MockModelAttributes, true, false)
+				.subscribe((model: MockModelAttributes) => {
+					expect(model.prop5 instanceof MockAttributesRel).toBeTruthy();
 				});
 
 			const req: TestRequest = httpTestingController.expectOne(customUrl);
