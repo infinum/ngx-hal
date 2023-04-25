@@ -16,6 +16,7 @@ export class CarModel extends HalModel {
 	carName: string;
 
 	@HasOne({
+		propertyClass: MockModel2,
 		includeInPayload: true,
 		externalName: 'parentCompany',
 	})

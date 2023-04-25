@@ -17,8 +17,7 @@
 		"lib": ["es2018", "dom"],
 		"paths": {
 			"ngx-hal": ["dist/ngx-hal"],
-			"ngx-hal/*": ["dist/ngx-hal/*"],
-			"core-js/es7/reflect": ["node_modules/core-js/proposals/reflect-metadata"]
+			"ngx-hal/*": ["dist/ngx-hal/*"]
 		}
 	}
 }

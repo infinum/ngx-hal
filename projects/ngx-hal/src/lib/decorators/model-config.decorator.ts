@@ -1,6 +1,7 @@
 import { ModelOptions, DEFAULT_MODEL_OPTIONS } from '../interfaces/model-options.interface';
 import { HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY } from '../constants/metadata.constant';
 import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
+import { setObjProperty } from '../helpers/metadata/metadata.helper';
 
 export function ModelConfig(config: ModelOptions) {
 	return function (target: any) {
@@ -9,7 +10,7 @@ export function ModelConfig(config: ModelOptions) {
 			value: configValue,
 			writable: true,
 		});
-		Reflect.defineMetadata(HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, config.halDocumentClass, target);
+		setObjProperty(target, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, config.halDocumentClass);
 		return target;
 	};
 }

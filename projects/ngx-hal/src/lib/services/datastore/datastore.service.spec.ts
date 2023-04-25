@@ -28,6 +28,10 @@ import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 import { DatastoreService } from './datastore.service';
 import { MockModelWithCustomNames } from '../../mocks/mock-model-with-custom-names';
+import { MockModelAttributes } from '../../mocks/mock-model-attributes';
+import { MockAttributesRel } from '../../mocks/mock-model-attributes-rel';
+import { MockChildModel } from '../../mocks/mock-child-model';
+import { MockChildModel2 } from '../../mocks/mock-child-model-2';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -89,6 +93,23 @@ describe('DatastoreService', () => {
 			expect(carModel.carParts).toBeDefined();
 			expect(carModel.carParts.length).toBe(1);
 			expect(carModel.carParts[0].name).toBe(partName);
+		});
+
+		it('should return property metadata of the most specific class', () => {
+			const mockModel = new MockChildModel(
+				{
+					name: 'mock child model',
+					mockModel2Connection: new MockChildModel2({ name: 'mock 2 child' }, datastoreService),
+				},
+				datastoreService,
+			);
+
+			expect(mockModel.getPropertyData('mockModel2Connection').propertyClass).toBe(MockChildModel2);
+
+			const mockModel2ConnectionMetadata = mockModel['hasOneProperties']
+				.map((property) => property.name)
+				.filter((name) => name === 'mockModel2Connection');
+			expect(mockModel2ConnectionMetadata.length).toBe(1);
 		});
 	});
 
@@ -372,6 +393,77 @@ describe('DatastoreService', () => {
 			});
 
 			calls[0].flush(mockModelResponseJson);
+		});
+	});
+
+	describe('Attribute decorator', () => {
+		beforeEach(() => {
+			datastoreService.modelTypes = [MockAttributesRel];
+		});
+
+		it('should create an instance of a class provided via useClass property', () => {
+			const customUrl = 'model-endpoint-2';
+
+			datastoreService
+				.request('get', customUrl, {}, MockModelAttributes, true, false)
+				.subscribe((model: MockModelAttributes) => {
+					expect(model.prop2 instanceof MockModel2).toBeTruthy();
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModelResponseJson);
+		});
+
+		it('should transform a value of property before creating a model instance', () => {
+			const customUrl = 'model-endpoint-2';
+
+			datastoreService
+				.request('get', customUrl, {}, MockModelAttributes, true, false)
+				.subscribe((model: MockModelAttributes) => {
+					expect(model.prop3).toBe('transformed name');
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModelResponseJson);
+		});
+
+		it('should create an instance of a class provided via useClass property and transform response value before using it', () => {
+			const customUrl = 'model-endpoint-2';
+
+			datastoreService
+				.request('get', customUrl, {}, MockModelAttributes, true, false)
+				.subscribe((model: MockModelAttributes) => {
+					expect(model.prop4 instanceof MockModel2).toBeTruthy();
+					expect(model.prop4.name).toBe('transformed name');
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModelResponseJson);
+		});
+
+		it('should create an instance of a class provided via useClass property provided as a string', () => {
+			const customUrl = 'model-endpoint-2';
+
+			datastoreService
+				.request('get', customUrl, {}, MockModelAttributes, true, false)
+				.subscribe((model: MockModelAttributes) => {
+					expect(model.prop5 instanceof MockAttributesRel).toBeTruthy();
+				});
+
+			const req: TestRequest = httpTestingController.expectOne(customUrl);
+
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModelResponseJson);
 		});
 	});
 

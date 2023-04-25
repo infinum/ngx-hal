@@ -49,6 +49,7 @@ import { isString } from '../utils/is-string/is-string.util';
 import { isFunction } from '../helpers/is-function/is-function.helper';
 import { ModelEndpoints } from '../interfaces/model-endpoints.interface';
 import { map } from 'rxjs/operators';
+import { getArrayObjProperty, getObjProperty } from '../helpers/metadata/metadata.helper';
 
 export abstract class HalModel<Datastore extends DatastoreService = DatastoreService> {
 	private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
@@ -104,7 +105,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 	}
 
 	public getHalDocumentClass<T extends this>(): HalDocumentConstructor<T> {
-		return Reflect.getMetadata(HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, this.constructor);
+		return getObjProperty(this, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY);
 	}
 
 	public getRelationshipUrl(relationshipName: string): string {
@@ -376,23 +377,37 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 	}
 
 	private get attributeProperties(): Array<AttributeModelProperty> {
-		return Reflect.getMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
+		return this.getPropertiesMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get headerAttributeProperties(): Array<HeaderAttributeModelProperty> {
-		return Reflect.getMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY, this) || [];
+		return this.getPropertiesMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get hasOneProperties(): Array<HasOneModelProperty> {
-		return Reflect.getMetadata(HAS_ONE_PROPERTIES_METADATA_KEY, this) || [];
+		return this.getPropertiesMetadata(HAS_ONE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get hasManyProperties(): Array<HasManyModelProperty> {
-		return Reflect.getMetadata(HAS_MANY_PROPERTIES_METADATA_KEY, this) || [];
+		return this.getPropertiesMetadata(HAS_MANY_PROPERTIES_METADATA_KEY);
 	}
 
 	private get linkProperties(): Array<LinkProperty> {
-		return Reflect.getMetadata(LINK_PROPERTIES_METADATA_KEY, this) || [];
+		return this.getPropertiesMetadata(LINK_PROPERTIES_METADATA_KEY);
+	}
+
+	private getPropertiesMetadata<T extends ModelProperty>(propertyKey: string): Array<T> {
+		const propertiesMetadata: Array<T> = getArrayObjProperty(this, propertyKey);
+
+		const uniqueMetadata: Array<T> = [];
+
+		propertiesMetadata.forEach((property: T) => {
+			if (uniqueMetadata.map((metadata: T) => metadata.name).indexOf(property.name) === -1) {
+				uniqueMetadata.push(property);
+			}
+		});
+
+		return uniqueMetadata;
 	}
 
 	private initializeHasOneProperties(): void {
@@ -454,17 +469,20 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		modelProperty: AttributeModelProperty | HeaderAttributeModelProperty,
 		rawPropertyValue: any,
 	): void {
+		const propertyValue = modelProperty.transformResponseValue
+			? modelProperty.transformResponseValue(rawPropertyValue)
+			: rawPropertyValue;
+
 		if (isString(modelProperty.propertyClass)) {
-			this[modelProperty.name] = this.datastore.findModelClassByType(modelProperty.propertyClass);
+			const propertyClass = this.datastore.findModelClassByType(modelProperty.propertyClass);
+			this[modelProperty.name] = new propertyClass(propertyValue);
 		} else if (isFunction(modelProperty.propertyClass)) {
-			const propertyClass = modelProperty.propertyClass(rawPropertyValue);
-			this[modelProperty.name] = new propertyClass(rawPropertyValue);
+			const propertyClass = modelProperty.propertyClass(propertyValue);
+			this[modelProperty.name] = new propertyClass(propertyValue);
 		} else if (modelProperty.propertyClass) {
-			this[modelProperty.name] = new modelProperty.propertyClass(rawPropertyValue);
-		} else if (modelProperty.transformResponseValue) {
-			this[modelProperty.name] = modelProperty.transformResponseValue(rawPropertyValue);
+			this[modelProperty.name] = new modelProperty.propertyClass(propertyValue);
 		} else {
-			this[modelProperty.name] = rawPropertyValue;
+			this[modelProperty.name] = propertyValue;
 		}
 	}
 

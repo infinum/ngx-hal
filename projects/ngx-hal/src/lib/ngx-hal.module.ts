@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import 'reflect-metadata';
 
 @NgModule({
 	declarations: [],

@@ -44,7 +44,6 @@
 		"@angular/router": "~13.3.11",
 		"core-js": "^3.2.1",
 		"deepmerge": "4.2.2",
-		"reflect-metadata": "^0.1.13",
 		"rxjs": "~6.5.3",
 		"tslib": "^2.0.0",
 		"uri-templates": "^0.2.0",
