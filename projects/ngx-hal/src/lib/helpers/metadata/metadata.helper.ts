@@ -5,8 +5,7 @@ export function getObjProperty(obj, propertyKey: string, defaultValue: any = [])
 		setObjProperty(objClass, propertyKey, defaultValue);
 	}
 
-	const x = objClass[propertyKey];
-	return x;
+	return objClass[propertyKey];
 }
 
 export function setObjProperty(objClass, propertyKey, value) {

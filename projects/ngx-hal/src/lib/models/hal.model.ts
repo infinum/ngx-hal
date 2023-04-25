@@ -105,7 +105,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 	}
 
 	public getHalDocumentClass<T extends this>(): HalDocumentConstructor<T> {
-		return getObjProperty(this, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY);
+		return getObjProperty(this, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, null);
 	}
 
 	public getRelationshipUrl(relationshipName: string): string {
