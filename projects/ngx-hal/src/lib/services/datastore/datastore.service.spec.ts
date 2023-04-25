@@ -17,8 +17,11 @@ import mockListWithEmbeddedJson from '../../mocks/mock-list-with-embedded.json';
 import { MockModel } from '../../mocks/mock-model';
 import { MockModel2 } from '../../mocks/mock-model-2';
 import mockModel2ResponseJson from '../../mocks/mock-model-2-response.json';
+import mockModels2ResponseJson from '../../mocks/mock-models-2-response.json';
+import minimalMockListResponseJson from '../../mocks/minimal-mock-list-response.json';
 import mockModelBareMinimumResponseJson from '../../mocks/mock-model-bare-minimum-response.json';
 import mockModelResponseJson from '../../mocks/mock-model-response.json';
+import mockModelResponseWithEmbeddedRelationshipJson from '../../mocks/mock-model-response-with-embedded-relationship.json';
 import { MockTemplatedModel } from '../../mocks/mock-model-templated';
 import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
 import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
@@ -965,6 +968,47 @@ describe('DatastoreService', () => {
 				`${BASE_NETWORK_URL}/Mock2?getSomeResources=true`,
 			);
 			expect(req.request.method).toEqual('GET');
+		});
+
+		it('should make a GET request for the original model, a request for hasOne relationship, and a request for a hasOne relationship of that relationship', () => {
+			datastoreService
+				.findOne(MockModel, 'mockModelId', ['mockModel2Connection.mockModel3s'])
+				.subscribe();
+
+			const originalReq: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`,
+			);
+			expect(originalReq.request.method).toEqual('GET');
+
+			originalReq.flush(mockModelResponseJson);
+
+			const req: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/Mock2/nup52clo`,
+			);
+			expect(req.request.method).toEqual('GET');
+
+			req.flush(mockModel2ResponseJson);
+
+			const req2: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/Mock3`);
+			expect(req2.request.method).toEqual('GET');
+		});
+
+		it('should make a GET request for the original model, skip the request for embedded hasOne relationship, and make a request for a hasOne relationship of that embedded relationship', () => {
+			datastoreService
+				.findOne(MockModel, 'mockModelId', ['mockModel2Connection.mockModel3s'])
+				.subscribe();
+
+			const originalReq: TestRequest = httpTestingController.expectOne(
+				`${BASE_NETWORK_URL}/mock-model-endpoint/mockModelId`,
+			);
+			expect(originalReq.request.method).toEqual('GET');
+
+			originalReq.flush(mockModelResponseWithEmbeddedRelationshipJson);
+
+			httpTestingController.expectNone(`${BASE_NETWORK_URL}/Mock2/nup52clo`);
+
+			const req2: TestRequest = httpTestingController.expectOne(`${BASE_NETWORK_URL}/Mock3`);
+			expect(req2.request.method).toEqual('GET');
 		});
 
 		it('should make a GET request for the original model and skip fetching HasMany relationship if there is no URL', () => {
@@ -1959,11 +2003,78 @@ describe('DatastoreService', () => {
 	});
 
 	describe('find method', () => {
-		xit('should fetch embedded list items', () => {});
+		it('should fetch embedded list items', () => {
+			datastoreService
+				.find(MockModel, {}, true, [])
+				.subscribe((response: HalDocument<MockModel>) => {
+					expect(response?.models.length).toBe(1);
+				});
+
+			const call: TestRequest = httpTestingController.expectOne((request) => {
+				const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
+				expect(request.method).toEqual('GET');
+				return isCorrectUrl;
+			});
+
+			call.flush(mockListWithEmbeddedJson);
+		});
+
+		it('should fetch list items if they are not embedded in the initial response', () => {
+			datastoreService
+				.find(MockModel, {}, true, [])
+				.subscribe((response: HalDocument<MockModel>) => {
+					expect(response?.models.length).toBe(1);
+				});
+
+			const call: TestRequest = httpTestingController.expectOne((request) => {
+				const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
+				expect(request.method).toEqual('GET');
+				return isCorrectUrl;
+			});
+
+			call.flush(minimalMockListResponseJson);
+
+			const relationshipCall: TestRequest = httpTestingController.expectOne((request) => {
+				const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock/1c5e7b79`;
+				expect(request.method).toEqual('GET');
+				return isCorrectUrl;
+			});
+
+			relationshipCall.flush(mockModelResponseJson);
+		});
 
 		xit('should pass proper request options to the requests for fetching embedded list items', () => {});
 
-		xit('should fetch the relationships of embedded list items', () => {});
+		it('should fetch the relationships of embedded list items once', () => {
+			datastoreService
+				.find(MockModel, {}, true, ['someResources'])
+				.subscribe((response: HalDocument<MockModel>) => {
+					expect(response?.models.length).toBe(1);
+					expect(response?.models[0].someResources?.length).toBe(1);
+				});
+
+			const initialRequest: TestRequest = httpTestingController.expectOne((request) => {
+				const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
+				expect(request.method).toEqual('GET');
+				return isCorrectUrl;
+			});
+
+			initialRequest.flush(mockListWithEmbeddedJson);
+
+			const relationshipRequest: TestRequest = httpTestingController.expectOne((request) => {
+				const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2`;
+				expect(request.method).toEqual('GET');
+				return isCorrectUrl;
+			});
+
+			relationshipRequest.flush(mockModels2ResponseJson);
+
+			httpTestingController.expectNone((request) => {
+				const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/Mock2`;
+				expect(request.method).toEqual('GET');
+				return isCorrectUrl;
+			});
+		});
 
 		xit('should pass proper request options while fetching the relationships of embedded list items', () => {});
 
@@ -1978,7 +2089,7 @@ describe('DatastoreService', () => {
 			const httpParams = new HttpParams().set(paramName1, paramValue1);
 			datastoreService.find(MockModel, {}, true, [], { params: httpParams }).subscribe();
 
-			const calls: Array<TestRequest> = httpTestingController.match((request) => {
+			const call: TestRequest = httpTestingController.expectOne((request) => {
 				const isCorrectUrl: boolean = request.url === `${BASE_NETWORK_URL}/mock-model-endpoint`;
 				expect(request.method).toEqual('GET');
 
@@ -1988,10 +2099,10 @@ describe('DatastoreService', () => {
 				return isCorrectUrl;
 			});
 
-			calls[0].flush(mockListWithEmbeddedJson);
+			call.flush(mockListWithEmbeddedJson);
 		});
 
-		it('should make a GET request with HTTP params when a paramater is passed in as an array', () => {
+		it('should make a GET request with HTTP params when a parameter is passed in as an array', () => {
 			const paramName1 = 'testParam';
 			const paramValue1 = 'paramVal';
 
@@ -2013,7 +2124,7 @@ describe('DatastoreService', () => {
 			calls[0].flush(mockListWithEmbeddedJson);
 		});
 
-		it('should make a GET request with HTTP params when a paramater is passed in as an array with multiple values', () => {
+		it('should make a GET request with HTTP params when a parameter is passed in as an array with multiple values', () => {
 			const paramName1 = 'testParam';
 			const paramValue1 = 'paramVal';
 			const paramValue2 = 'paramVal2';

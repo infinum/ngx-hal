@@ -328,20 +328,22 @@ export class DatastoreService {
 		fetchedModels: T | HalDocument<T> = null,
 		storePartialModels?: boolean,
 	): Observable<T | HalDocument<T>> {
+		let models$;
+
 		if (fetchedModels) {
-			return of(fetchedModels);
+			models$ = of(fetchedModels);
+		} else {
+			models$ = this.makeGetRequestWrapper(
+				url,
+				requestsOptions,
+				modelClass,
+				isSingleResource,
+				storePartialModels,
+			);
 		}
 
-		const httpRequest$ = this.makeGetRequestWrapper(
-			url,
-			requestsOptions,
-			modelClass,
-			isSingleResource,
-			storePartialModels,
-		);
-
 		if (includeRelationships.length) {
-			return httpRequest$.pipe(
+			return models$.pipe(
 				flatMap((model: T | HalDocument<T>) => {
 					const models: Array<T> = isSingleResource
 						? ([model] as Array<T>)
@@ -362,7 +364,7 @@ export class DatastoreService {
 			);
 		}
 
-		return httpRequest$;
+		return models$;
 	}
 
 	private makeGetRequestWrapper<T extends HalModel>(
@@ -556,6 +558,9 @@ export class DatastoreService {
 			storePartialModels,
 		).pipe(
 			flatMap((halDocument: HalDocument<T>) => {
+				if (relationshipDescriptors.length) {
+					return of(halDocument);
+				}
 				return this.fetchEmbeddedListItems(
 					halDocument,
 					modelClass,
