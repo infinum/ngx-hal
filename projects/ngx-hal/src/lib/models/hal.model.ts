@@ -371,23 +371,37 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 	}
 
 	private get attributeProperties(): Array<AttributeModelProperty> {
-		return getArrayObjProperty(this, ATTRIBUTE_PROPERTIES_METADATA_KEY);
+		return this.getPropertiesMetadata(ATTRIBUTE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get headerAttributeProperties(): Array<HeaderAttributeModelProperty> {
-		return getArrayObjProperty(this, HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY);
+		return this.getPropertiesMetadata(HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get hasOneProperties(): Array<HasOneModelProperty> {
-		return getArrayObjProperty(this, HAS_ONE_PROPERTIES_METADATA_KEY);
+		return this.getPropertiesMetadata(HAS_ONE_PROPERTIES_METADATA_KEY);
 	}
 
 	private get hasManyProperties(): Array<HasManyModelProperty> {
-		return getArrayObjProperty(this, HAS_MANY_PROPERTIES_METADATA_KEY);
+		return this.getPropertiesMetadata(HAS_MANY_PROPERTIES_METADATA_KEY);
 	}
 
 	private get linkProperties(): Array<LinkProperty> {
-		return getArrayObjProperty(this, LINK_PROPERTIES_METADATA_KEY);
+		return this.getPropertiesMetadata(LINK_PROPERTIES_METADATA_KEY);
+	}
+
+	private getPropertiesMetadata<T extends ModelProperty>(propertyKey: string): Array<T> {
+		const propertiesMetadata: Array<T> = getArrayObjProperty(this, propertyKey);
+
+		const uniqueMetadata: Array<T> = [];
+
+		propertiesMetadata.forEach((property: T) => {
+			if (uniqueMetadata.map((metadata: T) => metadata.name).indexOf(property.name) === -1) {
+				uniqueMetadata.push(property);
+			}
+		});
+
+		return uniqueMetadata;
 	}
 
 	private initializeHasOneProperties(): void {

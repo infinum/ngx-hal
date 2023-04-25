@@ -29,7 +29,7 @@ export function getArrayObjProperty<T>(obj, propertyKey: string): Array<T> {
 		parentMeta = getArrayObjProperty(parentClass, propertyKey);
 	}
 	const meta: Array<T> = getObjProperty(obj, propertyKey);
-	const finalMeta = [].concat(parentMeta, meta);
+	const finalMeta = [].concat(meta, parentMeta);
 
 	return finalMeta;
 }
