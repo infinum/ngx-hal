@@ -27,6 +27,8 @@ import { DatastoreService } from './datastore.service';
 import { MockModelWithCustomNames } from '../../mocks/mock-model-with-custom-names';
 import { MockModelAttributes } from '../../mocks/mock-model-attributes';
 import { MockAttributesRel } from '../../mocks/mock-model-attributes-rel';
+import { MockChildModel } from '../../mocks/mock-child-model';
+import { MockChildModel2 } from '../../mocks/mock-child-model-2';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
@@ -88,6 +90,23 @@ describe('DatastoreService', () => {
 			expect(carModel.carParts).toBeDefined();
 			expect(carModel.carParts.length).toBe(1);
 			expect(carModel.carParts[0].name).toBe(partName);
+		});
+
+		it('should return property metadata of the most specific class', () => {
+			const mockModel = new MockChildModel(
+				{
+					name: 'mock child model',
+					mockModel2Connection: new MockChildModel2({ name: 'mock 2 child' }, datastoreService),
+				},
+				datastoreService,
+			);
+
+			expect(mockModel.getPropertyData('mockModel2Connection').propertyClass).toBe(MockChildModel2);
+
+			const mockModel2ConnectionMetadata = mockModel['hasOneProperties']
+				.map((property) => property.name)
+				.filter((name) => name === 'mockModel2Connection');
+			expect(mockModel2ConnectionMetadata.length).toBe(1);
 		});
 	});
 
