@@ -67,7 +67,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		this.parseAttributes(resource);
 		this.parseHeaderAttributes(rawResponse);
 		this.initializeHasOneProperties();
-		this.initialzieHasManyProperties();
+		this.initializeHasManyProperties();
 		this.extractEmbeddedProperties(resource);
 	}
 
@@ -117,7 +117,13 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		}
 
 		const fieldName: string = property.externalName || relationshipName;
-		return this.links[fieldName] ? this.links[fieldName].href : '';
+		const url = this.links[fieldName] ? this.links[fieldName].href : '';
+
+		if (!url || url.startsWith(LOCAL_MODEL_ID_PREFIX) || url.startsWith(LOCAL_DOCUMENT_ID_PREFIX)) {
+			return null;
+		}
+
+		return url;
 	}
 
 	public getPropertyData(propertyName: string): ModelProperty {
@@ -425,7 +431,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		});
 	}
 
-	private initialzieHasManyProperties(): void {
+	private initializeHasManyProperties(): void {
 		this.hasManyProperties.forEach((property: ModelProperty) => {
 			Object.defineProperty(this, property.name, {
 				configurable: true,
@@ -453,7 +459,6 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 							halDocumentRaw.uniqueModelIdentificator,
 						);
 						this.datastore.storage.save(halDocumentRaw);
-						this.replaceRelationshipModel(property.externalName, halDocumentRaw);
 					}
 				},
 			});
