@@ -2,14 +2,15 @@ import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { SimpleHalStorage } from '../../classes/hal-storage/simple-hal-storage';
 import { EtagHalStorage } from '../../classes/hal-storage/etag-hal-storage';
 import { HalStorage } from './hal-storage';
+import { Pagination } from '../pagination';
 
-export type HalStorageType = SimpleHalStorage | EtagHalStorage;
+export type HalStorageType<P extends Pagination> = SimpleHalStorage<P> | EtagHalStorage<P>;
 
-export function createHalStorage(
+export function createHalStorage<P extends Pagination>(
 	cacheStrategy: CacheStrategy = CacheStrategy.NONE,
-	storageInstance: HalStorage,
-): HalStorageType {
-	let storage: HalStorageType;
+	storageInstance: HalStorage<P>,
+): HalStorageType<P> {
+	let storage: HalStorageType<P>;
 
 	switch (cacheStrategy) {
 		case CacheStrategy.NONE:

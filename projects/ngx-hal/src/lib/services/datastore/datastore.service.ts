@@ -15,7 +15,6 @@ import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
 import { ModelProperty, AttributeModelProperty } from '../../interfaces/model-property.interface';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
-import { PaginationConstructor } from '../../types/pagination.type';
 import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
 import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory';
@@ -39,25 +38,29 @@ import { isString } from '../../utils/is-string/is-string.util';
 import { isFunction } from '../../helpers/is-function/is-function.helper';
 import { populateTemplatedUrl } from '../../helpers/populate-templated-url/populate-templated-url.helper';
 import { getObjProperty } from '../../helpers/metadata/metadata.helper';
+import { Pagination } from '../../classes/pagination';
 
 @Injectable()
-export class DatastoreService {
+export class DatastoreService<P extends Pagination> {
 	public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
 	private _cacheStrategy: CacheStrategy;
 	// tslint:disable-next-line
-	private _storage: HalStorage; // set by Config decorator
+	private _storage: HalStorage<P>; // set by Config decorator
 	private internalStorage = createHalStorage(this.cacheStrategy, this.halStorage);
 	protected httpParamsOptions?: object;
-	public paginationClass: PaginationConstructor;
+	public paginationClass: { new (...args): P };
 	public modelTypes = [];
 
 	constructor(public http: HttpClient) {}
 
-	private getHalDocumentClass<T extends HalModel>(): HalDocumentConstructor<T> {
+	private getHalDocumentClass<
+		T extends HalModel<P>,
+		P extends Pagination,
+	>(): HalDocumentConstructor<T, P> {
 		return getObjProperty(this, HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY, null) || HalDocument;
 	}
 
-	public buildUrl(model?: HalModel): string {
+	public buildUrl(model?: HalModel<P>): string {
 		const hostUrl: string = this.buildHostUrl(model);
 
 		const urlParts: Array<string> = [hostUrl, model ? model.endpoint : null];
@@ -69,22 +72,22 @@ export class DatastoreService {
 		return urlParts.filter((urlPart) => urlPart).join('/');
 	}
 
-	public createHalDocument<T extends HalModel>(
+	public createHalDocument<T extends HalModel<P>>(
 		rawResource: RawHalResource,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		rawResponse?: HttpResponse<any>,
-	): HalDocument<T> {
-		const propertyClass: ModelConstructor<T> = isFunction(modelClass)
-			? (modelClass as ModelConstructorFn<T>)(rawResource)
-			: (modelClass as ModelConstructor<T>);
+	): HalDocument<T, P> {
+		const propertyClass: ModelConstructor<T, P> = isFunction(modelClass)
+			? (modelClass as ModelConstructorFn<T, P>)(rawResource)
+			: (modelClass as ModelConstructor<T, P>);
 		const representantiveModel: T = new propertyClass({}, this);
 		const halDocumentClass =
-			representantiveModel.getHalDocumentClass() || this.getHalDocumentClass<T>();
+			representantiveModel.getHalDocumentClass<T, P>() || this.getHalDocumentClass<T, P>();
 		return new halDocumentClass(rawResource, rawResponse, propertyClass, this);
 	}
 
-	public findOne<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	public findOne<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		modelId: string,
 		includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
 		requestOptions: RequestOptions = {},
@@ -110,7 +113,7 @@ export class DatastoreService {
 		);
 	}
 
-	public fetchModelRelationships<T extends HalModel>(
+	public fetchModelRelationships<T extends HalModel<P>>(
 		model: T,
 		relationshipNames: RelationshipRequestDescriptor | Array<RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions = {},
@@ -132,7 +135,7 @@ export class DatastoreService {
 		return combineLatest(relationships$).pipe(map(() => model));
 	}
 
-	private fetchRelationships<T extends HalModel>(
+	private fetchRelationships<T extends HalModel<P>>(
 		model: T,
 		relationshipDescriptors: Array<RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions = {}, // "global" options for all requests
@@ -162,7 +165,7 @@ export class DatastoreService {
 			// Checks if the relationship is already embdedded inside the emdedded property, or
 			// as a part of attribute properties
 			const embeddedRelationship: RawHalResource = model.getEmbeddedResource(relationshipName);
-			let fetchedModels: T | HalDocument<T>;
+			let fetchedModels: T | HalDocument<T, P>;
 
 			if (embeddedRelationship) {
 				fetchedModels = this.processRawResource(
@@ -261,69 +264,69 @@ export class DatastoreService {
 		);
 	}
 
-	private handleGetRequestWithRelationships<T extends HalModel>(
+	private handleGetRequestWithRelationships<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: true,
 		includeRelationships: Array<RelationshipRequestDescriptor>,
 	): Observable<T>;
-	private handleGetRequestWithRelationships<T extends HalModel>(
+	private handleGetRequestWithRelationships<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: false,
 		includeRelationships: Array<RelationshipRequestDescriptor>,
-	): Observable<HalDocument<T>>;
-	private handleGetRequestWithRelationships<T extends HalModel>(
+	): Observable<HalDocument<T, P>>;
+	private handleGetRequestWithRelationships<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		includeRelationships: Array<RelationshipRequestDescriptor>,
-	): Observable<T | HalDocument<T>>;
-	private handleGetRequestWithRelationships<T extends HalModel>(
+	): Observable<T | HalDocument<T, P>>;
+	private handleGetRequestWithRelationships<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: true,
 		includeRelationships: Array<RelationshipRequestDescriptor>,
-		fetchedModels: T | HalDocument<T>,
+		fetchedModels: T | HalDocument<T, P>,
 	): Observable<T>;
-	private handleGetRequestWithRelationships<T extends HalModel>(
+	private handleGetRequestWithRelationships<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		includeRelationships: Array<RelationshipRequestDescriptor>,
 		fetchedModels: T,
 	): Observable<T>;
-	private handleGetRequestWithRelationships<T extends HalModel>(
+	private handleGetRequestWithRelationships<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		includeRelationships: Array<RelationshipRequestDescriptor>,
-		fetchedModels: HalDocument<T>,
-	): Observable<HalDocument<T>>;
-	private handleGetRequestWithRelationships<T extends HalModel>(
+		fetchedModels: HalDocument<T, P>,
+	): Observable<HalDocument<T, P>>;
+	private handleGetRequestWithRelationships<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		includeRelationships: Array<RelationshipRequestDescriptor>,
-		fetchedModels: T | HalDocument<T>,
+		fetchedModels: T | HalDocument<T, P>,
 		storePartialModels?: boolean,
-	): Observable<T | HalDocument<T>>;
-	private handleGetRequestWithRelationships<T extends HalModel>(
+	): Observable<T | HalDocument<T, P>>;
+	private handleGetRequestWithRelationships<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		includeRelationships: Array<RelationshipRequestDescriptor> = [],
-		fetchedModels: T | HalDocument<T> = null,
+		fetchedModels: T | HalDocument<T, P> = null,
 		storePartialModels?: boolean,
-	): Observable<T | HalDocument<T>> {
+	): Observable<T | HalDocument<T, P>> {
 		let models$;
 
 		if (fetchedModels) {
@@ -340,10 +343,10 @@ export class DatastoreService {
 
 		if (includeRelationships.length) {
 			return models$.pipe(
-				flatMap((model: T | HalDocument<T>) => {
+				flatMap((model: T | HalDocument<T, P>) => {
 					const models: Array<T> = isSingleResource
 						? ([model] as Array<T>)
-						: (model as HalDocument<T>).models;
+						: (model as HalDocument<T, P>).models;
 
 					const relationshipCalls: Array<Observable<any>> = this.triggerFetchingModelRelationships(
 						models,
@@ -363,14 +366,14 @@ export class DatastoreService {
 		return models$;
 	}
 
-	private makeGetRequestWrapper<T extends HalModel>(
+	private makeGetRequestWrapper<T extends HalModel<P>>(
 		url: string,
 		requestsOptions: RequestsOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		storePartialModels?: boolean,
-	): Observable<HalDocument<T> | T> {
-		const originalGetRequest$: Observable<T | HalDocument<T>> = this.makeGetRequest(
+	): Observable<HalDocument<T, P> | T> {
+		const originalGetRequest$: Observable<T | HalDocument<T, P>> = this.makeGetRequest(
 			url,
 			requestsOptions.mainRequest,
 			modelClass,
@@ -400,7 +403,7 @@ export class DatastoreService {
 		return originalGetRequest$;
 	}
 
-	private triggerFetchingModelRelationships<T extends HalModel>(
+	private triggerFetchingModelRelationships<T extends HalModel<P>>(
 		models: Array<T>,
 		includeRelationships: Array<RelationshipRequestDescriptor>,
 		requestOptions?: RequestOptions,
@@ -419,75 +422,75 @@ export class DatastoreService {
 		return modelRelationshipCalls;
 	}
 
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 	): Observable<Array<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: false,
 	): Observable<Array<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 	): Observable<Array<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
-	): Observable<HalDocument<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	): Observable<HalDocument<T, P>>;
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
-	): Observable<HalDocument<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	): Observable<HalDocument<T, P>>;
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 		customUrl?: string,
-	): Observable<HalDocument<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	): Observable<HalDocument<T, P>>;
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 	): Observable<Array<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: boolean,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
-	): Observable<Array<T> | HalDocument<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	): Observable<Array<T> | HalDocument<T, P>>;
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: boolean,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 		customUrl: string,
-	): Observable<Array<T> | HalDocument<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	): Observable<Array<T> | HalDocument<T, P>>;
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: boolean,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 		customUrl: string,
 		subsequentRequestsOptions: RequestOptions,
-	): Observable<Array<T> | HalDocument<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	): Observable<Array<T> | HalDocument<T, P>>;
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
@@ -495,9 +498,9 @@ export class DatastoreService {
 		customUrl: string,
 		subsequentRequestsOptions: RequestOptions,
 		storePartialModels?: boolean,
-	): Observable<HalDocument<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	): Observable<HalDocument<T, P>>;
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
@@ -506,8 +509,8 @@ export class DatastoreService {
 		subsequentRequestsOptions: RequestOptions,
 		storePartialModels?: boolean,
 	): Observable<T>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: boolean,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
@@ -515,9 +518,9 @@ export class DatastoreService {
 		customUrl: string,
 		subsequentRequestsOptions: RequestOptions,
 		storePartialModels?: boolean,
-	): Observable<Array<T> | HalDocument<T>>;
-	public find<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	): Observable<Array<T> | HalDocument<T, P>>;
+	public find<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		params: object | { [param: string]: string | string[] } | HttpParams = {},
 		includeMeta: boolean = false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
@@ -525,7 +528,7 @@ export class DatastoreService {
 		customUrl?: string,
 		subsequentRequestsOptions: RequestOptions = {},
 		storePartialModels: boolean = false,
-	): Observable<HalDocument<T> | Array<T>> {
+	): Observable<HalDocument<T, P> | Array<T>> {
 		const url: string = customUrl || this.buildModelUrl(modelClass);
 
 		const subsequentOptions: RequestOptions = deepmergeWrapper({}, subsequentRequestsOptions);
@@ -553,7 +556,7 @@ export class DatastoreService {
 			null,
 			storePartialModels,
 		).pipe(
-			flatMap((halDocument: HalDocument<T>) => {
+			flatMap((halDocument: HalDocument<T, P>) => {
 				if (relationshipDescriptors.length) {
 					return of(halDocument);
 				}
@@ -569,13 +572,13 @@ export class DatastoreService {
 					}),
 				);
 			}),
-			map((halDocument: HalDocument<T>) => (includeMeta ? halDocument : halDocument.models)),
+			map((halDocument: HalDocument<T, P>) => (includeMeta ? halDocument : halDocument.models)),
 		);
 	}
 
-	public save<T extends HalModel>(
+	public save<T extends HalModel<P>>(
 		model: T,
-		modelClass: ModelConstructor<T>,
+		modelClass: ModelConstructor<T, P>,
 		requestOptions?: RequestOptions,
 		saveOptions: CustomOptions<T> = {},
 	): Observable<T> {
@@ -630,7 +633,7 @@ export class DatastoreService {
 		);
 	}
 
-	private updateModelWithChangedProperties<T extends HalModel>(model: T, payload: object) {
+	private updateModelWithChangedProperties<T extends HalModel<P>>(model: T, payload: object) {
 		Object.keys(payload).forEach((externalPropertyName: string) => {
 			const property: AttributeModelProperty = model.getPropertyData(externalPropertyName);
 
@@ -644,7 +647,7 @@ export class DatastoreService {
 		});
 	}
 
-	public update<T extends HalModel>(
+	public update<T extends HalModel<P>>(
 		model: T,
 		requestOptions?: RequestOptions,
 		updateOptions: CustomOptions<T> = {},
@@ -677,7 +680,7 @@ export class DatastoreService {
 		);
 	}
 
-	public delete<T extends HalModel>(
+	public delete<T extends HalModel<P>>(
 		model: T,
 		requestOptions?: RequestOptions,
 		updateOptions: CustomOptions<T> = {},
@@ -700,59 +703,59 @@ export class DatastoreService {
 		return this.internalStorage;
 	}
 
-	public request<T extends HalModel>(
+	public request<T extends HalModel<P>>(
 		method: string,
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T>,
+		modelClass: ModelConstructor<T, P>,
 		singleResource: false,
-	): Observable<HalDocument<T>>;
-	public request<T extends HalModel>(
+	): Observable<HalDocument<T, P>>;
+	public request<T extends HalModel<P>>(
 		method: string,
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T>,
+		modelClass: ModelConstructor<T, P>,
 		singleResource: false,
 		includeNetworkConfig: false,
-	): Observable<HalDocument<T>>;
-	public request<T extends HalModel>(
+	): Observable<HalDocument<T, P>>;
+	public request<T extends HalModel<P>>(
 		method: string,
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T>,
+		modelClass: ModelConstructor<T, P>,
 		singleResource: false,
 		includeNetworkConfig: true,
-	): Observable<HalDocument<T>>;
-	public request<T extends HalModel>(
+	): Observable<HalDocument<T, P>>;
+	public request<T extends HalModel<P>>(
 		method: string,
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T>,
+		modelClass: ModelConstructor<T, P>,
 		singleResource: true,
 	): Observable<T>;
-	public request<T extends HalModel>(
+	public request<T extends HalModel<P>>(
 		method: string,
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T>,
+		modelClass: ModelConstructor<T, P>,
 		singleResource: boolean,
-	): Observable<HalDocument<T> | T>;
-	public request<T extends HalModel>(
+	): Observable<HalDocument<T, P> | T>;
+	public request<T extends HalModel<P>>(
 		method: string,
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T>,
+		modelClass: ModelConstructor<T, P>,
 		singleResource: boolean,
 		includeNetworkConfig?: boolean,
-	): Observable<HalDocument<T> | T>;
-	public request<T extends HalModel>(
+	): Observable<HalDocument<T, P> | T>;
+	public request<T extends HalModel<P>>(
 		method: string,
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T>,
+		modelClass: ModelConstructor<T, P>,
 		singleResource: boolean,
 		includeNetworkConfig: boolean = true,
-	): Observable<HalDocument<T> | T> {
+	): Observable<HalDocument<T, P> | T> {
 		const customUrl: string = includeNetworkConfig
 			? `${this.buildHostUrl(new modelClass({}, this))}/${url}`
 			: url;
@@ -765,32 +768,32 @@ export class DatastoreService {
 		}
 	}
 
-	private makeGetRequest<T extends HalModel>(
+	private makeGetRequest<T extends HalModel<P>>(
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		singleResource: false,
-	): Observable<HalDocument<T>>;
-	private makeGetRequest<T extends HalModel>(
+	): Observable<HalDocument<T, P>>;
+	private makeGetRequest<T extends HalModel<P>>(
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		singleResource: true,
 	): Observable<T>;
-	private makeGetRequest<T extends HalModel>(
+	private makeGetRequest<T extends HalModel<P>>(
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		singleResource: boolean,
 		storePartialModels?: boolean,
-	): Observable<HalDocument<T> | T>;
-	private makeGetRequest<T extends HalModel>(
+	): Observable<HalDocument<T, P> | T>;
+	private makeGetRequest<T extends HalModel<P>>(
 		url: string,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		singleResource: boolean,
 		storePartialModels?: boolean,
-	): Observable<HalDocument<T> | T> {
+	): Observable<HalDocument<T, P> | T> {
 		const {
 			cleanUrl,
 			requestOptions: options,
@@ -823,7 +826,7 @@ export class DatastoreService {
 		);
 	}
 
-	public head<T extends HalModel>(url: string, requestOptions: RequestOptions): Observable<any> {
+	public head<T extends HalModel<P>>(url: string, requestOptions: RequestOptions): Observable<any> {
 		const { cleanUrl, requestOptions: options } = this.extractRequestInfo(url, requestOptions);
 
 		return this.http.head<T>(cleanUrl, options as any);
@@ -880,7 +883,7 @@ export class DatastoreService {
 		return params;
 	}
 
-	private makePostRequest<T extends HalModel>(
+	private makePostRequest<T extends HalModel<P>>(
 		url: string,
 		payload: object,
 		requestOptions?: RequestOptions,
@@ -892,7 +895,7 @@ export class DatastoreService {
 		return this.http.post<T>(cleanUrl, payload, options as { [K: string]: any });
 	}
 
-	private makePutRequest<T extends HalModel>(
+	private makePutRequest<T extends HalModel<P>>(
 		url: string,
 		payload: object,
 		requestOptions?: RequestOptions,
@@ -904,7 +907,7 @@ export class DatastoreService {
 		return this.http.put<T>(cleanUrl, payload, options as { [K: string]: any });
 	}
 
-	private makePatchRequest<T extends HalModel>(
+	private makePatchRequest<T extends HalModel<P>>(
 		url: string,
 		payload: object,
 		requestOptions?: RequestOptions,
@@ -916,7 +919,7 @@ export class DatastoreService {
 		return this.http.patch<T>(cleanUrl, payload, options as { [K: string]: any });
 	}
 
-	private makeDeleteRequest<T extends HalModel>(
+	private makeDeleteRequest<T extends HalModel<P>>(
 		url: string,
 		requestOptions?: RequestOptions,
 	): Observable<any> {
@@ -927,51 +930,55 @@ export class DatastoreService {
 		return this.http.delete<T>(cleanUrl, options as { [K: string]: any });
 	}
 
-	private processRawResource<T extends HalModel>(
+	private processRawResource<T extends HalModel<P>>(
 		rawResource: RawHalResource,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: false,
 		response: HttpResponse<T>,
-	): HalDocument<T>;
-	private processRawResource<T extends HalModel>(
+	): HalDocument<T, P>;
+	private processRawResource<T extends HalModel<P>>(
 		rawResource: RawHalResource,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: true,
 		response: HttpResponse<T>,
 	): T;
-	private processRawResource<T extends HalModel>(
+	private processRawResource<T extends HalModel<P>>(
 		rawResource: RawHalResource,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		response: HttpResponse<T>,
-	): T | HalDocument<T>;
-	private processRawResource<T extends HalModel>(
+	): T | HalDocument<T, P>;
+	private processRawResource<T extends HalModel<P>>(
 		rawResource: RawHalResource,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
-		isSingleResource: boolean,
-		response: HttpResponse<T>,
-		url?: string,
-		savePartialModels?: boolean,
-	): T | HalDocument<T>;
-	private processRawResource<T extends HalModel>(
-		rawResource: RawHalResource,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		response: HttpResponse<T>,
 		url?: string,
 		savePartialModels?: boolean,
-	): T | HalDocument<T> {
+	): T | HalDocument<T, P>;
+	private processRawResource<T extends HalModel<P>>(
+		rawResource: RawHalResource,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
+		isSingleResource: boolean,
+		response: HttpResponse<T>,
+		url?: string,
+		savePartialModels?: boolean,
+	): T | HalDocument<T, P> {
 		if (isSingleResource) {
-			const propertyClass: ModelConstructor<T> = isFunction(modelClass)
-				? (modelClass as ModelConstructorFn<T>)(rawResource)
-				: (modelClass as ModelConstructor<T>);
+			const propertyClass: ModelConstructor<T, P> = isFunction(modelClass)
+				? (modelClass as ModelConstructorFn<T, P>)(rawResource)
+				: (modelClass as ModelConstructor<T, P>);
 			const model: T = new propertyClass(rawResource, this, response);
 			this.populateResourceWithRelationshipIndentificators(model);
 			this.storage.save(model, response, [url]);
 			return model;
 		}
 
-		const halDocument: HalDocument<T> = this.createHalDocument(rawResource, modelClass, response);
+		const halDocument: HalDocument<T, P> = this.createHalDocument(
+			rawResource,
+			modelClass,
+			response,
+		);
 
 		this.storage.saveAll(halDocument.models, savePartialModels);
 
@@ -983,7 +990,7 @@ export class DatastoreService {
 		return halDocument;
 	}
 
-	private buildModelUrl(modelClass: ModelConstructor<HalModel>, modelId?: string): string {
+	private buildModelUrl(modelClass: ModelConstructor<HalModel<P>, P>, modelId?: string): string {
 		const model = new modelClass({}, this);
 
 		if (modelId && model.modelEndpoints?.singleResourceEndpoint) {
@@ -1000,16 +1007,16 @@ export class DatastoreService {
 		return response.body;
 	}
 
-	private populateResourceWithRelationshipIndentificators<T extends HalModel>(model: T): void {
+	private populateResourceWithRelationshipIndentificators<T extends HalModel<P>>(model: T): void {
 		const localResource: T = this.storage.get(model.uniqueModelIdentificator);
 		if (localResource) {
 			model.hasManyDocumentIdentificators = localResource.hasManyDocumentIdentificators;
 		}
 	}
 
-	private fetchEmbeddedListItems<T extends HalModel>(
-		halDocument: HalDocument<T>,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+	private fetchEmbeddedListItems<T extends HalModel<P>>(
+		halDocument: HalDocument<T, P>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		includeRelationships: Array<RelationshipRequestDescriptor> = [],
 		requestOptions: RequestOptions = {},
 	): Observable<Array<T>> {
@@ -1057,13 +1064,11 @@ export class DatastoreService {
 		return combineLatest(modelCalls);
 	}
 
-	private buildHostUrl(model?: HalModel): string {
-		// tslint:disable-next-line:max-line-length
+	private buildHostUrl(model?: HalModel<P>): string {
 		const baseUrl: string =
 			model && model.networkConfig && model.networkConfig.baseUrl
 				? model.networkConfig.baseUrl
 				: this.networkConfig.baseUrl;
-		// tslint:disable-next-line:max-line-length
 		const networkEndpoint: string =
 			model && model.networkConfig && model.networkConfig.endpoint
 				? model.networkConfig.endpoint
@@ -1072,7 +1077,7 @@ export class DatastoreService {
 		return [baseUrl, networkEndpoint].filter((urlPart) => urlPart).join('/');
 	}
 
-	private defaultUrlBuildFunction<T extends HalModel>(model: T, urlFromModel: string): string {
+	private defaultUrlBuildFunction<T extends HalModel<P>>(model: T, urlFromModel: string): string {
 		if (model.isSaved && model.selfLink) {
 			return model.selfLink;
 		}
@@ -1094,12 +1099,12 @@ export class DatastoreService {
 		return this._cacheStrategy;
 	}
 
-	private get halStorage(): HalStorage {
+	private get halStorage(): HalStorage<P> {
 		return this._storage;
 	}
 
-	public findModelClassByType<T extends HalModel>(modelType: string): ModelConstructor<T> {
-		const modelClass: ModelConstructor<T> = this.modelTypes.find(
+	public findModelClassByType<T extends HalModel<P>>(modelType: string): ModelConstructor<T, P> {
+		const modelClass: ModelConstructor<T, P> = this.modelTypes.find(
 			(modelClass) => modelClass.modelType === modelType,
 		);
 
@@ -1112,8 +1117,8 @@ export class DatastoreService {
 		return modelClass;
 	}
 
-	public createModel<T extends HalModel>(
-		modelClass: ModelConstructor<T>,
+	public createModel<T extends HalModel<P>>(
+		modelClass: ModelConstructor<T, P>,
 		recordData: object = {},
 	): T {
 		const rawRecordData: object = Object.assign({}, recordData);

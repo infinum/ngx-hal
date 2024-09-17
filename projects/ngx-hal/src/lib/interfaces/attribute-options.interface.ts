@@ -1,7 +1,8 @@
+import { Pagination } from '../classes/pagination';
 import { ModelConstructor, ModelConstructorFn } from '../types/model-constructor.type';
 
-export interface AttributeOptions {
-	useClass?: string | ModelConstructor<any> | ModelConstructorFn<any>;
+export interface AttributeOptions<P extends Pagination> {
+	useClass?: string | ModelConstructor<any, P> | ModelConstructorFn<any, P>;
 	transformResponseValue?: (rawAttribute: any) => any;
 	transformBeforeSave?: (raw: any) => any;
 	externalName?: string;

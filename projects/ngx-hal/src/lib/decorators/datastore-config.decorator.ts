@@ -1,10 +1,11 @@
-import { DatastoreOptions } from '../interfaces/datastore-options.interface';
+import { Pagination } from '../classes/pagination';
 import { HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY } from '../constants/metadata.constant';
+import { setObjProperty } from '../helpers/metadata/metadata.helper';
+import { DatastoreOptions } from '../interfaces/datastore-options.interface';
 import { DEFAULT_NETWORK_CONFIG, NetworkConfig } from '../interfaces/network-config.interface';
 import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
-import { setObjProperty } from '../helpers/metadata/metadata.helper';
 
-export function DatastoreConfig(config: DatastoreOptions) {
+export function DatastoreConfig<P extends Pagination>(config: DatastoreOptions<P>) {
 	return function (target: any) {
 		const networkConfig = deepmergeWrapper<NetworkConfig>(
 			DEFAULT_NETWORK_CONFIG,
