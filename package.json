@@ -21,12 +21,8 @@
 		"test": "ng test",
 		"lint": "ng lint",
 		"publish": "ng build --configuration production && npm publish dist/ngx-hal/",
-		"publish-beta": "ng build --configuration production && npm publish --tag beta dist/ngx-hal/"
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "lint-staged"
-		}
+		"publish-beta": "ng build --configuration production && npm publish --tag beta dist/ngx-hal/",
+		"prepare": "husky"
 	},
 	"lint-staged": {
 		"**/*": "prettier --write --ignore-unknown"
@@ -37,7 +33,7 @@
 	},
 	"dependencies": {
 		"deepmerge": "4.3.1",
-		"tslib": "^2.0.0",
+		"tslib": ">=2.0.0",
 		"uri-templates": "^0.2.0"
 	},
 	"peerDependencies": {
@@ -47,8 +43,8 @@
 		"@angular/platform-browser": ">=18.2.13",
 		"@angular/platform-browser-dynamic": ">=18.2.13",
 		"rxjs": ">=6.5.3",
-		"zone.js": ">=0.14.10",
-		"tslib": ">=2.0.0"
+		"tslib": ">=2.0.0",
+		"zone.js": ">=0.14.10"
 	},
 	"devDependencies": {
 		"@angular-devkit/architect": "0.2001.4",
@@ -70,7 +66,7 @@
 		"codelyzer": "^6.0.2",
 		"core-js": "^3.44.0",
 		"eslint": "^9.32.0",
-		"husky": "^3.0.8",
+		"husky": "^9.1.7",
 		"jasmine-core": "~3.8.0",
 		"jasmine-spec-reporter": "~5.0.0",
 		"karma": "~6.4.4",
@@ -78,7 +74,7 @@
 		"karma-coverage-istanbul-reporter": "~3.0.3",
 		"karma-jasmine": "~4.0.0",
 		"karma-jasmine-html-reporter": "^1.5.0",
-		"lint-staged": "^13.0.3",
+		"lint-staged": "^16.1.2",
 		"ng-packagr": "^20.1.0",
 		"prettier": "3.6.2",
 		"protractor": "~7.0.0",
