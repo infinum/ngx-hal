@@ -1,3 +1,4 @@
+import { Pagination } from '../classes/pagination';
 import { HAS_ONE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { ModelProperty } from '../enums/model-property.enum';
 import { getObjProperty } from '../helpers/metadata/metadata.helper';
@@ -7,9 +8,9 @@ import { HasOneModelProperty } from '../interfaces/model-property.interface';
 import { HalModel } from '../models/hal.model';
 import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
 
-export function HasOne(options: HasOneOptions) {
-	return (model: HalModel, propertyName: string) => {
-		const hasOneOptions: HasOneOptions = deepmergeWrapper(DEFAULT_HAS_ONE_OPTIONS, options);
+export function HasOne<P extends Pagination>(options: HasOneOptions<P>) {
+	return (model: HalModel<P>, propertyName: string) => {
+		const hasOneOptions: HasOneOptions<P> = deepmergeWrapper(DEFAULT_HAS_ONE_OPTIONS, options);
 
 		const existingHasOneProperties: Array<HasOneModelProperty> = getObjProperty(
 			model,

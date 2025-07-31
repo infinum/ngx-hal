@@ -1,3 +1,4 @@
+import { Pagination } from '../classes/pagination';
 import { HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { getObjProperty } from '../helpers/metadata/metadata.helper';
@@ -13,9 +14,9 @@ import {
 import { HalModel } from '../models/hal.model';
 import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
 
-export function HeaderAttribute(options: HeaderAttributeOptions = {}) {
-	return (model: HalModel, propertyName: string) => {
-		const headerAttributeOptions: HeaderAttributeOptions = deepmergeWrapper(
+export function HeaderAttribute<P extends Pagination>(options: HeaderAttributeOptions<P> = {}) {
+	return (model: HalModel<P>, propertyName: string) => {
+		const headerAttributeOptions: HeaderAttributeOptions<P> = deepmergeWrapper(
 			DEFAULT_HEADER_ATTRIBUTE_OPTIONS,
 			options,
 		);

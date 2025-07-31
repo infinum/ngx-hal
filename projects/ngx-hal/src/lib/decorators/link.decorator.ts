@@ -1,3 +1,4 @@
+import { Pagination } from '../classes/pagination';
 import { LINK_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { ModelProperty } from '../enums/model-property.enum';
 import { getObjProperty } from '../helpers/metadata/metadata.helper';
@@ -6,8 +7,8 @@ import { LinkRelationshipOptions } from '../interfaces/link-relationship-options
 import { LinkProperty } from '../interfaces/model-property.interface';
 import { HalModel } from '../models/hal.model';
 
-export function Link(options: LinkRelationshipOptions = {}) {
-	return (model: HalModel, propertyName: string) => {
+export function Link<P extends Pagination>(options: LinkRelationshipOptions = {}) {
+	return (model: HalModel<P>, propertyName: string) => {
 		const existingLinkProperties: Array<LinkProperty> = getObjProperty(
 			model,
 			LINK_PROPERTIES_METADATA_KEY,

@@ -2,10 +2,11 @@ import { HttpResponse } from '@angular/common/http';
 import { HalModel } from '../../models/hal.model';
 import { HalDocument } from './../hal-document';
 import { HalStorage } from './hal-storage';
+import { Pagination } from '../pagination';
 
-export class SimpleHalStorage extends HalStorage {
-	public save<T extends HalModel>(
-		model: T | HalDocument<T>,
+export class SimpleHalStorage<P extends Pagination> extends HalStorage<P> {
+	public save<T extends HalModel<P>>(
+		model: T | HalDocument<T, P>,
 		response?: HttpResponse<T>,
 		alternateUniqueIdentificators: Array<string> = [],
 	): void {
@@ -17,7 +18,7 @@ export class SimpleHalStorage extends HalStorage {
 		});
 	}
 
-	public get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T> {
+	public get<T extends HalModel<P>>(uniqueModelIdentificator: string): T | HalDocument<T, P> {
 		return this.internalStorage[uniqueModelIdentificator];
 	}
 }

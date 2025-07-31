@@ -1,22 +1,23 @@
-import { HalModel } from '../../models/hal.model';
-import { HalDocument } from './../hal-document';
 import { HttpResponse } from '@angular/common/http';
+import { HalModel } from '../../models/hal.model';
 import { RequestOptions } from '../../types/request-options.type';
-import { HalStorage } from './hal-storage';
 import { setRequestHeader } from '../../utils/set-request-header/set-request-header.util';
+import { Pagination } from '../pagination';
+import { HalDocument } from './../hal-document';
+import { HalStorage } from './hal-storage';
 
-export interface EtagStorageModel<T extends HalModel> {
-	model: T | HalDocument<T>;
+export interface EtagStorageModel<T extends HalModel<P>, P extends Pagination> {
+	model: T | HalDocument<T, P>;
 	etag: string;
 }
 
-export class EtagHalStorage extends HalStorage {
-	public save<T extends HalModel>(
-		model: T | HalDocument<T>,
+export class EtagHalStorage<P extends Pagination> extends HalStorage<P> {
+	public save<T extends HalModel<P>>(
+		model: T | HalDocument<T, P>,
 		response?: HttpResponse<T>,
 		alternateUniqueIdentificators: Array<string> = [],
-	): Array<EtagStorageModel<T>> {
-		const storedModels: Array<EtagStorageModel<T>> = [];
+	): Array<EtagStorageModel<T, P>> {
+		const storedModels: Array<EtagStorageModel<T, P>> = [];
 
 		const identificators: Array<string> = [].concat(alternateUniqueIdentificators);
 		identificators.push(model.uniqueModelIdentificator);
@@ -33,8 +34,8 @@ export class EtagHalStorage extends HalStorage {
 		return storedModels;
 	}
 
-	public get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T> {
-		const localModel: EtagStorageModel<T> = this.getRawStorageModel(uniqueModelIdentificator);
+	public get<T extends HalModel<P>>(uniqueModelIdentificator: string): T | HalDocument<T, P> {
+		const localModel: EtagStorageModel<T, P> = this.getRawStorageModel(uniqueModelIdentificator);
 		return localModel ? localModel.model : undefined;
 	}
 
@@ -42,7 +43,8 @@ export class EtagHalStorage extends HalStorage {
 		uniqueModelIdentificator: string,
 		requestOptions: RequestOptions,
 	): void {
-		const storageModel: EtagStorageModel<any> = this.getRawStorageModel(uniqueModelIdentificator);
+		const storageModel: EtagStorageModel<any, P> =
+			this.getRawStorageModel(uniqueModelIdentificator);
 
 		if (!storageModel) {
 			return;
@@ -57,9 +59,9 @@ export class EtagHalStorage extends HalStorage {
 		}
 	}
 
-	protected getRawStorageModel<T extends HalModel>(
+	protected getRawStorageModel<T extends HalModel<P>>(
 		uniqueModelIdentificator: string,
-	): EtagStorageModel<T> {
+	): EtagStorageModel<T, P> {
 		return this.internalStorage[uniqueModelIdentificator];
 	}
 

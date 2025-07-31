@@ -6,9 +6,13 @@ import { RequestOptions } from '../../types/request-options.type';
 import { HalDocument } from '../../classes/hal-document';
 import { ModelConstructor } from '../../types/model-constructor.type';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
+import { Pagination } from '../../classes/pagination';
 
-export abstract class ModelService<Model extends HalModel> {
-	constructor(protected datastore: DatastoreService, private modelClass: ModelConstructor<Model>) {}
+export abstract class ModelService<Model extends HalModel<P>, P extends Pagination> {
+	constructor(
+		protected datastore: DatastoreService<P>,
+		private modelClass: ModelConstructor<Model, P>,
+	) {}
 
 	public findOne(
 		modelId: string,
@@ -37,7 +41,7 @@ export abstract class ModelService<Model extends HalModel> {
 	public find(
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: true,
-	): Observable<HalDocument<Model>>;
+	): Observable<HalDocument<Model, P>>;
 	public find(
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: false,
@@ -47,7 +51,7 @@ export abstract class ModelService<Model extends HalModel> {
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
-	): Observable<HalDocument<Model>>;
+	): Observable<HalDocument<Model, P>>;
 	public find(
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: false,
@@ -59,7 +63,7 @@ export abstract class ModelService<Model extends HalModel> {
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
-	): Observable<HalDocument<Model>>;
+	): Observable<HalDocument<Model, P>>;
 	public find(
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: true,
@@ -68,7 +72,7 @@ export abstract class ModelService<Model extends HalModel> {
 		subsequentRequestsOptions: RequestOptions,
 		customUrl?: string,
 		storePartialModels?: boolean,
-	): Observable<HalDocument<Model>>;
+	): Observable<HalDocument<Model, P>>;
 	public find(
 		params: object | { [param: string]: string | string[] } | HttpParams,
 		includeMeta: false,
@@ -86,7 +90,7 @@ export abstract class ModelService<Model extends HalModel> {
 		subsequentRequestsOptions: RequestOptions = {},
 		customUrl?: string,
 		storePartialModels?: boolean,
-	): Observable<HalDocument<Model> | Array<Model>> {
+	): Observable<HalDocument<Model, P> | Array<Model>> {
 		return this.datastore.find(
 			this.modelClass,
 			params,

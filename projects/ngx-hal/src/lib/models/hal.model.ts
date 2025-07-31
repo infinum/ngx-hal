@@ -50,9 +50,13 @@ import { isFunction } from '../helpers/is-function/is-function.helper';
 import { ModelEndpoints } from '../interfaces/model-endpoints.interface';
 import { map } from 'rxjs/operators';
 import { getArrayObjProperty, getObjProperty } from '../helpers/metadata/metadata.helper';
+import { Pagination } from '../classes/pagination';
 
-export abstract class HalModel<Datastore extends DatastoreService = DatastoreService> {
-	private config: ModelOptions = this['config'] || DEFAULT_MODEL_OPTIONS;
+export abstract class HalModel<
+	P extends Pagination,
+	Datastore extends DatastoreService<P> = DatastoreService<P>,
+> {
+	private config: ModelOptions<P> = this['config'] || DEFAULT_MODEL_OPTIONS;
 	private temporarySelfLink: string = null;
 	private localModelIdentificator: string;
 	private internalHasManyDocumentIdentificators: { [K: string]: string } = {};
@@ -104,7 +108,10 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		return this.config.type;
 	}
 
-	public getHalDocumentClass<T extends this>(): HalDocumentConstructor<T> {
+	public getHalDocumentClass<T extends HalModel<P>, P extends Pagination>(): HalDocumentConstructor<
+		T,
+		P
+	> {
 		return getObjProperty(this, HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY, null);
 	}
 
@@ -283,7 +290,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		const externalPropertyName: string = property.externalName;
 
 		// TODO check if this[propertyName] is an array of models or just a HalDocument
-		this[propertyName].forEach((model: HalModel) => {
+		this[propertyName].forEach((model: HalModel<P>) => {
 			if (model && model.selfLink) {
 				hasManyPropertyLinks.push({
 					href: model.selfLink,
@@ -364,7 +371,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		return this.datastore.fetchModelRelationships(this, relationshipDescriptors, requestOptions);
 	}
 
-	public getRelationship<T extends HalModel>(relationshipName: string): T | HalDocument<T> {
+	public getRelationship<T extends HalModel<P>>(relationshipName: string): T | HalDocument<T, P> {
 		const property: ModelProperty = this.getPropertyData(relationshipName);
 
 		const isHasOneProperty: boolean = property.type === ModelPropertyEnum.HasOne;
@@ -417,7 +424,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 				get() {
 					return this.getHasOneRelationship(property);
 				},
-				set<T extends HalModel>(value: T) {
+				set<T extends HalModel<P>>(value: T) {
 					if (isHalModelInstance(value) || !value) {
 						this.replaceRelationshipModel(property.externalName, value);
 					} else {
@@ -436,7 +443,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 			Object.defineProperty(this, property.name, {
 				configurable: true,
 				get() {
-					const halDocument: HalDocument<HalModel> = this.getHasManyRelationship(property);
+					const halDocument: HalDocument<HalModel<P>, P> = this.getHasManyRelationship(property);
 
 					if (!halDocument) {
 						return;
@@ -444,8 +451,10 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 
 					return halDocument.models;
 				},
-				set<T extends HalModel>(value: Array<T>) {
-					const existingHalDocument: HalDocument<HalModel> = this.getHasManyRelationship(property);
+				set<T extends HalModel<P>>(value: Array<T>) {
+					const existingHalDocument: HalDocument<HalModel<P>, P> = this.getHasManyRelationship(
+						property,
+					);
 
 					if (existingHalDocument) {
 						existingHalDocument.models = value;
@@ -505,7 +514,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		);
 	}
 
-	private getHasOneRelationship<T extends HalModel>(property: ModelProperty): T {
+	private getHasOneRelationship<T extends HalModel<P>>(property: ModelProperty): T {
 		const relationshipLinks: RawHalLink = this.links[property.externalName];
 
 		if (!relationshipLinks) {
@@ -517,7 +526,9 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		return this.datastore.storage.get(modelIdentificator);
 	}
 
-	private getHasManyRelationship<T extends HalModel>(property: ModelProperty): HalDocument<T> {
+	private getHasManyRelationship<T extends HalModel<P>>(
+		property: ModelProperty,
+	): HalDocument<T, P> {
 		const uniqueRelationshipIdentificator: string =
 			this.hasManyDocumentIdentificators[property.externalName];
 
@@ -525,9 +536,9 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 			return;
 		}
 
-		const halDocument: HalDocument<T> = this.datastore.storage.get(
+		const halDocument: HalDocument<T, P> = this.datastore.storage.get(
 			uniqueRelationshipIdentificator,
-		) as HalDocument<T>;
+		) as HalDocument<T, P>;
 
 		if (!halDocument) {
 			console.warn(`Has many relationship ${property.name} is not fetched.`);
@@ -551,7 +562,7 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		this.temporarySelfLink = link;
 	}
 
-	private replaceRelationshipModel<T extends HalModel>(
+	private replaceRelationshipModel<T extends HalModel<P>>(
 		relationshipName: string,
 		relationshipModel: T,
 	): void {
@@ -579,15 +590,15 @@ export abstract class HalModel<Datastore extends DatastoreService = DatastoreSer
 		this.localModelIdentificator = `${LOCAL_MODEL_ID_PREFIX}-${generateUUID()}`;
 	}
 
-	private isHasOneProperty(property: ModelOptions): boolean {
+	private isHasOneProperty(property: ModelOptions<P>): boolean {
 		return property.type === ModelPropertyEnum.HasOne;
 	}
 
-	private isHasManyProperty(property: ModelOptions): boolean {
+	private isHasManyProperty(property: ModelOptions<P>): boolean {
 		return property.type === ModelPropertyEnum.HasMany;
 	}
 
-	public populateModelMetadata<K extends HalModel>(sourceModel: K) {
+	public populateModelMetadata<K extends HalModel<P>>(sourceModel: K) {
 		this.resource = sourceModel.resource;
 		this.rawResponse = sourceModel.rawResponse;
 		this.parseAttributes(this.resource);

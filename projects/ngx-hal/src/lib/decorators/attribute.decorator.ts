@@ -1,3 +1,4 @@
+import { Pagination } from '../classes/pagination';
 import { ATTRIBUTE_PROPERTIES_METADATA_KEY } from '../constants/metadata.constant';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { getObjProperty } from '../helpers/metadata/metadata.helper';
@@ -10,9 +11,12 @@ import { AttributeModelProperty } from '../interfaces/model-property.interface';
 import { HalModel } from '../models/hal.model';
 import { deepmergeWrapper } from '../utils/deepmerge-wrapper';
 
-export function Attribute(options: AttributeOptions = {}) {
-	return (model: HalModel, propertyName: string) => {
-		const attributeOptions: AttributeOptions = deepmergeWrapper(DEFAULT_ATTRIBUTE_OPTIONS, options);
+export function Attribute<P extends Pagination>(options: AttributeOptions<P> = {}) {
+	return (model: HalModel<P>, propertyName: string) => {
+		const attributeOptions: AttributeOptions<P> = deepmergeWrapper(
+			DEFAULT_ATTRIBUTE_OPTIONS,
+			options,
+		);
 		const existingAttributeProperties: Array<AttributeModelProperty> = getObjProperty(
 			model,
 			ATTRIBUTE_PROPERTIES_METADATA_KEY,

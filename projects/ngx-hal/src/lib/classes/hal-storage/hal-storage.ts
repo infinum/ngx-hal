@@ -1,22 +1,28 @@
-import { HalModel } from '../../models/hal.model';
-import { HalDocument } from './../hal-document';
 import { HttpResponse } from '@angular/common/http';
-import { RequestOptions } from '../../types/request-options.type';
 import { Observable } from 'rxjs';
+import { HalModel } from '../../models/hal.model';
 import { ModelConstructor, ModelConstructorFn } from '../../types/model-constructor.type';
+import { RequestOptions } from '../../types/request-options.type';
+import { Pagination } from '../pagination';
+import { HalDocument } from './../hal-document';
 
-export abstract class HalStorage {
+export abstract class HalStorage<P extends Pagination> {
 	protected internalStorage: { [K: string]: any } = {};
 
-	public abstract save<T extends HalModel>(
-		model: T | HalDocument<T>,
+	public abstract save<T extends HalModel<P>>(
+		model: T | HalDocument<T, P>,
 		response?: HttpResponse<T>,
 		alternateUniqueIdentificators?: Array<string>,
 	): void;
 
-	public abstract get<T extends HalModel>(uniqueModelIdentificator: string): T | HalDocument<T>;
+	public abstract get<T extends HalModel<P>>(
+		uniqueModelIdentificator: string,
+	): T | HalDocument<T, P>;
 
-	public saveAll<T extends HalModel>(models: Array<T>, savePartialModels: boolean = false): void {
+	public saveAll<T extends HalModel<P>>(
+		models: Array<T>,
+		savePartialModels: boolean = false,
+	): void {
 		models.forEach((model: T) => {
 			if (savePartialModels || !this.get(model.uniqueModelIdentificator)) {
 				this.save(model);
@@ -24,7 +30,7 @@ export abstract class HalStorage {
 		});
 	}
 
-	public remove(model: HalModel): void {
+	public remove(model: HalModel<P>): void {
 		delete this.internalStorage[model.uniqueModelIdentificator];
 	}
 
@@ -35,13 +41,13 @@ export abstract class HalStorage {
 		// noop
 	}
 
-	public makeGetRequestWrapper?<T extends HalModel>(
+	public makeGetRequestWrapper?<T extends HalModel<P>>(
 		urls: { originalUrl: string; cleanUrl: string; urlWithParams: string },
-		cachedResource: T | HalDocument<T>,
-		originalGetRequest$: Observable<T | HalDocument<T>>,
+		cachedResource: T | HalDocument<T, P>,
+		originalGetRequest$: Observable<T | HalDocument<T, P>>,
 		requestOptions: RequestOptions,
-		modelClass: ModelConstructor<T> | ModelConstructorFn<T>,
+		modelClass: ModelConstructor<T, P> | ModelConstructorFn<T, P>,
 		isSingleResource: boolean,
 		storePartialModels?: boolean,
-	): Observable<T | HalDocument<T>>;
+	): Observable<T | HalDocument<T, P>>;
 }

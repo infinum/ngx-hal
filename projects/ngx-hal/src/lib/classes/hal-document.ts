@@ -17,16 +17,16 @@ import { RequestOptions } from '../types/request-options.type';
 import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
 import { generateUUID } from '../helpers/uuid/uuid.helper';
 
-export class HalDocument<T extends HalModel> {
+export class HalDocument<T extends HalModel<P>, P extends Pagination> {
 	public models: Array<T>;
-	public pagination: Pagination;
+	public pagination: P;
 	public uniqueModelIdentificator: string;
 
 	constructor(
 		private rawResource: RawHalResource,
 		private rawResponse: HttpResponse<any>,
-		private modelClass: ModelConstructor<T>,
-		private datastore: DatastoreService,
+		private modelClass: ModelConstructor<T, P>,
+		private datastore: DatastoreService<P>,
 	) {
 		this.parseRawResources(rawResource);
 		this.generateUniqueModelIdentificator();
@@ -50,7 +50,7 @@ export class HalDocument<T extends HalModel> {
 		includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
 		requestOptions: RequestOptions = {},
 		subsequentRequestsOptions: RequestOptions = {},
-	): Observable<HalDocument<T>> {
+	): Observable<HalDocument<T, P>> {
 		requestOptions.params = requestOptions.params || {};
 
 		if (pageNumber || pageNumber === 0) {
@@ -82,7 +82,7 @@ export class HalDocument<T extends HalModel> {
 		});
 	}
 
-	private generatePagination(pagination: RawHalResource): Pagination {
+	private generatePagination(pagination: RawHalResource): P {
 		if (!this.datastore.paginationClass) {
 			return null;
 		}
