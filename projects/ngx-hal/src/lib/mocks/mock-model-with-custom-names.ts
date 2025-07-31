@@ -1,3 +1,4 @@
+import { Pagination } from '../classes/pagination';
 import { HasMany } from '../decorators/has-many.decorator';
 import { HasOne } from '../decorators/has-one.decorator';
 import { Link } from '../decorators/link.decorator';
@@ -9,7 +10,7 @@ import { MockModel2 } from './mock-model-2';
 	type: 'ExternalNamesMock',
 	endpoint: 'external-names-mock-model-endpoint',
 })
-export class MockModelWithCustomNames extends HalModel {
+export class MockModelWithCustomNames extends HalModel<Pagination> {
 	@HasOne({
 		includeInPayload: true,
 		propertyClass: MockModel2,

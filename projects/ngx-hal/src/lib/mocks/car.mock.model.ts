@@ -4,12 +4,13 @@ import { Attribute } from '../decorators/attribute.decorator';
 import { MockModel2 } from './mock-model-2';
 import { HasOne } from '../decorators/has-one.decorator';
 import { HasMany } from '../decorators/has-many.decorator';
+import { Pagination } from '../classes/pagination';
 
 @ModelConfig({
 	type: 'Car',
 	endpoint: 'car',
 })
-export class CarModel extends HalModel {
+export class CarModel extends HalModel<Pagination> {
 	@Attribute({
 		externalName: 'name',
 	})

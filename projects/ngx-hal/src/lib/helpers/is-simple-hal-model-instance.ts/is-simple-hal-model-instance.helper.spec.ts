@@ -1,12 +1,13 @@
-import { TestBed } from '@angular/core/testing';
-import { HalModel } from '../../models/hal.model';
-import { DatastoreService } from '../../services/datastore/datastore.service';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { SimpleHalModel } from '../../models/simple-hal.model';
-import { isSimpleHalModelInstance } from './is-simple-hal-model-instance.helper';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { Pagination } from '../../classes/pagination';
+import { HalModel } from '../../models/hal.model';
+import { SimpleHalModel } from '../../models/simple-hal.model';
+import { DatastoreService } from '../../services/datastore/datastore.service';
+import { isSimpleHalModelInstance } from './is-simple-hal-model-instance.helper';
 
-class InheritsHal extends HalModel {}
+class InheritsHal extends HalModel<Pagination> {}
 class InheritsSimpleHal extends SimpleHalModel {}
 class DoesNotInherit {}
 
@@ -28,7 +29,7 @@ describe('isSimpleHalModelInstance', () => {
 	});
 
 	it('should return false for an instance of a class which extends HalModel', () => {
-		const datastoreService: DatastoreService = TestBed.inject(DatastoreService);
+		const datastoreService: DatastoreService<Pagination> = TestBed.inject(DatastoreService);
 		const instance: InheritsHal = new InheritsHal({}, datastoreService);
 		expect(isSimpleHalModelInstance(instance)).toBe(false);
 	});
