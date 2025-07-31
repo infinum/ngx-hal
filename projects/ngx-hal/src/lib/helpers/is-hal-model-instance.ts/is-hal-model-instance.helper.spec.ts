@@ -2,7 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { HalModel } from '../../models/hal.model';
 import { DatastoreService } from '../../services/datastore/datastore.service';
 import { isHalModelInstance } from './is-hal-model-instance.helper';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 class InheritsHal extends HalModel {}
 class DoesNotInherit {}
@@ -10,8 +11,12 @@ class DoesNotInherit {}
 describe('isHalModelInstance', () => {
 	beforeEach(() =>
 		TestBed.configureTestingModule({
-			imports: [HttpClientTestingModule],
-			providers: [DatastoreService],
+			imports: [],
+			providers: [
+				DatastoreService,
+				provideHttpClient(withInterceptorsFromDi()),
+				provideHttpClientTesting(),
+			],
 		}),
 	);
 

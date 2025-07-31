@@ -1,11 +1,11 @@
 import {
-	HttpClientTestingModule,
 	HttpTestingController,
 	TestRequest,
+	provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { HttpParams } from '@angular/common/http';
+import { HttpParams, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HalDocument } from '../../classes/hal-document';
 import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
@@ -41,8 +41,12 @@ describe('DatastoreService', () => {
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
-			imports: [HttpClientTestingModule],
-			providers: [DatastoreService],
+			imports: [],
+			providers: [
+				DatastoreService,
+				provideHttpClient(withInterceptorsFromDi()),
+				provideHttpClientTesting(),
+			],
 		});
 
 		httpTestingController = TestBed.inject(HttpTestingController);
