@@ -44,7 +44,7 @@ import { Pagination } from '../../classes/pagination';
 export class DatastoreService<P extends Pagination> {
 	public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
 	private _cacheStrategy: CacheStrategy;
-	// tslint:disable-next-line
+	// eslint:disable-next-line
 	private _storage: HalStorage<P>; // set by Config decorator
 	private internalStorage = createHalStorage(this.cacheStrategy, this.halStorage);
 	protected httpParamsOptions?: object;

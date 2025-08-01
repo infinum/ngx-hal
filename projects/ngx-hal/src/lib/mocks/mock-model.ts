@@ -5,12 +5,13 @@ import { MockModel2 } from './mock-model-2';
 import { HasOne } from '../decorators/has-one.decorator';
 import { HasMany } from '../decorators/has-many.decorator';
 import { Link } from '../decorators/link.decorator';
+import { Pagination } from '../classes/pagination';
 
 @ModelConfig({
 	type: 'Mock',
 	endpoint: 'mock-model-endpoint',
 })
-export class MockModel extends HalModel {
+export class MockModel extends HalModel<Pagination> {
 	@Attribute()
 	name: string;
 

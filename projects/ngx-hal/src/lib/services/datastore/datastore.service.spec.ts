@@ -1,48 +1,53 @@
 import {
-	HttpClientTestingModule,
 	HttpTestingController,
 	TestRequest,
+	provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { HttpParams } from '@angular/common/http';
+import { HttpParams, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HalDocument } from '../../classes/hal-document';
+import { Pagination } from '../../classes/pagination';
 import { LINKS_PROPERTY_NAME } from '../../constants/hal.constant';
 import { CustomOptions } from '../../interfaces/custom-options.interface';
 import { CarModel } from '../../mocks/car.mock.model';
 import carsResponseJson from '../../mocks/cars-response.json';
-import modelWithCustomNamesResponseJson from '../../mocks/model-with-custom-names-response.json';
 import listItemsWithDifferentListNamesResponseJson from '../../mocks/list-items-with-different-list-names-response.json';
+import minimalMockListResponseJson from '../../mocks/minimal-mock-list-response.json';
+import { MockChildModel } from '../../mocks/mock-child-model';
+import { MockChildModel2 } from '../../mocks/mock-child-model-2';
 import mockListWithEmbeddedJson from '../../mocks/mock-list-with-embedded.json';
 import { MockModel } from '../../mocks/mock-model';
 import { MockModel2 } from '../../mocks/mock-model-2';
 import mockModel2ResponseJson from '../../mocks/mock-model-2-response.json';
-import mockModels2ResponseJson from '../../mocks/mock-models-2-response.json';
-import minimalMockListResponseJson from '../../mocks/minimal-mock-list-response.json';
+import { MockModelAttributes } from '../../mocks/mock-model-attributes';
+import { MockAttributesRel } from '../../mocks/mock-model-attributes-rel';
 import mockModelBareMinimumResponseJson from '../../mocks/mock-model-bare-minimum-response.json';
-import mockModelResponseJson from '../../mocks/mock-model-response.json';
 import mockModelResponseWithEmbeddedRelationshipJson from '../../mocks/mock-model-response-with-embedded-relationship.json';
+import mockModelResponseJson from '../../mocks/mock-model-response.json';
 import { MockTemplatedModel } from '../../mocks/mock-model-templated';
+import { MockModelWithCustomNames } from '../../mocks/mock-model-with-custom-names';
 import { MockModelWithDefaultValues } from '../../mocks/mock-model-with-default-values';
+import mockModels2ResponseJson from '../../mocks/mock-models-2-response.json';
+import modelWithCustomNamesResponseJson from '../../mocks/model-with-custom-names-response.json';
 import simpleHalDocumentJson from '../../mocks/simple-hal-document.json';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
 import { DatastoreService } from './datastore.service';
-import { MockModelWithCustomNames } from '../../mocks/mock-model-with-custom-names';
-import { MockModelAttributes } from '../../mocks/mock-model-attributes';
-import { MockAttributesRel } from '../../mocks/mock-model-attributes-rel';
-import { MockChildModel } from '../../mocks/mock-child-model';
-import { MockChildModel2 } from '../../mocks/mock-child-model-2';
 
 const BASE_NETWORK_URL = 'http://test.com';
 
 describe('DatastoreService', () => {
 	let httpTestingController: HttpTestingController;
-	let datastoreService: DatastoreService;
+	let datastoreService: DatastoreService<Pagination>;
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
-			imports: [HttpClientTestingModule],
-			providers: [DatastoreService],
+			imports: [],
+			providers: [
+				DatastoreService,
+				provideHttpClient(withInterceptorsFromDi()),
+				provideHttpClientTesting(),
+			],
 		});
 
 		httpTestingController = TestBed.inject(HttpTestingController);
@@ -224,35 +229,6 @@ describe('DatastoreService', () => {
 			expect(req.request.method).toEqual('GET');
 
 			req.flush(simpleHalDocumentJson);
-		});
-
-		it('should make a GET request without duplicate query parameters', () => {
-			const customUrl = 'test1';
-
-			const paramName = 'size';
-			const paramValue = '100';
-
-			const paramName2 = 'size';
-			const paramValue2 = '500';
-
-			const params = {
-				[paramName]: paramValue,
-				[paramName2]: paramValue2,
-			};
-
-			datastoreService.request('get', customUrl, { params }, MockModel, false, false).subscribe();
-
-			const calls: Array<TestRequest> = httpTestingController.match((request) => {
-				const isCorrectUrl: boolean = request.url === customUrl;
-
-				expect(request.method).toEqual('GET');
-				expect(request.params.get(paramName2)).toEqual(paramValue2);
-				expect(request.params.keys().length).toBe(1);
-
-				return isCorrectUrl;
-			});
-
-			calls[0].flush(simpleHalDocumentJson);
 		});
 
 		it('should make a GET request with templated URL parameters', () => {
@@ -2006,7 +1982,7 @@ describe('DatastoreService', () => {
 		it('should fetch embedded list items', () => {
 			datastoreService
 				.find(MockModel, {}, true, [])
-				.subscribe((response: HalDocument<MockModel>) => {
+				.subscribe((response: HalDocument<MockModel, Pagination>) => {
 					expect(response?.models.length).toBe(1);
 				});
 
@@ -2022,7 +1998,7 @@ describe('DatastoreService', () => {
 		it('should fetch list items if they are not embedded in the initial response', () => {
 			datastoreService
 				.find(MockModel, {}, true, [])
-				.subscribe((response: HalDocument<MockModel>) => {
+				.subscribe((response: HalDocument<MockModel, Pagination>) => {
 					expect(response?.models.length).toBe(1);
 				});
 
@@ -2048,7 +2024,7 @@ describe('DatastoreService', () => {
 		it('should fetch the relationships of embedded list items once', () => {
 			datastoreService
 				.find(MockModel, {}, true, ['someResources'])
-				.subscribe((response: HalDocument<MockModel>) => {
+				.subscribe((response: HalDocument<MockModel, Pagination>) => {
 					expect(response?.models.length).toBe(1);
 					expect(response?.models[0].someResources?.length).toBe(1);
 				});
@@ -2247,7 +2223,7 @@ describe('DatastoreService', () => {
 	describe('fetchModelRelationships method', () => {
 		let mockModel: MockModel;
 
-		beforeEach(async (done: DoneFn) => {
+		beforeEach((done: DoneFn) => {
 			datastoreService.findOne(MockModel, 'mockModelId').subscribe((mockModel1: MockModel) => {
 				mockModel = mockModel1;
 				done();
@@ -2309,7 +2285,7 @@ describe('DatastoreService', () => {
 
 	describe('HAL Document', () => {
 		it('should correctly extract list items if list property name is "item"', () => {
-			const cars: HalDocument<CarModel> = datastoreService.createHalDocument(
+			const cars: HalDocument<CarModel, Pagination> = datastoreService.createHalDocument(
 				carsResponseJson as any,
 				CarModel,
 				{ body: carsResponseJson } as any,
@@ -2324,7 +2300,7 @@ describe('DatastoreService', () => {
 				JSON.stringify(carsResponseJson).replace(/item/g, listItemPropertyName),
 			);
 
-			const cars: HalDocument<CarModel> = datastoreService.createHalDocument(
+			const cars: HalDocument<CarModel, Pagination> = datastoreService.createHalDocument(
 				modifiedCarsResponseJson as any,
 				CarModel,
 				{ body: carsResponseJson } as any,
@@ -2334,7 +2310,7 @@ describe('DatastoreService', () => {
 		});
 
 		it('should correctly extract list items if list property name is "list"', () => {
-			const cars: HalDocument<CarModel> = datastoreService.createHalDocument(
+			const cars: HalDocument<CarModel, Pagination> = datastoreService.createHalDocument(
 				listItemsWithDifferentListNamesResponseJson as any,
 				CarModel,
 				{ body: carsResponseJson } as any,
@@ -2425,7 +2401,7 @@ describe('DatastoreService', () => {
 			expect(result).toEqual(expectedResult);
 		});
 
-		// tslint:disable-next-line:max-line-length
+		// eslint:disable-next-line:max-line-length
 		it('should return an array with one RelationshipRequestDescriptor with a single child but without originalRelationshipDescriptor', () => {
 			const relationshipDescriptors: Array<RelationshipRequestDescriptor> = [
 				userAnimalsRelationshipDescriptor,

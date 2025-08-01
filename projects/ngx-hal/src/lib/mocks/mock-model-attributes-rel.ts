@@ -1,3 +1,4 @@
+import { Pagination } from '../classes/pagination';
 import { Attribute } from '../decorators/attribute.decorator';
 import { ModelConfig } from '../decorators/model-config.decorator';
 import { HalModel } from '../models/hal.model';
@@ -6,7 +7,7 @@ import { HalModel } from '../models/hal.model';
 	type: 'MockAttributesRel',
 	endpoint: 'MockAttributesRel',
 })
-export class MockAttributesRel extends HalModel {
+export class MockAttributesRel extends HalModel<Pagination> {
 	public static modelType = 'MockAttributesRel';
 
 	@Attribute()
