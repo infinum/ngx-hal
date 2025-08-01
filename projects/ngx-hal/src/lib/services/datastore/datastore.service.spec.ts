@@ -2401,7 +2401,7 @@ describe('DatastoreService', () => {
 			expect(result).toEqual(expectedResult);
 		});
 
-		// tslint:disable-next-line:max-line-length
+		// eslint:disable-next-line:max-line-length
 		it('should return an array with one RelationshipRequestDescriptor with a single child but without originalRelationshipDescriptor', () => {
 			const relationshipDescriptors: Array<RelationshipRequestDescriptor> = [
 				userAnimalsRelationshipDescriptor,
