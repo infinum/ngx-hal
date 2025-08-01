@@ -2223,7 +2223,7 @@ describe('DatastoreService', () => {
 	describe('fetchModelRelationships method', () => {
 		let mockModel: MockModel;
 
-		beforeEach(async (done: DoneFn) => {
+		beforeEach((done: DoneFn) => {
 			datastoreService.findOne(MockModel, 'mockModelId').subscribe((mockModel1: MockModel) => {
 				mockModel = mockModel1;
 				done();
