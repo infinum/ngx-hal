@@ -63,7 +63,6 @@
 		"@types/node": "^24.1.0",
 		"@typescript-eslint/eslint-plugin": "^8.38.0",
 		"@typescript-eslint/parser": "^8.38.0",
-		"codelyzer": "^6.0.2",
 		"core-js": "^3.44.0",
 		"eslint": "^9.32.0",
 		"husky": "^9.1.7",
@@ -78,7 +77,6 @@
 		"ng-packagr": "^20.1.0",
 		"prettier": "3.6.2",
 		"ts-node": "~10.9.2",
-		"tslint-config-airbnb": "^5.11.2",
 		"typescript": "~5.8.3"
 	}
 }
