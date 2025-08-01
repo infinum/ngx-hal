@@ -77,7 +77,6 @@
 		"lint-staged": "^16.1.2",
 		"ng-packagr": "^20.1.0",
 		"prettier": "3.6.2",
-		"protractor": "~7.0.0",
 		"ts-node": "~10.9.2",
 		"tslint-config-airbnb": "^5.11.2",
 		"typescript": "~5.8.3"
