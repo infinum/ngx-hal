@@ -31,6 +31,7 @@ export * from './lib/interfaces/has-one-options.interface';
 export * from './lib/interfaces/link-relationship-options.interface';
 export * from './lib/interfaces/custom-options.interface';
 export * from './lib/interfaces/model-endpoints.interface';
+export * from './lib/interfaces/raw-hal-resource.interface';
 
 export * from './lib/types/relationship-request-descriptor.type';
 export * from './lib/types/request-options.type';
@@ -40,3 +41,5 @@ export * from './lib/services/model-service/model.service';
 
 export * from './lib/helpers/array-attribute-class/array-attribute-class';
 export * from './lib/helpers/populate-templated-url/populate-templated-url.helper';
+
+export * from './lib/types/model-constructor.type';
