@@ -13,13 +13,14 @@ export function getQueryParams(url: string): object {
 
 	params.forEach((param: string) => {
 		const [key, value] = param.split('=');
+		const paramValue = value || '';
 
 		if (queryParams[key]) {
-			queryParams[key] = [decodeURIComponentWithErrorHandling(value)].concat(queryParams[key]);
+			queryParams[key] = [decodeURIComponentWithErrorHandling(paramValue)].concat(queryParams[key]);
 		} else {
-			const items: Array<string> = value.split(',');
+			const items: Array<string> = paramValue.split(',');
 			if (items.length === 1) {
-				queryParams[key] = decodeURIComponentWithErrorHandling(value);
+				queryParams[key] = decodeURIComponentWithErrorHandling(paramValue);
 			} else {
 				queryParams[key] = items.map((urlParam: string) =>
 					decodeURIComponentWithErrorHandling(urlParam),
@@ -32,6 +33,9 @@ export function getQueryParams(url: string): object {
 }
 
 export function decodeURIComponentWithErrorHandling(value: string): string {
+	if (!value) {
+		return value;
+	}
 	try {
 		return decodeURIComponent(value);
 	} catch (e) {
