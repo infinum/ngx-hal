@@ -20,9 +20,10 @@
 		"build": "ng build",
 		"test": "ng test",
 		"lint": "ng lint",
-		"publish": "ng build --configuration production && npm publish dist/ngx-hal/",
-		"publish-beta": "ng build --configuration production && npm publish --tag beta dist/ngx-hal/",
-		"prepare": "husky"
+		"publish": "ng build --configuration production && pnpm publish dist/ngx-hal/",
+		"publish-beta": "ng build --configuration production && pnpm publish --tag beta dist/ngx-hal/",
+		"prepare": "husky",
+		"preinstall": "npx only-allow pnpm"
 	},
 	"lint-staged": {
 		"**/*": "prettier --write --ignore-unknown"
