@@ -2,7 +2,7 @@ import { HalStorage } from '../classes/hal-storage/hal-storage';
 import { Pagination } from '../classes/pagination';
 import { CacheStrategy } from '../enums/cache-strategy.enum';
 import { HalModel } from '../models/hal.model';
-import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
+import { HalDocumentConstructor } from '../types/hal-document-constructor.type';
 import { NetworkConfig } from './network-config.interface';
 
 export interface DatastoreOptions<P extends Pagination> {

@@ -43,7 +43,7 @@ import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
 import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import { DatastoreService } from '../services/datastore/datastore.service';
-import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
+import { HalDocumentConstructor } from '../types/hal-document-constructor.type';
 import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
 import { PlainHeaders, RequestOptions } from '../types/request-options.type';
 import { ensureRelationshipRequestDescriptors } from '../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
@@ -237,12 +237,12 @@ export abstract class HalModel<
 
 		return this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
 			const propertyName: string = property.name;
-			const isPropertyExcludedFromPaylaod: boolean = property.excludeFromPayload;
+			const isPropertyExcludedFromPayload: boolean = property.excludeFromPayload;
 			const isSpecificFieldsSpecified: boolean = specificFields && Boolean(specificFields.length);
 			const isSpecificFieldsConditionSatisfied: boolean =
 				!isSpecificFieldsSpecified || specificFields.indexOf(propertyName) !== -1;
 
-			if (isPropertyExcludedFromPaylaod || !isSpecificFieldsConditionSatisfied) {
+			if (isPropertyExcludedFromPayload || !isSpecificFieldsConditionSatisfied) {
 				return payload;
 			}
 
