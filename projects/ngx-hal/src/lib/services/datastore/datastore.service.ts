@@ -1,47 +1,46 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
-import { Observable, combineLatest, of, throwError, from } from 'rxjs';
-import { map, flatMap, tap, catchError, mergeMap, delay } from 'rxjs/operators';
-import { NetworkConfig, DEFAULT_NETWORK_CONFIG } from '../../interfaces/network-config.interface';
-import { HalModel } from '../../models/hal.model';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { combineLatest, Observable, of, throwError } from 'rxjs';
+import { catchError, flatMap, map, tap } from 'rxjs/operators';
 import { HalDocument } from '../../classes/hal-document';
-import { ModelConstructor, ModelConstructorFn } from '../../types/model-constructor.type';
-import { HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY } from '../../constants/metadata.constant';
-import { LOCAL_MODEL_ID_PREFIX, LOCAL_DOCUMENT_ID_PREFIX } from '../../constants/general.constant';
-import { HalDocumentConstructor } from '../../types/hal-document-construtor.type';
-import { RequestOptions } from '../../types/request-options.type';
-import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
-import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
-import { ModelProperty, AttributeModelProperty } from '../../interfaces/model-property.interface';
-import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
-import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
-import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
-import { CacheStrategy } from '../../enums/cache-strategy.enum';
+import { HalStorage } from '../../classes/hal-storage/hal-storage';
 import { createHalStorage } from '../../classes/hal-storage/hal-storage-factory';
-import { RequestsOptions } from '../../interfaces/requests-options.interface';
-import { makeQueryParamsString } from '../../helpers/make-query-params-string/make-query-params-string.helper';
-import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
-import {
-	getQueryParams,
-	decodeURIComponentWithErrorHandling,
-} from '../../utils/get-query-params/get-query-params.util';
+import { Pagination } from '../../classes/pagination';
+import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
+import { HAL_DATASTORE_DOCUMENT_CLASS_METADATA_KEY } from '../../constants/metadata.constant';
+import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
+import { CacheStrategy } from '../../enums/cache-strategy.enum';
+import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
+import { isFunction } from '../../helpers/is-function/is-function.helper';
 import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
 import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
-import { CustomOptions } from '../../interfaces/custom-options.interface';
-import { deepmergeWrapper } from '../../utils/deepmerge-wrapper';
-import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
-import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
-import { RelationshipDescriptorMappings } from '../../types/relationship-descriptor-mappings.type';
-import { EMBEDDED_PROPERTY_NAME } from '../../constants/hal.constant';
-import { HalStorage } from '../../classes/hal-storage/hal-storage';
-import { isString } from '../../utils/is-string/is-string.util';
-import { isFunction } from '../../helpers/is-function/is-function.helper';
-import { populateTemplatedUrl } from '../../helpers/populate-templated-url/populate-templated-url.helper';
+import { makeQueryParamsString } from '../../helpers/make-query-params-string/make-query-params-string.helper';
 import { getObjProperty } from '../../helpers/metadata/metadata.helper';
-import { Pagination } from '../../classes/pagination';
+import { populateTemplatedUrl } from '../../helpers/populate-templated-url/populate-templated-url.helper';
+import { CustomOptions } from '../../interfaces/custom-options.interface';
+import { AttributeModelProperty, ModelProperty } from '../../interfaces/model-property.interface';
+import { DEFAULT_NETWORK_CONFIG, NetworkConfig } from '../../interfaces/network-config.interface';
+import { RawHalLink } from '../../interfaces/raw-hal-link.interface';
+import { RawHalResource } from '../../interfaces/raw-hal-resource.interface';
+import { RequestsOptions } from '../../interfaces/requests-options.interface';
+import { HalModel } from '../../models/hal.model';
+import { HalDocumentConstructor } from '../../types/hal-document-constructor.type';
+import { ModelConstructor, ModelConstructorFn } from '../../types/model-constructor.type';
+import { RelationshipDescriptorMappings } from '../../types/relationship-descriptor-mappings.type';
+import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
+import { RequestOptions } from '../../types/request-options.type';
+import { deepmergeWrapper } from '../../utils/deepmerge-wrapper';
+import { ensureRelationshipRequestDescriptors } from '../../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
+import {
+	decodeURIComponentWithErrorHandling,
+	getQueryParams,
+} from '../../utils/get-query-params/get-query-params.util';
+import { getResponseHeader } from '../../utils/get-response-headers/get-response-header.util';
+import { isString } from '../../utils/is-string/is-string.util';
+import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
 
-@Injectable()
-export class DatastoreService<P extends Pagination> {
+export abstract class DatastoreService<P extends Pagination> {
+	protected abstract http: HttpClient;
+
 	public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
 	private _cacheStrategy: CacheStrategy;
 	// eslint:disable-next-line
@@ -50,8 +49,6 @@ export class DatastoreService<P extends Pagination> {
 	protected httpParamsOptions?: object;
 	public paginationClass: { new (...args): P };
 	public modelTypes = [];
-
-	constructor(public http: HttpClient) {}
 
 	private getHalDocumentClass<
 		T extends HalModel<P>,
@@ -80,9 +77,9 @@ export class DatastoreService<P extends Pagination> {
 		const propertyClass: ModelConstructor<T, P> = isFunction(modelClass)
 			? (modelClass as ModelConstructorFn<T, P>)(rawResource)
 			: (modelClass as ModelConstructor<T, P>);
-		const representantiveModel: T = new propertyClass({}, this);
+		const representativeModel: T = new propertyClass({}, this);
 		const halDocumentClass =
-			representantiveModel.getHalDocumentClass<T, P>() || this.getHalDocumentClass<T, P>();
+			representativeModel.getHalDocumentClass<T, P>() || this.getHalDocumentClass<T, P>();
 		return new halDocumentClass(rawResource, rawResponse, propertyClass, this);
 	}
 
@@ -162,7 +159,7 @@ export class DatastoreService<P extends Pagination> {
 			const isSingleResource: boolean =
 				property.type === ModelPropertyEnum.Attribute || property.type === ModelPropertyEnum.HasOne;
 
-			// Checks if the relationship is already embdedded inside the emdedded property, or
+			// Checks if the relationship is already embedded inside the embedded property, or
 			// as a part of attribute properties
 			const embeddedRelationship: RawHalResource = model.getEmbeddedResource(relationshipName);
 			let fetchedModels: T | HalDocument<T, P>;
@@ -203,7 +200,7 @@ export class DatastoreService<P extends Pagination> {
 					if (isHalModelInstance(model)) {
 						if (property.type === ModelPropertyEnum.HasOne) {
 							// The original relationship URL on the parent model must be replaced because
-							// the actual relationship URL may have some query parameteres attached to it
+							// the actual relationship URL may have some query parameters attached to it
 							model.links[externalRelationshipName].href = fetchedRelation.uniqueModelIdentificator;
 						} else if (property.type === ModelPropertyEnum.HasMany) {
 							model.updateHasManyDocumentIdentificator(
@@ -387,12 +384,12 @@ export class DatastoreService<P extends Pagination> {
 				urlWithParams,
 				requestOptions: options,
 			} = this.extractRequestInfo(url, requestsOptions.mainRequest);
-			const cachedResoucesFromUrl =
+			const cachedResourcesFromUrl =
 				this.storage.get(decodeURIComponentWithErrorHandling(url)) ||
 				this.storage.get(decodeURIComponentWithErrorHandling(urlWithParams));
 			return this.storage.makeGetRequestWrapper(
 				{ cleanUrl, urlWithParams, originalUrl: url },
-				cachedResoucesFromUrl,
+				cachedResourcesFromUrl,
 				originalGetRequest$,
 				options,
 				modelClass,
@@ -597,7 +594,7 @@ export class DatastoreService<P extends Pagination> {
 			changedPropertiesOnly: false,
 		});
 
-		const transformedPaylaod = options.transformPayloadBeforeSave(payload);
+		const transformedPayload = options.transformPayloadBeforeSave(payload);
 		const modelHeaders: object = model.generateHeaders();
 
 		const modelRequestOptions: RequestOptions = requestOptions || {};
@@ -607,9 +604,9 @@ export class DatastoreService<P extends Pagination> {
 		let request$;
 
 		if (model.isSaved) {
-			request$ = this.makePutRequest(url, transformedPaylaod, modelRequestOptions);
+			request$ = this.makePutRequest(url, transformedPayload, modelRequestOptions);
 		} else {
-			request$ = this.makePostRequest(url, transformedPaylaod, modelRequestOptions);
+			request$ = this.makePostRequest(url, transformedPayload, modelRequestOptions);
 		}
 
 		return request$.pipe(
@@ -665,16 +662,16 @@ export class DatastoreService<P extends Pagination> {
 			specificFields: options.specificFields,
 			changedPropertiesOnly: true,
 		});
-		const transformedPaylaod = options.transformPayloadBeforeSave(payload);
+		const transformedPayload = options.transformPayloadBeforeSave(payload);
 		const modelHeaders: object = model.generateHeaders();
 
 		const modelRequestOptions: RequestOptions = requestOptions || {};
 		modelRequestOptions.headers = modelRequestOptions.headers || {};
 		Object.assign(modelRequestOptions.headers, modelHeaders);
 
-		return this.makePatchRequest(url, transformedPaylaod, modelRequestOptions).pipe(
+		return this.makePatchRequest(url, transformedPayload, modelRequestOptions).pipe(
 			map(() => {
-				this.updateModelWithChangedProperties(model, transformedPaylaod);
+				this.updateModelWithChangedProperties(model, transformedPayload);
 				return model;
 			}),
 		);
@@ -969,7 +966,7 @@ export class DatastoreService<P extends Pagination> {
 				? (modelClass as ModelConstructorFn<T, P>)(rawResource)
 				: (modelClass as ModelConstructor<T, P>);
 			const model: T = new propertyClass(rawResource, this, response);
-			this.populateResourceWithRelationshipIndentificators(model);
+			this.populateResourceWithRelationshipIdentificators(model);
 			this.storage.save(model, response, [url]);
 			return model;
 		}
@@ -983,7 +980,7 @@ export class DatastoreService<P extends Pagination> {
 		this.storage.saveAll(halDocument.models, savePartialModels);
 
 		halDocument.models.forEach((listModel: T) => {
-			this.populateResourceWithRelationshipIndentificators(listModel);
+			this.populateResourceWithRelationshipIdentificators(listModel);
 		});
 
 		this.storage.save(halDocument, response, [url]);
@@ -1007,7 +1004,7 @@ export class DatastoreService<P extends Pagination> {
 		return response.body;
 	}
 
-	private populateResourceWithRelationshipIndentificators<T extends HalModel<P>>(model: T): void {
+	private populateResourceWithRelationshipIdentificators<T extends HalModel<P>>(model: T): void {
 		const localResource: T = this.storage.get(model.uniqueModelIdentificator);
 		if (localResource) {
 			model.hasManyDocumentIdentificators = localResource.hasManyDocumentIdentificators;
