@@ -1,4 +1,3 @@
-import { Pagination } from '../classes/pagination';
 import { Attribute } from '../decorators/attribute.decorator';
 import { HasOne } from '../decorators/has-one.decorator';
 import { ModelConfig } from '../decorators/model-config.decorator';

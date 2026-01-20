@@ -1,9 +1,9 @@
-import { HalModel } from '../models/hal.model';
-import { ModelConfig } from '../decorators/model-config.decorator';
-import { Attribute } from '../decorators/attribute.decorator';
-import { MockModel3 } from './mock-model-3';
-import { HasMany } from '../decorators/has-many.decorator';
 import { Pagination } from '../classes/pagination';
+import { Attribute } from '../decorators/attribute.decorator';
+import { HasMany } from '../decorators/has-many.decorator';
+import { ModelConfig } from '../decorators/model-config.decorator';
+import { HalModel } from '../models/hal.model';
+import { MockModel3 } from './mock-model-3';
 
 @ModelConfig({
 	type: 'Mock2',

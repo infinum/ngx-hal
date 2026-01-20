@@ -1,8 +1,8 @@
-import { CacheStrategy } from '../../enums/cache-strategy.enum';
-import { SimpleHalStorage } from '../../classes/hal-storage/simple-hal-storage';
 import { EtagHalStorage } from '../../classes/hal-storage/etag-hal-storage';
-import { HalStorage } from './hal-storage';
+import { SimpleHalStorage } from '../../classes/hal-storage/simple-hal-storage';
+import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { Pagination } from '../pagination';
+import { HalStorage } from './hal-storage';
 
 export type HalStorageType<P extends Pagination> = SimpleHalStorage<P> | EtagHalStorage<P>;
 

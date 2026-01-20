@@ -1,5 +1,5 @@
+import { HttpHeaders, HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { HttpResponse, HttpHeaders } from '@angular/common/http';
 import { getResponseHeader } from './get-response-header.util';
 
 describe('getResponseHeader', () => {

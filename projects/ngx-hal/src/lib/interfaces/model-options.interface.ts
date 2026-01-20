@@ -1,7 +1,7 @@
-import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
-import { HalModel } from '../models/hal.model';
-import { NetworkConfig } from './network-config.interface';
 import { Pagination } from '../classes/pagination';
+import { HalModel } from '../models/hal.model';
+import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
+import { NetworkConfig } from './network-config.interface';
 
 export class ModelOptions<P extends Pagination> {
 	type: string;

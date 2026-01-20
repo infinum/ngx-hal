@@ -1,4 +1,4 @@
-import { LINKS_PROPERTY_NAME, EMBEDDED_PROPERTY_NAME } from '../constants/hal.constant';
+import { EMBEDDED_PROPERTY_NAME, LINKS_PROPERTY_NAME } from '../constants/hal.constant';
 import { RawHalLinks } from './raw-hal-links.interface';
 
 export interface RawHalResource {
