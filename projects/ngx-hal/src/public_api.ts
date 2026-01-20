@@ -7,10 +7,8 @@ export * from './lib/decorators/has-one.decorator';
 export * from './lib/decorators/header-attribute.decorator';
 export * from './lib/decorators/link.decorator';
 export * from './lib/decorators/model-config.decorator';
-export * from './lib/decorators/model-service-config.decorator';
 
 export * from './lib/models/hal.model';
-export * from './lib/models/simple-hal.model';
 
 export * from './lib/classes/hal-document';
 export * from './lib/classes/pagination';
