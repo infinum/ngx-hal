@@ -29,7 +29,6 @@ export * from './lib/interfaces/has-many-options.interface';
 export * from './lib/interfaces/has-one-options.interface';
 export * from './lib/interfaces/link-relationship-options.interface';
 export * from './lib/interfaces/model-endpoints.interface';
-export * from './lib/interfaces/model-service-options.interface';
 export * from './lib/interfaces/network-config.interface';
 export * from './lib/interfaces/raw-hal-resource.interface';
 

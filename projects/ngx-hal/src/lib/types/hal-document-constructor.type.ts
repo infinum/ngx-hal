@@ -3,5 +3,5 @@ import { Pagination } from '../classes/pagination';
 import { HalModel } from '../models/hal.model';
 
 export type HalDocumentConstructor<T extends HalModel<P>, P extends Pagination> = {
-	new (...args): HalDocument<T, P>;
+	new (...args: Array<any>): HalDocument<T, P>;
 };
