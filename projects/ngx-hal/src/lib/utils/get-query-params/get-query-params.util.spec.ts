@@ -52,7 +52,10 @@ describe('getQueryParams', () => {
 		const parameterName = 'firstParameter';
 		const result = getQueryParams(`test.com?${parameterName}=animal,toy,plane`);
 		expect(Object.keys(result).length).toBe(1);
-		expect(result[parameterName].sort()).toEqual(['animal', 'toy', 'plane'].sort());
+		const paramValue = result[parameterName];
+		expect(Array.isArray(paramValue) ? paramValue.sort() : paramValue).toEqual(
+			['animal', 'toy', 'plane'].sort(),
+		);
 	});
 
 	it('should return array values for the parameters with more than one value passed as multiple occurances of the same parameter', () => {
@@ -61,14 +64,20 @@ describe('getQueryParams', () => {
 			`test.com?${parameterName}=animal&firstParameter=toy&firstParameter=plane`,
 		);
 		expect(Object.keys(result).length).toBe(1);
-		expect(result[parameterName].sort()).toEqual(['animal', 'toy', 'plane'].sort());
+		const paramValue = result[parameterName];
+		expect(Array.isArray(paramValue) ? paramValue.sort() : paramValue).toEqual(
+			['animal', 'toy', 'plane'].sort(),
+		);
 	});
 
 	it('should properly decode an array query parameter passed as a string divided with commas', () => {
 		const parameterName = 'firstParameter';
 		const result = getQueryParams(`test.com?${parameterName}=animal%2F,toy,plane`);
 		expect(Object.keys(result).length).toBe(1);
-		expect(result[parameterName].sort()).toEqual(['animal/', 'toy', 'plane'].sort());
+		const paramValue = result[parameterName];
+		expect(Array.isArray(paramValue) ? paramValue.sort() : paramValue).toEqual(
+			['animal/', 'toy', 'plane'].sort(),
+		);
 	});
 
 	it('should properly decode an array query parameter passed as multiple occurances of the same parameter', () => {
@@ -77,6 +86,9 @@ describe('getQueryParams', () => {
 			`test.com?firstParameter=animal&${parameterName}=toy%2F&firstParameter=plane`,
 		);
 		expect(Object.keys(result).length).toBe(1);
-		expect(result[parameterName].sort()).toEqual(['animal', 'toy/', 'plane'].sort());
+		const paramValue = result[parameterName];
+		expect(Array.isArray(paramValue) ? paramValue.sort() : paramValue).toEqual(
+			['animal', 'toy/', 'plane'].sort(),
+		);
 	});
 });

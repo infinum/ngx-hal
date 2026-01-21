@@ -1,5 +1,5 @@
-export function getQueryParams(url: string): object {
-	const queryParams: object = {};
+export function getQueryParams(url: string): Record<string, string | string[]> {
+	const queryParams: Record<string, string | string[]> = {};
 	const parser: HTMLAnchorElement = document.createElement('a');
 	parser.href = url;
 

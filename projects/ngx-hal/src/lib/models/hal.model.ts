@@ -153,14 +153,16 @@ export abstract class HalModel<
 		const property: ModelProperty = this.getPropertyData(resourceName);
 
 		if (this.resource[property.externalName]) {
-			return this.resource[property.externalName];
+			return this.resource[property.externalName] as RawHalResource;
 		}
 
 		if (!this.resource[EMBEDDED_PROPERTY_NAME]) {
 			return;
 		}
 
-		return this.resource[EMBEDDED_PROPERTY_NAME][property.externalName];
+		return this.resource[EMBEDDED_PROPERTY_NAME]?.[property.externalName] as
+			| RawHalResource
+			| undefined;
 	}
 
 	public save(
@@ -200,9 +202,11 @@ export abstract class HalModel<
 			);
 	}
 
-	public generatePayload(options: GeneratePayloadOptions = {}): object {
-		const attributePropertiesPayload: object = this.getAttributePropertiesPayload(options);
-		const relationshipsPayload: object = this.generateRelationshipsPayload(options);
+	public generatePayload(options: GeneratePayloadOptions = {}): Record<string, unknown> {
+		const attributePropertiesPayload: Record<string, unknown> =
+			this.getAttributePropertiesPayload(options);
+		const relationshipsPayload: Record<string, unknown> =
+			this.generateRelationshipsPayload(options);
 		const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipsPayload).length);
 
 		const payload = { ...attributePropertiesPayload };
@@ -216,7 +220,7 @@ export abstract class HalModel<
 
 	// Used only when HalModels or HalDocument are passed when creating a new model
 	private extractEmbeddedProperties(rawResource: RawHalResource): void {
-		const embeddedProperties: object = rawResource[EMBEDDED_PROPERTY_NAME] || {};
+		const embeddedProperties: Record<string, unknown> = rawResource[EMBEDDED_PROPERTY_NAME] || {};
 
 		Object.keys(embeddedProperties).forEach((propertyName: string) => {
 			const property: ModelProperty = this.getPropertyData(propertyName);
@@ -232,41 +236,46 @@ export abstract class HalModel<
 		});
 	}
 
-	private getAttributePropertiesPayload(payloadOptions: GeneratePayloadOptions = {}): object {
+	private getAttributePropertiesPayload(
+		payloadOptions: GeneratePayloadOptions = {},
+	): Record<string, unknown> {
 		const { specificFields, changedPropertiesOnly } = payloadOptions;
 
-		return this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
-			const propertyName: string = property.name;
-			const isPropertyExcludedFromPaylaod: boolean = property.excludeFromPayload;
-			const isSpecificFieldsSpecified: boolean = specificFields && Boolean(specificFields.length);
-			const isSpecificFieldsConditionSatisfied: boolean =
-				!isSpecificFieldsSpecified || specificFields.indexOf(propertyName) !== -1;
+		return this.attributeProperties.reduce<Record<string, unknown>>(
+			(payload: Record<string, unknown>, property: AttributeModelProperty) => {
+				const propertyName: string = property.name;
+				const isPropertyExcludedFromPaylaod: boolean = property.excludeFromPayload;
+				const isSpecificFieldsSpecified: boolean = specificFields && Boolean(specificFields.length);
+				const isSpecificFieldsConditionSatisfied: boolean =
+					!isSpecificFieldsSpecified || specificFields.indexOf(propertyName) !== -1;
 
-			if (isPropertyExcludedFromPaylaod || !isSpecificFieldsConditionSatisfied) {
-				return payload;
-			}
+				if (isPropertyExcludedFromPaylaod || !isSpecificFieldsConditionSatisfied) {
+					return payload;
+				}
 
-			const externalPropertyName: string = property.externalName;
-			const propertyPayload: object = property.transformBeforeSave
-				? property.transformBeforeSave(this[propertyName])
-				: this[propertyName];
+				const externalPropertyName: string = property.externalName;
+				const propertyPayload = property.transformBeforeSave
+					? property.transformBeforeSave(this[propertyName])
+					: this[propertyName];
 
-			if (changedPropertiesOnly) {
-				const isPropertyChanged: boolean = propertyPayload !== this.resource[propertyName];
+				if (changedPropertiesOnly) {
+					const isPropertyChanged: boolean = propertyPayload !== this.resource[propertyName];
 
-				if (isPropertyChanged) {
+					if (isPropertyChanged) {
+						payload[externalPropertyName] = propertyPayload;
+					}
+				} else {
 					payload[externalPropertyName] = propertyPayload;
 				}
-			} else {
-				payload[externalPropertyName] = propertyPayload;
-			}
 
-			return payload;
-		}, {});
+				return payload;
+			},
+			{},
+		);
 	}
 
-	private generateHasOnePropertyPayload(property: HasOneModelProperty): object {
-		const payload: object = {};
+	private generateHasOnePropertyPayload(property: HasOneModelProperty): Record<string, unknown> {
+		const payload: Record<string, unknown> = {};
 
 		const propertyName: string = property.name;
 		const externalPropertyName: string = property.externalName;
@@ -282,8 +291,8 @@ export abstract class HalModel<
 		return payload;
 	}
 
-	private generateHasManyPropertyPayload(property: HasManyModelProperty): object {
-		const payload: object = {};
+	private generateHasManyPropertyPayload(property: HasManyModelProperty): Record<string, unknown> {
+		const payload: Record<string, unknown> = {};
 		const hasManyPropertyLinks = [];
 
 		const propertyName: string = property.name;
@@ -305,7 +314,9 @@ export abstract class HalModel<
 		return payload;
 	}
 
-	private generateRelationshipsPayload(payloadOptions: GeneratePayloadOptions = {}): object {
+	private generateRelationshipsPayload(
+		payloadOptions: GeneratePayloadOptions = {},
+	): Record<string, unknown> {
 		const { specificFields } = payloadOptions;
 		const isSpecificFieldsSpecified: boolean = specificFields && Boolean(specificFields.length);
 
@@ -315,26 +326,29 @@ export abstract class HalModel<
 				(property: HasOneModelProperty) =>
 					!isSpecificFieldsSpecified || specificFields.indexOf(property.name) !== -1,
 			)
-			.reduce((payload: object, property: HasOneModelProperty) => {
-				const propertyName: string = property.name;
+			.reduce<Record<string, unknown>>(
+				(payload: Record<string, unknown>, property: HasOneModelProperty) => {
+					const propertyName: string = property.name;
 
-				if (!this[propertyName]) {
+					if (!this[propertyName]) {
+						return payload;
+					}
+
+					const isHasOneProperty: boolean = property.type === ModelPropertyEnum.HasOne;
+					let propertyPayload: Record<string, unknown>;
+
+					if (isHasOneProperty) {
+						propertyPayload = this.generateHasOnePropertyPayload(property);
+					} else {
+						propertyPayload = this.generateHasManyPropertyPayload(property);
+					}
+
+					Object.assign(payload, propertyPayload);
+
 					return payload;
-				}
-
-				const isHasOneProperty: boolean = property.type === ModelPropertyEnum.HasOne;
-				let propertyPayload: object;
-
-				if (isHasOneProperty) {
-					propertyPayload = this.generateHasOnePropertyPayload(property);
-				} else {
-					propertyPayload = this.generateHasManyPropertyPayload(property);
-				}
-
-				Object.assign(payload, propertyPayload);
-
-				return payload;
-			}, {});
+				},
+				{},
+			);
 	}
 
 	public generateHeaders(): PlainHeaders {

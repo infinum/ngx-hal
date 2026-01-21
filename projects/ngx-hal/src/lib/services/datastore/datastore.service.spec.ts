@@ -1937,7 +1937,7 @@ describe('DatastoreService', () => {
 		});
 
 		it('should make a PATCH request with the properties from specifiedFields which are changed', () => {
-			const customFunctionForPayloadTransformation = (originalPayload: object) => {
+			const customFunctionForPayloadTransformation = (originalPayload: Record<string, unknown>) => {
 				return Object.assign({ additionalProperty: 'infiltrator' }, originalPayload);
 			};
 
@@ -2082,7 +2082,7 @@ describe('DatastoreService', () => {
 			const paramName1 = 'testParam';
 			const paramValue1 = 'paramVal';
 
-			const params: object = {
+			const params: Record<string, string | string[]> = {
 				[paramName1]: [paramValue1],
 			};
 			datastoreService.find(MockModel, params, true, []).subscribe();
@@ -2106,7 +2106,7 @@ describe('DatastoreService', () => {
 			const paramValue2 = 'paramVal2';
 			const paramsArray = [paramValue1, paramValue2];
 
-			const params: object = {
+			const params: Record<string, string | string[]> = {
 				[paramName1]: [paramValue1, paramValue2],
 			};
 			datastoreService.find(MockModel, params, true, []).subscribe();
@@ -2162,7 +2162,7 @@ describe('DatastoreService', () => {
 			const templatedValue = 'tmpld';
 
 			const httpParams = new HttpParams().set(paramName1, paramValue1).set('text', templatedValue);
-			const params: object = {
+			const params: Record<string, string | string[]> = {
 				[paramName2]: paramValue2,
 				text: templatedValue,
 			};

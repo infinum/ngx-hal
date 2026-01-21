@@ -31,41 +31,39 @@ export abstract class ModelService<Model extends HalModel<P>, P extends Paginati
 		);
 	}
 
+	public find(params: Record<string, string | string[]> | HttpParams): Observable<Array<Model>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
-	): Observable<Array<Model>>;
-	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
+		params: Record<string, string | string[]> | HttpParams,
 		includeMeta: false,
 	): Observable<Array<Model>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
+		params: Record<string, string | string[]> | HttpParams,
 		includeMeta: true,
 	): Observable<HalDocument<Model, P>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
+		params: Record<string, string | string[]> | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 	): Observable<Array<Model>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
+		params: Record<string, string | string[]> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 	): Observable<HalDocument<Model, P>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
+		params: Record<string, string | string[]> | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 	): Observable<Array<Model>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
+		params: Record<string, string | string[]> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 	): Observable<HalDocument<Model, P>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
+		params: Record<string, string | string[]> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
@@ -74,7 +72,7 @@ export abstract class ModelService<Model extends HalModel<P>, P extends Paginati
 		storePartialModels?: boolean,
 	): Observable<HalDocument<Model, P>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams,
+		params: Record<string, string | string[]> | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
@@ -83,7 +81,7 @@ export abstract class ModelService<Model extends HalModel<P>, P extends Paginati
 		storePartialModels?: boolean,
 	): Observable<Array<Model>>;
 	public find(
-		params: object | { [param: string]: string | string[] } | HttpParams = {},
+		params: Record<string, string | string[]> | HttpParams = {},
 		includeMeta: boolean = false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
 		requestOptions: RequestOptions = {},
@@ -103,7 +101,7 @@ export abstract class ModelService<Model extends HalModel<P>, P extends Paginati
 		);
 	}
 
-	public createNewModel(recordData: object = {}): Model {
+	public createNewModel(recordData: Record<string, unknown> = {}): Model {
 		const model: Model = this.datastore.createModel(this.modelClass, recordData);
 		this.datastore.storage.save(model);
 		return model;

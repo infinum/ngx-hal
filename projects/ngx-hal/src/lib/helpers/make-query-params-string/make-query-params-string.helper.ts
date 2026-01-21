@@ -1,4 +1,7 @@
-export function makeQueryParamsString(params: object, sortAlphabetically: boolean = false): string {
+export function makeQueryParamsString(
+	params: Record<string, string | string[]>,
+	sortAlphabetically: boolean = false,
+): string {
 	let paramKeys: Array<string> = Object.keys(params);
 
 	if (sortAlphabetically) {

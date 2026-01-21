@@ -34,10 +34,8 @@ export class HalDocument<T extends HalModel<P>, P extends Pagination> {
 
 	public get hasEmbeddedItems(): boolean {
 		const listPropertyName: string = this.getListPropertyName(this.rawResource);
-		return (
-			this.rawResource[EMBEDDED_PROPERTY_NAME] &&
-			this.rawResource[EMBEDDED_PROPERTY_NAME][listPropertyName]
-		);
+		const embedded = this.rawResource[EMBEDDED_PROPERTY_NAME];
+		return Boolean(embedded && embedded[listPropertyName]);
 	}
 
 	public get itemLinks(): Array<RawHalLink> {
@@ -97,13 +95,15 @@ export class HalDocument<T extends HalModel<P>, P extends Pagination> {
 			return [];
 		}
 
-		return resources[EMBEDDED_PROPERTY_NAME][listPropertyName] || [];
+		const embeddedValue = resources[EMBEDDED_PROPERTY_NAME]?.[listPropertyName];
+
+		return Array.isArray(embeddedValue) ? embeddedValue : [];
 	}
 
 	private getListPropertyName(listResponse: RawHalResource): string {
 		const links = listResponse[LINKS_PROPERTY_NAME];
 
-		const embdedded: object = this.rawResource[EMBEDDED_PROPERTY_NAME];
+		const embdedded: Record<string, unknown> | undefined = this.rawResource[EMBEDDED_PROPERTY_NAME];
 		const fallbackListPropertyName = embdedded
 			? Object.keys(embdedded)[0]
 			: 'noListPropertyPresent';

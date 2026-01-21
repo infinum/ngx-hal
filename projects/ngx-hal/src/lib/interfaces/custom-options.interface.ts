@@ -1,5 +1,5 @@
 export interface CustomOptions<T> {
 	buildUrlFunction?: (model: T, urlFromModel: string) => string;
-	transformPayloadBeforeSave?: (payload: object) => object;
+	transformPayloadBeforeSave?: (payload: Record<string, unknown>) => Record<string, unknown>;
 	specificFields?: Array<string>;
 }
