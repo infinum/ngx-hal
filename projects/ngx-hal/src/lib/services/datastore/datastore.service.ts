@@ -11,7 +11,7 @@ import { DEFAULT_REQUEST_OPTIONS } from '../../constants/request.constant';
 import { CacheStrategy } from '../../enums/cache-strategy.enum';
 import { ModelProperty as ModelPropertyEnum } from '../../enums/model-property.enum';
 import { isFunction } from '../../helpers/is-function/is-function.helper';
-import { isHalModelInstance } from '../../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
+import { isHalModelInstance } from '../../helpers/is-hal-model-instance/is-hal-model-instance.helper';
 import { makeHttpParams } from '../../helpers/make-http-params/make-http-params.helper';
 import { makeQueryParamsString } from '../../helpers/make-query-params-string/make-query-params-string.helper';
 import { getObjProperty } from '../../helpers/metadata/metadata.helper';

@@ -19,7 +19,7 @@ import {
 } from '../constants/metadata.constant';
 import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
 import { isFunction } from '../helpers/is-function/is-function.helper';
-import { isHalModelInstance } from '../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
+import { isHalModelInstance } from '../helpers/is-hal-model-instance/is-hal-model-instance.helper';
 import { getArrayObjProperty, getObjProperty } from '../helpers/metadata/metadata.helper';
 import { generateUUID } from '../helpers/uuid/uuid.helper';
 import { CustomOptions } from '../interfaces/custom-options.interface';

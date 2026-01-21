@@ -1,5 +1,5 @@
-import { isHalModelInstance } from '../is-hal-model-instance.ts/is-hal-model-instance.helper';
-import { isSimpleHalModelInstance } from '../is-simple-hal-model-instance.ts/is-simple-hal-model-instance.helper';
+import { isHalModelInstance } from '../is-hal-model-instance/is-hal-model-instance.helper';
+import { isSimpleHalModelInstance } from '../is-simple-hal-model-instance/is-simple-hal-model-instance.helper';
 
 export function isFunction(functionToCheck: any): boolean {
 	return (
