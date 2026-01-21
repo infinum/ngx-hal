@@ -9,8 +9,10 @@ import { RequestOptions } from '../../types/request-options.type';
 import { DatastoreService } from '../datastore/datastore.service';
 
 export abstract class ModelService<Model extends HalModel<P>, P extends Pagination> {
-	protected abstract datastore: DatastoreService<P>;
-	protected abstract modelClass: ModelConstructor<Model, P>;
+	constructor(
+		protected datastore: DatastoreService<P>,
+		private modelClass: ModelConstructor<Model, P>,
+	) {}
 
 	public findOne(
 		modelId: string,

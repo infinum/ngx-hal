@@ -1,4 +1,5 @@
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { combineLatest, Observable, of, throwError } from 'rxjs';
 import { catchError, flatMap, map, tap } from 'rxjs/operators';
 import { HalDocument } from '../../classes/hal-document';
@@ -38,9 +39,8 @@ import { getResponseHeader } from '../../utils/get-response-headers/get-response
 import { isString } from '../../utils/is-string/is-string.util';
 import { removeQueryParams } from '../../utils/remove-query-params/remove-query-params.util';
 
-export abstract class DatastoreService<P extends Pagination> {
-	protected abstract http: HttpClient;
-
+@Injectable()
+export class DatastoreService<P extends Pagination> {
 	public networkConfig: NetworkConfig = this['networkConfig'] || DEFAULT_NETWORK_CONFIG;
 	private _cacheStrategy: CacheStrategy;
 	// eslint:disable-next-line
@@ -49,6 +49,8 @@ export abstract class DatastoreService<P extends Pagination> {
 	protected httpParamsOptions?: object;
 	public paginationClass: { new (...args): P };
 	public modelTypes = [];
+
+	constructor(private http: HttpClient) {}
 
 	private getHalDocumentClass<
 		T extends HalModel<P>,
