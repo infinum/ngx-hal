@@ -374,11 +374,9 @@ export abstract class HalModel<
 	public getRelationship<T extends HalModel<P>>(relationshipName: string): T | HalDocument<T, P> {
 		const property: ModelProperty = this.getPropertyData(relationshipName);
 
-		const isHasOneProperty: boolean = property.type === ModelPropertyEnum.HasOne;
-
-		if (isHasOneProperty) {
+		if (this.isHasOneProperty(property)) {
 			return this.getHasOneRelationship(property) as T;
-		} else if (this.isHasManyProperty) {
+		} else {
 			return this.getHasManyRelationship(property);
 		}
 	}
