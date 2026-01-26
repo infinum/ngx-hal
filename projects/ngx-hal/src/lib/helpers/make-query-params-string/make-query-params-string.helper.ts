@@ -10,7 +10,10 @@ export function makeQueryParamsString(
 
 	const queryParamsString: string = paramKeys.reduce(
 		(paramsString: string, queryParamKey: string) => {
-			return `${paramsString}&${queryParamKey}=${params[queryParamKey]}`;
+			const value = params[queryParamKey];
+			const stringValue = Array.isArray(value) ? value.join(',') : String(value);
+
+			return `${paramsString}&${queryParamKey}=${stringValue}`;
 		},
 		'',
 	);

@@ -31,57 +31,57 @@ export abstract class ModelService<Model extends HalModel<P>, P extends Paginati
 		);
 	}
 
-	public find(params: Record<string, string | string[]> | HttpParams): Observable<Array<Model>>;
+	public find(params: Record<string, unknown> | HttpParams): Observable<Array<Model>>;
 	public find(
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: false,
 	): Observable<Array<Model>>;
 	public find(
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: true,
 	): Observable<HalDocument<Model, P>>;
 	public find(
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 	): Observable<Array<Model>>;
 	public find(
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 	): Observable<HalDocument<Model, P>>;
 	public find(
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 	): Observable<Array<Model>>;
 	public find(
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 	): Observable<HalDocument<Model, P>>;
 	public find(
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: true,
-		includeRelationships: Array<string | RelationshipRequestDescriptor>,
-		requestOptions: RequestOptions,
-		subsequentRequestsOptions: RequestOptions,
-		customUrl?: string,
-		storePartialModels?: boolean,
-	): Observable<HalDocument<Model, P>>;
-	public find(
-		params: Record<string, string | string[]> | HttpParams,
-		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 		subsequentRequestsOptions: RequestOptions,
 		customUrl?: string,
 		storePartialModels?: boolean,
+	): Observable<HalDocument<Model, P>>;
+	public find(
+		params: Record<string, unknown> | HttpParams,
+		includeMeta: false,
+		includeRelationships: Array<string | RelationshipRequestDescriptor>,
+		requestOptions: RequestOptions,
+		subsequentRequestsOptions: RequestOptions,
+		customUrl?: string,
+		storePartialModels?: boolean,
 	): Observable<Array<Model>>;
 	public find(
-		params: Record<string, string | string[]> | HttpParams = {},
+		params: Record<string, unknown> | HttpParams = {},
 		includeMeta: boolean = false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
 		requestOptions: RequestOptions = {},

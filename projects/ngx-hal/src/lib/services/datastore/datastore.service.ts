@@ -424,35 +424,35 @@ export class DatastoreService<P extends Pagination> {
 
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 	): Observable<Array<T>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: false,
 	): Observable<Array<T>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 	): Observable<Array<T>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 	): Observable<HalDocument<T, P>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 	): Observable<HalDocument<T, P>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
@@ -460,21 +460,21 @@ export class DatastoreService<P extends Pagination> {
 	): Observable<HalDocument<T, P>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 	): Observable<Array<T>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: boolean,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
 	): Observable<Array<T> | HalDocument<T, P>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: boolean,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
@@ -482,7 +482,7 @@ export class DatastoreService<P extends Pagination> {
 	): Observable<Array<T> | HalDocument<T, P>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: boolean,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
@@ -491,7 +491,7 @@ export class DatastoreService<P extends Pagination> {
 	): Observable<Array<T> | HalDocument<T, P>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: true,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
@@ -501,7 +501,7 @@ export class DatastoreService<P extends Pagination> {
 	): Observable<HalDocument<T, P>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
@@ -511,7 +511,7 @@ export class DatastoreService<P extends Pagination> {
 	): Observable<T>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams,
+		params: Record<string, unknown> | HttpParams,
 		includeMeta: boolean,
 		includeRelationships: Array<string | RelationshipRequestDescriptor>,
 		requestOptions: RequestOptions,
@@ -521,7 +521,7 @@ export class DatastoreService<P extends Pagination> {
 	): Observable<Array<T> | HalDocument<T, P>>;
 	public find<T extends HalModel<P>>(
 		modelClass: ModelConstructor<T, P>,
-		params: Record<string, string | string[]> | HttpParams = {},
+		params: Record<string, unknown> | HttpParams = {},
 		includeMeta: boolean = false,
 		includeRelationships: Array<string | RelationshipRequestDescriptor> = [],
 		requestOptions: RequestOptions = {},
@@ -534,7 +534,9 @@ export class DatastoreService<P extends Pagination> {
 		const subsequentOptions: RequestOptions = deepmergeWrapper({}, subsequentRequestsOptions);
 
 		const paramsObject: Record<string, string | string[]> = this.ensureParamsObject(params || {});
-		requestOptions.params = this.ensureParamsObject(requestOptions.params || {});
+		requestOptions.params = this.ensureParamsObject(
+			(requestOptions.params as Record<string, unknown>) || {},
+		);
 		requestOptions.params = Object.assign(requestOptions.params, paramsObject);
 
 		const options: RequestOptions = deepmergeWrapper({}, requestOptions);
@@ -597,7 +599,7 @@ export class DatastoreService<P extends Pagination> {
 			changedPropertiesOnly: false,
 		});
 
-		const transformedPaylaod: Record<string, unknown> = options.transformPayloadBeforeSave(payload);
+		const transformedPaylaod = options.transformPayloadBeforeSave(payload);
 		const modelHeaders: PlainHeaders = model.generateHeaders();
 
 		const modelRequestOptions: RequestOptions = requestOptions || {};
@@ -633,10 +635,7 @@ export class DatastoreService<P extends Pagination> {
 		);
 	}
 
-	private updateModelWithChangedProperties<T extends HalModel<P>>(
-		model: T,
-		payload: Record<string, unknown>,
-	) {
+	private updateModelWithChangedProperties<T extends HalModel<P>>(model: T, payload: unknown) {
 		Object.keys(payload).forEach((externalPropertyName: string) => {
 			const property: AttributeModelProperty = model.getPropertyData(externalPropertyName);
 
@@ -668,7 +667,7 @@ export class DatastoreService<P extends Pagination> {
 			specificFields: options.specificFields,
 			changedPropertiesOnly: true,
 		});
-		const transformedPaylaod: Record<string, unknown> = options.transformPayloadBeforeSave(payload);
+		const transformedPaylaod = options.transformPayloadBeforeSave(payload);
 		const modelHeaders = model.generateHeaders();
 
 		const modelRequestOptions: RequestOptions = requestOptions || {};
@@ -843,7 +842,9 @@ export class DatastoreService<P extends Pagination> {
 		urlWithParams: string;
 		requestOptions: RequestOptions;
 	} {
-		const params: Record<string, string | string[]> = this.ensureParamsObject(options.params || {});
+		const params: Record<string, string | string[]> = this.ensureParamsObject(
+			(options.params as Record<string, unknown>) || {},
+		);
 		Object.assign(options, { params });
 		const requestOptions: RequestOptions = deepmergeWrapper(
 			DEFAULT_REQUEST_OPTIONS,
@@ -853,11 +854,17 @@ export class DatastoreService<P extends Pagination> {
 
 		this.storage.enrichRequestOptions(url, options);
 
-		const fillParams = Object.assign({}, options.params, options.routeParams);
+		const fillParams = Object.assign(
+			{},
+			this.ensureParamsObject((options.params as Record<string, unknown>) || {}),
+			this.ensureParamsObject((options.routeParams as Record<string, unknown>) || {}),
+		);
 		const templatedUrl: string = populateTemplatedUrl(url, fillParams);
 
 		const urlQueryParams: Record<string, string | string[]> = getQueryParams(templatedUrl);
-		const paramsObject = this.ensureParamsObject(requestOptions.params || {});
+		const paramsObject = this.ensureParamsObject(
+			(requestOptions.params as Record<string, unknown>) || {},
+		);
 		requestOptions.params = Object.assign(urlQueryParams, paramsObject);
 
 		const cleanUrl: string = removeQueryParams(templatedUrl);
@@ -880,7 +887,7 @@ export class DatastoreService<P extends Pagination> {
 	}
 
 	private ensureParamsObject(
-		params: HttpParams | Record<string, string | string[]>,
+		params: HttpParams | Record<string, unknown>,
 	): Record<string, string | string[]> {
 		if (params instanceof HttpParams) {
 			return params
@@ -892,12 +899,23 @@ export class DatastoreService<P extends Pagination> {
 				}, {});
 		}
 
-		return params;
+		const result: Record<string, string | string[]> = {};
+
+		Object.keys(params).forEach((key: string) => {
+			const value = params[key];
+			if (Array.isArray(value)) {
+				result[key] = value.map((v) => String(v));
+			} else {
+				result[key] = String(value);
+			}
+		});
+
+		return result;
 	}
 
 	private makePostRequest<T extends HalModel<P>>(
 		url: string,
-		payload: Record<string, unknown>,
+		payload: unknown,
 		requestOptions?: RequestOptions,
 	): Observable<unknown> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(
@@ -909,7 +927,7 @@ export class DatastoreService<P extends Pagination> {
 
 	private makePutRequest<T extends HalModel<P>>(
 		url: string,
-		payload: Record<string, unknown>,
+		payload: unknown,
 		requestOptions?: RequestOptions,
 	): Observable<unknown> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(
@@ -921,7 +939,7 @@ export class DatastoreService<P extends Pagination> {
 
 	private makePatchRequest<T extends HalModel<P>>(
 		url: string,
-		payload: Record<string, unknown>,
+		payload: unknown,
 		requestOptions?: RequestOptions,
 	): Observable<unknown> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(

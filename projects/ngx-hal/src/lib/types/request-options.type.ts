@@ -7,8 +7,8 @@ export type PlainHeaders = {
 export type RequestOptions = {
 	headers?: HttpHeaders | PlainHeaders;
 	observe?: string;
-	params?: HttpParams | Record<string, string | string[]>;
-	routeParams?: Record<string, string | string[]>;
+	params?: HttpParams | Record<string, unknown>;
+	routeParams?: Record<string, unknown>;
 	reportProgress?: boolean;
 	responseType?;
 	withCredentials?: boolean;
