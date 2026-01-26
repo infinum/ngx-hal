@@ -374,6 +374,11 @@ export abstract class HalModel<
 	public getRelationship<T extends HalModel<P>>(relationshipName: string): T | HalDocument<T, P> {
 		const property: ModelProperty = this.getPropertyData(relationshipName);
 
+		if (!property) {
+			console.warn(`Relationship with the name ${relationshipName} is not defined on the model.`);
+			return;
+		}
+
 		if (this.isHasOneProperty(property)) {
 			return this.getHasOneRelationship(property) as T;
 		} else {
