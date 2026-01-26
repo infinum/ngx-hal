@@ -200,7 +200,7 @@ export abstract class HalModel<
 			);
 	}
 
-	public generatePayload(options: GeneratePayloadOptions = {}): object {
+	public generatePayload(options: GeneratePayloadOptions = {}) {
 		const attributePropertiesPayload: object = this.getAttributePropertiesPayload(options);
 		const relationshipsPayload: object = this.generateRelationshipsPayload(options);
 		const hasRelationshipLinks: boolean = Boolean(Object.keys(relationshipsPayload).length);
