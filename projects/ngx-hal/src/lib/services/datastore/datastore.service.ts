@@ -592,12 +592,12 @@ export class DatastoreService<P extends Pagination> {
 
 		const url: string = options.buildUrlFunction(model, this.buildUrl(model));
 
-		const payload: object = model.generatePayload({
+		const payload = model.generatePayload({
 			specificFields: options.specificFields,
 			changedPropertiesOnly: false,
 		});
 
-		const transformedPaylaod: object = options.transformPayloadBeforeSave(payload);
+		const transformedPaylaod = options.transformPayloadBeforeSave(payload);
 		const modelHeaders: object = model.generateHeaders();
 
 		const modelRequestOptions: RequestOptions = requestOptions || {};
@@ -633,7 +633,7 @@ export class DatastoreService<P extends Pagination> {
 		);
 	}
 
-	private updateModelWithChangedProperties<T extends HalModel<P>>(model: T, payload: object) {
+	private updateModelWithChangedProperties<T extends HalModel<P>>(model: T, payload: unknown) {
 		Object.keys(payload).forEach((externalPropertyName: string) => {
 			const property: AttributeModelProperty = model.getPropertyData(externalPropertyName);
 
@@ -661,11 +661,11 @@ export class DatastoreService<P extends Pagination> {
 		const options: CustomOptions<T> = deepmergeWrapper(defaultUpdateOptions, updateOptions);
 
 		const url: string = options.buildUrlFunction(model, this.buildUrl(model));
-		const payload: object = model.generatePayload({
+		const payload = model.generatePayload({
 			specificFields: options.specificFields,
 			changedPropertiesOnly: true,
 		});
-		const transformedPaylaod: object = options.transformPayloadBeforeSave(payload);
+		const transformedPaylaod = options.transformPayloadBeforeSave(payload);
 		const modelHeaders: object = model.generateHeaders();
 
 		const modelRequestOptions: RequestOptions = requestOptions || {};
@@ -885,7 +885,7 @@ export class DatastoreService<P extends Pagination> {
 
 	private makePostRequest<T extends HalModel<P>>(
 		url: string,
-		payload: object,
+		payload: unknown,
 		requestOptions?: RequestOptions,
 	): Observable<any> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(
@@ -897,7 +897,7 @@ export class DatastoreService<P extends Pagination> {
 
 	private makePutRequest<T extends HalModel<P>>(
 		url: string,
-		payload: object,
+		payload: unknown,
 		requestOptions?: RequestOptions,
 	): Observable<any> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(
@@ -909,7 +909,7 @@ export class DatastoreService<P extends Pagination> {
 
 	private makePatchRequest<T extends HalModel<P>>(
 		url: string,
-		payload: object,
+		payload: unknown,
 		requestOptions?: RequestOptions,
 	): Observable<any> {
 		const { requestOptions: options, cleanUrl } = this.extractRequestInfo(
