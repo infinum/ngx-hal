@@ -1,7 +1,7 @@
-import { HalModel } from '../models/hal.model';
-import { ModelConfig } from '../decorators/model-config.decorator';
-import { Attribute } from '../decorators/attribute.decorator';
 import { Pagination } from '../classes/pagination';
+import { Attribute } from '../decorators/attribute.decorator';
+import { ModelConfig } from '../decorators/model-config.decorator';
+import { HalModel } from '../models/hal.model';
 
 @ModelConfig({
 	type: 'Mock3',

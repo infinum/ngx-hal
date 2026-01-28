@@ -1,56 +1,56 @@
-import { Observable } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { HalDocument } from '../classes/hal-document';
+import { Pagination } from '../classes/pagination';
+import { LOCAL_DOCUMENT_ID_PREFIX, LOCAL_MODEL_ID_PREFIX } from '../constants/general.constant';
 import {
-	ModelOptions,
-	DEFAULT_MODEL_OPTIONS,
-	DEFAULT_MODEL_TYPE,
-} from '../interfaces/model-options.interface';
-import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
+	EMBEDDED_PROPERTY_NAME,
+	LINKS_PROPERTY_NAME,
+	SELF_PROPERTY_NAME,
+} from '../constants/hal.constant';
 import {
 	ATTRIBUTE_PROPERTIES_METADATA_KEY,
 	HAL_MODEL_DOCUMENT_CLASS_METADATA_KEY,
-	HAS_ONE_PROPERTIES_METADATA_KEY,
 	HAS_MANY_PROPERTIES_METADATA_KEY,
+	HAS_ONE_PROPERTIES_METADATA_KEY,
 	HEADER_ATTRIBUTE_PROPERTIES_METADATA_KEY,
 	LINK_PROPERTIES_METADATA_KEY,
 } from '../constants/metadata.constant';
-import { HalDocumentConstructor } from '../types/hal-document-construtor.type';
+import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
+import { isFunction } from '../helpers/is-function/is-function.helper';
+import { isHalModelInstance } from '../helpers/is-hal-model-instance/is-hal-model-instance.helper';
+import { getArrayObjProperty, getObjProperty } from '../helpers/metadata/metadata.helper';
+import { generateUUID } from '../helpers/uuid/uuid.helper';
+import { CustomOptions } from '../interfaces/custom-options.interface';
+import { GeneratePayloadOptions } from '../interfaces/generate-payload-options.interface';
+import { ModelEndpoints } from '../interfaces/model-endpoints.interface';
 import {
-	ModelProperty,
+	DEFAULT_MODEL_OPTIONS,
+	DEFAULT_MODEL_TYPE,
+	ModelOptions,
+} from '../interfaces/model-options.interface';
+import {
 	AttributeModelProperty,
-	HasOneModelProperty,
 	HasManyModelProperty,
+	HasOneModelProperty,
 	HeaderAttributeModelProperty,
 	LinkProperty,
+	ModelProperty,
 } from '../interfaces/model-property.interface';
-import {
-	LINKS_PROPERTY_NAME,
-	SELF_PROPERTY_NAME,
-	EMBEDDED_PROPERTY_NAME,
-} from '../constants/hal.constant';
-import { LOCAL_DOCUMENT_ID_PREFIX, LOCAL_MODEL_ID_PREFIX } from '../constants/general.constant';
-import { DatastoreService } from '../services/datastore/datastore.service';
+import { NetworkConfig } from '../interfaces/network-config.interface';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
-import { HalDocument } from '../classes/hal-document';
-import { NetworkConfig } from '../interfaces/network-config.interface';
-import { generateUUID } from '../helpers/uuid/uuid.helper';
-import { getResponseHeader } from '../utils/get-response-headers/get-response-header.util';
-import { isHalModelInstance } from '../helpers/is-hal-model-instance.ts/is-hal-model-instance.helper';
-import { PlainHeaders, RequestOptions } from '../types/request-options.type';
-import { ModelProperty as ModelPropertyEnum } from '../enums/model-property.enum';
-import { GeneratePayloadOptions } from '../interfaces/generate-payload-options.interface';
-import { CustomOptions } from '../interfaces/custom-options.interface';
-import { ensureRelationshipRequestDescriptors } from '../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
+import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
+import { DatastoreService } from '../services/datastore/datastore.service';
+import { HalDocumentConstructor } from '../types/hal-document-constructor.type';
 import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
+import { PlainHeaders, RequestOptions } from '../types/request-options.type';
+import { ensureRelationshipRequestDescriptors } from '../utils/ensure-relationship-descriptors/ensure-relationship-descriptors.util';
+import { getResponseHeader } from '../utils/get-response-headers/get-response-header.util';
+import { isString } from '../utils/is-string/is-string.util';
 import { removeQueryParams } from '../utils/remove-query-params/remove-query-params.util';
 import { setRequestHeader } from '../utils/set-request-header/set-request-header.util';
-import { isString } from '../utils/is-string/is-string.util';
-import { isFunction } from '../helpers/is-function/is-function.helper';
-import { ModelEndpoints } from '../interfaces/model-endpoints.interface';
-import { map } from 'rxjs/operators';
-import { getArrayObjProperty, getObjProperty } from '../helpers/metadata/metadata.helper';
-import { Pagination } from '../classes/pagination';
 
 export abstract class HalModel<
 	P extends Pagination,
@@ -237,12 +237,12 @@ export abstract class HalModel<
 
 		return this.attributeProperties.reduce((payload: object, property: AttributeModelProperty) => {
 			const propertyName: string = property.name;
-			const isPropertyExcludedFromPaylaod: boolean = property.excludeFromPayload;
+			const isPropertyExcludedFromPayload: boolean = property.excludeFromPayload;
 			const isSpecificFieldsSpecified: boolean = specificFields && Boolean(specificFields.length);
 			const isSpecificFieldsConditionSatisfied: boolean =
 				!isSpecificFieldsSpecified || specificFields.indexOf(propertyName) !== -1;
 
-			if (isPropertyExcludedFromPaylaod || !isSpecificFieldsConditionSatisfied) {
+			if (isPropertyExcludedFromPayload || !isSpecificFieldsConditionSatisfied) {
 				return payload;
 			}
 

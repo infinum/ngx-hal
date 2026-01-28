@@ -1,12 +1,12 @@
-import { HttpResponse, HttpParams } from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HalModel } from '../../models/hal.model';
-import { DatastoreService } from '../datastore/datastore.service';
-import { RequestOptions } from '../../types/request-options.type';
 import { HalDocument } from '../../classes/hal-document';
+import { Pagination } from '../../classes/pagination';
+import { HalModel } from '../../models/hal.model';
 import { ModelConstructor } from '../../types/model-constructor.type';
 import { RelationshipRequestDescriptor } from '../../types/relationship-request-descriptor.type';
-import { Pagination } from '../../classes/pagination';
+import { RequestOptions } from '../../types/request-options.type';
+import { DatastoreService } from '../datastore/datastore.service';
 
 export abstract class ModelService<Model extends HalModel<P>, P extends Pagination> {
 	constructor(

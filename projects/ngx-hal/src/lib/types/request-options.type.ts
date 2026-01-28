@@ -6,7 +6,7 @@ export type PlainHeaders = {
 
 export type RequestOptions = {
 	headers?: HttpHeaders | PlainHeaders;
-	observe?;
+	observe?: string;
 	params?:
 		| HttpParams
 		| {

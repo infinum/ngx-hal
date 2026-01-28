@@ -75,7 +75,7 @@ describe('DatastoreService', () => {
 			carModel = new CarModel(
 				{
 					name: carName,
-					prentCompany: new MockModel2({ name: companyName }, datastoreService),
+					parentCompany: new MockModel2({ name: companyName }, datastoreService),
 					parts: [new MockModel2({ name: partName }, datastoreService)],
 				},
 				datastoreService,
@@ -476,7 +476,7 @@ describe('DatastoreService', () => {
 		});
 
 		it('should make a request to a custom URL if buildUrl function is provided and model should be provided there', () => {
-			const modelName = 'mockModell23';
+			const modelName = 'mockModel23';
 			const mockModel = new MockModel({ name: modelName }, datastoreService);
 
 			const customUrl = 'fully-custom-rul';
@@ -683,7 +683,7 @@ describe('DatastoreService', () => {
 			const carModel = new CarModel(
 				{
 					name: carName,
-					prentCompany: companyModel,
+					parentCompany: companyModel,
 					parts: [partsModel],
 				},
 				datastoreService,
@@ -719,7 +719,7 @@ describe('DatastoreService', () => {
 			const carModel = new CarModel(
 				{
 					name: carName,
-					prentCompany: companyModel,
+					parentCompany: companyModel,
 					parts: [partsModel],
 				},
 				datastoreService,
@@ -756,7 +756,7 @@ describe('DatastoreService', () => {
 			const carModel = new CarModel(
 				{
 					name: carName,
-					prentCompany: companyModel,
+					parentCompany: companyModel,
 					parts: [partsModel],
 				},
 				datastoreService,
@@ -792,7 +792,7 @@ describe('DatastoreService', () => {
 			const carModel = new CarModel(
 				{
 					name: carName,
-					prentCompany: companyModel,
+					parentCompany: companyModel,
 					parts: [partsModel],
 				},
 				datastoreService,
@@ -829,7 +829,7 @@ describe('DatastoreService', () => {
 			const carModel = new CarModel(
 				{
 					name: carName,
-					prentCompany: companyModel,
+					parentCompany: companyModel,
 					parts: [partsModel],
 				},
 				datastoreService,
@@ -865,7 +865,7 @@ describe('DatastoreService', () => {
 			const carModel = new CarModel(
 				{
 					name: carName,
-					prentCompany: companyModel,
+					parentCompany: companyModel,
 					parts: [partsModel],
 				},
 				datastoreService,
@@ -903,7 +903,7 @@ describe('DatastoreService', () => {
 			req.flush(mockModelResponseJson);
 		});
 
-		it('should not make a GET request for fetching a single model if noone is subscribed to it', () => {
+		it('should not make a GET request for fetching a single model if none is subscribed to it', () => {
 			const spy = spyOn(datastoreService, 'findOne');
 
 			datastoreService.findOne(MockModel, 'mockModelId');

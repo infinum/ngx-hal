@@ -1,21 +1,21 @@
 import { HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
 import {
-	LINKS_PROPERTY_NAME,
 	EMBEDDED_PROPERTY_NAME,
+	LINKS_PROPERTY_NAME,
 	SELF_PROPERTY_NAME,
 } from '../constants/hal.constant';
-import { HalModel } from '../models/hal.model';
-import { Pagination } from './pagination';
-import { ModelConstructor } from '../types/model-constructor.type';
-import { DatastoreService } from '../services/datastore/datastore.service';
-import { isArray } from '../utils/is-array/is-array.util';
+import { generateUUID } from '../helpers/uuid/uuid.helper';
 import { RawHalLink } from '../interfaces/raw-hal-link.interface';
 import { RawHalLinks } from '../interfaces/raw-hal-links.interface';
-import { RequestOptions } from '../types/request-options.type';
+import { RawHalResource } from '../interfaces/raw-hal-resource.interface';
+import { HalModel } from '../models/hal.model';
+import { DatastoreService } from '../services/datastore/datastore.service';
+import { ModelConstructor } from '../types/model-constructor.type';
 import { RelationshipRequestDescriptor } from '../types/relationship-request-descriptor.type';
-import { generateUUID } from '../helpers/uuid/uuid.helper';
+import { RequestOptions } from '../types/request-options.type';
+import { isArray } from '../utils/is-array/is-array.util';
+import { Pagination } from './pagination';
 
 export class HalDocument<T extends HalModel<P>, P extends Pagination> {
 	public models: Array<T>;

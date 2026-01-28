@@ -1,8 +1,8 @@
 import { HttpResponse } from '@angular/common/http';
 import { HalModel } from '../../models/hal.model';
+import { Pagination } from '../pagination';
 import { HalDocument } from './../hal-document';
 import { HalStorage } from './hal-storage';
-import { Pagination } from '../pagination';
 
 export class SimpleHalStorage<P extends Pagination> extends HalStorage<P> {
 	public save<T extends HalModel<P>>(

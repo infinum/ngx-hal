@@ -55,7 +55,7 @@ describe('getQueryParams', () => {
 		expect(result[parameterName].sort()).toEqual(['animal', 'toy', 'plane'].sort());
 	});
 
-	it('should return array values for the parameters with more than one value passed as multiple occurances of the same parameter', () => {
+	it('should return array values for the parameters with more than one value passed as multiple occurrences of the same parameter', () => {
 		const parameterName = 'firstParameter';
 		const result = getQueryParams(
 			`test.com?${parameterName}=animal&firstParameter=toy&firstParameter=plane`,
@@ -71,7 +71,7 @@ describe('getQueryParams', () => {
 		expect(result[parameterName].sort()).toEqual(['animal/', 'toy', 'plane'].sort());
 	});
 
-	it('should properly decode an array query parameter passed as multiple occurances of the same parameter', () => {
+	it('should properly decode an array query parameter passed as multiple occurrences of the same parameter', () => {
 		const parameterName = 'firstParameter';
 		const result = getQueryParams(
 			`test.com?firstParameter=animal&${parameterName}=toy%2F&firstParameter=plane`,
