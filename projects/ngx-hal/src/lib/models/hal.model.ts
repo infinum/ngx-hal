@@ -381,7 +381,7 @@ export abstract class HalModel<
 
 		if (this.isHasOneProperty(property)) {
 			return this.getHasOneRelationship(property) as T;
-		} else {
+		} else if (this.isHasManyProperty(property)) {
 			return this.getHasManyRelationship(property);
 		}
 	}
