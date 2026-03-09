@@ -25,9 +25,6 @@ importers:
       deepmerge:
         specifier: 4.3.1
         version: 4.3.1
-      latest:
-        specifier: link:@typescript-eslint/parser/latest
-        version: link:@typescript-eslint/parser/latest
       prettier-plugin-organize-imports:
         specifier: ^4.3.0
         version: 4.3.0(prettier@3.8.1)(typescript@5.9.3)
@@ -35,7 +32,7 @@ importers:
         specifier: '>=7.8.2'
         version: 7.8.2
       tslib:
-        specifier: ^2.8.1
+        specifier: '>=2.8.1'
         version: 2.8.1
       uri-templates:
         specifier: ^0.2.0
