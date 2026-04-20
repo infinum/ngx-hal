@@ -60,9 +60,9 @@
 		"@angular/compiler-cli": "^21.2.9",
 		"@angular/language-service": "^21.2.9",
 		"@types/jasmine": "~5.1.15",
-		"@types/node": "^25.5.0",
-		"@typescript-eslint/eslint-plugin": "^8.57.1",
-		"@typescript-eslint/parser": "^8.57.1",
+		"@types/node": "^25.6.0",
+		"@typescript-eslint/eslint-plugin": "^8.58.2",
+		"@typescript-eslint/parser": "^8.58.2",
 		"eslint": "^9.39.4",
 		"husky": "^9.1.7",
 		"jasmine-core": "~5.13.0",
@@ -73,8 +73,8 @@
 		"karma-jasmine": "~5.1.0",
 		"karma-jasmine-html-reporter": "^2.2.0",
 		"lint-staged": "^16.4.0",
-		"ng-packagr": "^21.2.1",
-		"prettier": "3.8.1",
+		"ng-packagr": "^21.2.3",
+		"prettier": "3.8.3",
 		"typescript": "~5.9.3"
 	},
 	"engines": {
