@@ -77,8 +77,16 @@
 		"prettier": "3.8.3",
 		"typescript": "~5.9.3"
 	},
-	"engines": {
-		"node": "22.20.0"
+	"pnpm": {
+		"overrides": {
+			"@hono/node-server": "1.19.13",
+			"hono": "4.12.14",
+			"follow-redirects": "1.16.0",
+			"socket.io-parser": ">=4.2.6",
+			"flatted": ">=3.4.2",
+			"yaml": ">=2.8.3",
+			"path-to-regexp": ">=8.4.0"
+		}
 	},
 	"packageManager": "pnpm@10.28.2"
 }
