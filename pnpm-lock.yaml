@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  hono: 4.12.14
+  hono: 4.12.23
   '@hono/node-server': 1.19.13
   follow-redirects: 1.16.0
   socket.io-parser: '>=4.2.6'
@@ -1204,7 +1204,7 @@ packages:
       }
     engines: { node: '>=18.14.1' }
     peerDependencies:
-      hono: 4.12.14
+      hono: 4.12.23
 
   '@humanfs/core@0.19.2':
     resolution:
@@ -3799,10 +3799,10 @@ packages:
       }
     engines: { node: '>= 0.4' }
 
-  hono@4.12.14:
+  hono@4.12.23:
     resolution:
       {
-        integrity: sha512-am5zfg3yu6sqn5yjKBNqhnTX7Cv+m00ox+7jbaKkrLMRJ4rAdldd1xPd/JzbBWspqaQv6RSTrgFN95EsfhC+7w==,
+        integrity: sha512-eIaZ9qDgu7XV0pxOCrg7/WhnQ6Ivm22UcxhXx/A3dcbqbbYgBEkc6e/J/s7j2tS96zoB0S9VBdLwQNCWwUo4LA==,
       }
     engines: { node: '>=16.9.0' }
 
@@ -6617,9 +6617,9 @@ snapshots:
   '@harperfast/extended-iterable@1.0.3':
     optional: true
 
-  '@hono/node-server@1.19.13(hono@4.12.14)':
+  '@hono/node-server@1.19.13(hono@4.12.23)':
     dependencies:
-      hono: 4.12.14
+      hono: 4.12.23
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -6818,7 +6818,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.26.0(zod@4.3.6)':
     dependencies:
-      '@hono/node-server': 1.19.13(hono@4.12.14)
+      '@hono/node-server': 1.19.13(hono@4.12.23)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -6828,7 +6828,7 @@ snapshots:
       eventsource-parser: 3.0.8
       express: 5.2.1
       express-rate-limit: 8.5.2(express@5.2.1)
-      hono: 4.12.14
+      hono: 4.12.23
       jose: 6.2.3
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -8158,7 +8158,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.12.14: {}
+  hono@4.12.23: {}
 
   hosted-git-info@9.0.3:
     dependencies:
