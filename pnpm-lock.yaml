@@ -62,8 +62,8 @@ importers:
         specifier: 21.3.1
         version: 21.3.1(@angular/cli@21.2.12(@types/node@25.6.0)(chokidar@5.0.0))(chokidar@5.0.0)(eslint@9.39.4)(typescript@5.9.3)
       '@angular-eslint/eslint-plugin':
-        specifier: 21.3.1
-        version: 21.3.1(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
+        specifier: 21.4.0
+        version: 21.4.0(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@angular-eslint/eslint-plugin-template':
         specifier: 21.3.1
         version: 21.3.1(@angular-eslint/template-parser@21.3.1(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/types@8.58.2)(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
@@ -343,6 +343,12 @@ packages:
         integrity: sha512-jjbnJPUXQeQBJ8RM+ahlbt4GH2emVN8JvG3AhFbPci1FrqXi9cOOfkbwLmvpoyTli4LF8gy7g4ctFqnlRgqryw==,
       }
 
+  '@angular-eslint/bundled-angular-compiler@21.4.0':
+    resolution:
+      {
+        integrity: sha512-/3H4BPbQ1BHJkkrUsfusZtmHc+qiFWBBZ9UDPWah4xZMjflexOK9U4GYeH7nMjcuyqFnIlMMeJJNwNLGt/hmdg==,
+      }
+
   '@angular-eslint/eslint-plugin-template@21.3.1':
     resolution:
       {
@@ -359,6 +365,16 @@ packages:
     resolution:
       {
         integrity: sha512-08NNTxwawRLTWPLl8dg1BnXMwimx93y4wMEwx2aWQpJbIt4pmNvwJzd+NgoD/Ag2VdLS/gOMadhJH5fgaYKsPQ==,
+      }
+    peerDependencies:
+      '@typescript-eslint/utils': ^7.11.0 || ^8.0.0
+      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
+      typescript: '*'
+
+  '@angular-eslint/eslint-plugin@21.4.0':
+    resolution:
+      {
+        integrity: sha512-mow2DMj+xBvGl5t7jzC34R8YfbHbaGNyCNFzpovtl9qc0JbuqLyg6htmt8xb05f8ZjATOr4nz0ESt6HV4c51hw==,
       }
     peerDependencies:
       '@typescript-eslint/utils': ^7.11.0 || ^8.0.0
@@ -386,6 +402,16 @@ packages:
     resolution:
       {
         integrity: sha512-Q3SGA1/36phZhmsp1mYrKzp/jcmqofRr861MYn46FaWIKSYXBYRzl+H3FIJKBu5CE36Bggu6hbNpwGPuUp+MCg==,
+      }
+    peerDependencies:
+      '@typescript-eslint/utils': ^7.11.0 || ^8.0.0
+      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
+      typescript: '*'
+
+  '@angular-eslint/utils@21.4.0':
+    resolution:
+      {
+        integrity: sha512-7pi+Ga7QmdH5Ig/diau6fR5L4yubgKr9TOjdCg7OeuE/zo0O3osTCNT6JOodzS/iQM1kSCJFDoIBKFeUOttiNw==,
       }
     peerDependencies:
       '@typescript-eslint/utils': ^7.11.0 || ^8.0.0
@@ -5882,6 +5908,8 @@ snapshots:
 
   '@angular-eslint/bundled-angular-compiler@21.3.1': {}
 
+  '@angular-eslint/bundled-angular-compiler@21.4.0': {}
+
   '@angular-eslint/eslint-plugin-template@21.3.1(@angular-eslint/template-parser@21.3.1(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/types@8.58.2)(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
     dependencies:
       '@angular-eslint/bundled-angular-compiler': 21.3.1
@@ -5901,6 +5929,15 @@ snapshots:
       '@typescript-eslint/utils': 8.58.2(eslint@9.39.4)(typescript@5.9.3)
       eslint: 9.39.4
       ts-api-utils: 2.4.0(typescript@5.9.3)
+      typescript: 5.9.3
+
+  '@angular-eslint/eslint-plugin@21.4.0(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
+    dependencies:
+      '@angular-eslint/bundled-angular-compiler': 21.4.0
+      '@angular-eslint/utils': 21.4.0(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
+      '@typescript-eslint/utils': 8.58.2(eslint@9.39.4)(typescript@5.9.3)
+      eslint: 9.39.4
+      ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
 
   '@angular-eslint/schematics@21.3.1(@angular-eslint/template-parser@21.3.1(eslint@9.39.4)(typescript@5.9.3))(@angular/cli@21.2.12(@types/node@25.6.0)(chokidar@5.0.0))(@typescript-eslint/types@8.58.2)(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(chokidar@5.0.0)(eslint@9.39.4)(typescript@5.9.3)':
@@ -5931,6 +5968,13 @@ snapshots:
   '@angular-eslint/utils@21.3.1(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
     dependencies:
       '@angular-eslint/bundled-angular-compiler': 21.3.1
+      '@typescript-eslint/utils': 8.58.2(eslint@9.39.4)(typescript@5.9.3)
+      eslint: 9.39.4
+      typescript: 5.9.3
+
+  '@angular-eslint/utils@21.4.0(@typescript-eslint/utils@8.58.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
+    dependencies:
+      '@angular-eslint/bundled-angular-compiler': 21.4.0
       '@typescript-eslint/utils': 8.58.2(eslint@9.39.4)(typescript@5.9.3)
       eslint: 9.39.4
       typescript: 5.9.3
