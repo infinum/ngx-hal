@@ -11,6 +11,7 @@ overrides:
   socket.io-parser: '>=4.2.6'
   flatted: '>=3.4.2'
   yaml: '>=2.8.3'
+  tmp: '>=0.2.6'
   path-to-regexp: '>=8.4.0'
   picomatch@<2.3.2: 2.3.2
   picomatch@>=4.0.0 <4.0.4: 4.0.4
@@ -5576,10 +5577,10 @@ packages:
       }
     engines: { node: '>=12.0.0' }
 
-  tmp@0.2.5:
+  tmp@0.2.7:
     resolution:
       {
-        integrity: sha512-voyz6MApa1rQGUxT3E+BK7/ROe8itEx7vD8/HEvt4xwXucvQ5G5oeEiHkmHZJuBO21RpOf+YYm9MOivj709jow==,
+        integrity: sha512-e0votIpp4Uo2AJYSzVHV6xCcawuiez3DzqDAbrTc3YxBkplN6e+dM13ZeIcZnDg/QpSuU2zfZ3rzwY8ukEnaXw==,
       }
     engines: { node: '>=14.14' }
 
@@ -8419,7 +8420,7 @@ snapshots:
       rimraf: 3.0.2
       socket.io: 4.8.3
       source-map: 0.6.1
-      tmp: 0.2.5
+      tmp: 0.2.7
       ua-parser-js: 0.7.41
       yargs: 16.2.0
     transitivePeerDependencies:
@@ -9343,7 +9344,7 @@ snapshots:
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
 
-  tmp@0.2.5: {}
+  tmp@0.2.7: {}
 
   to-regex-range@5.0.1:
     dependencies:
