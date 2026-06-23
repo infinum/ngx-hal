@@ -61,8 +61,8 @@
 		"@angular/language-service": "^21.2.14",
 		"@types/jasmine": "~5.1.15",
 		"@types/node": "^25.9.1",
-		"@typescript-eslint/eslint-plugin": "^8.59.4",
-		"@typescript-eslint/parser": "^8.59.4",
+		"@typescript-eslint/eslint-plugin": "^8.62.0",
+		"@typescript-eslint/parser": "^8.62.0",
 		"eslint": "^9.39.4",
 		"husky": "^9.1.7",
 		"jasmine-core": "~5.13.0",
@@ -74,27 +74,20 @@
 		"karma-jasmine-html-reporter": "^2.2.0",
 		"lint-staged": "^16.4.0",
 		"ng-packagr": "^21.2.3",
-		"prettier": "3.8.3",
+		"prettier": "3.8.4",
 		"typescript": "~5.9.3"
 	},
 	"engines": {
-		"node": "22.20.0"
+		"node": "24.17.0"
 	},
 	"pnpm": {
 		"overrides": {
-			"hono": "4.12.23",
-			"@hono/node-server": "1.19.13",
-			"follow-redirects": "1.16.0",
-			"socket.io-parser": ">=4.2.6",
-			"flatted": ">=3.4.2",
-			"yaml": ">=2.8.3",
-			"tmp": ">=0.2.6",
-			"path-to-regexp": ">=8.4.0",
-			"picomatch@<2.3.2": "2.3.2",
-			"picomatch@>=4.0.0 <4.0.4": "4.0.4",
-			"brace-expansion@<1.1.13": "1.1.13",
-			"brace-expansion@>=4.0.0 <5.0.5": "5.0.5",
-			"lodash@<=4.17.23": "4.18.0"
+			"hono": "4.12.25",
+			"vite": ">=7.3.5 <8",
+			"piscina": ">=5.2.0 <6",
+			"esbuild": ">=0.28.1 <0.29",
+			"@babel/core": ">=7.29.6 <8",
+			"undici@>=7.0.0 <7.28.0": ">=7.28.0 <8"
 		}
 	},
 	"packageManager": "pnpm@10.28.2"
