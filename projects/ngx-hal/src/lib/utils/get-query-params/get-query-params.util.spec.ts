@@ -41,10 +41,16 @@ describe('getQueryParams', () => {
 	});
 
 	it('should fallback to the original value of a query parameter if decoding is not possible', () => {
-		spyOn(console, 'error').and.stub();
 		const result = getQueryParams('test.com?firstParameter=%E0%A4%A');
 		expect(result).toEqual({
 			firstParameter: '%E0%A4%A',
+		});
+	});
+
+	it('should properly decode query parameter containing a percentage sign', () => {
+		const result = getQueryParams('test.com?firstParameter=animal%25');
+		expect(result).toEqual({
+			firstParameter: 'animal%',
 		});
 	});
 
