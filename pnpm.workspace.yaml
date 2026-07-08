@@ -1,2 +1,4 @@
 packages:
   - 'projects/**'
+
+minimumReleaseAge: 10080 # 7 days
