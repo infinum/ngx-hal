@@ -38,8 +38,7 @@ export function decodeURIComponentWithErrorHandling(value: string): string {
 	}
 	try {
 		return decodeURIComponent(value);
-	} catch (e) {
-		console.error(e);
+	} catch {
 		return value;
 	}
 }
