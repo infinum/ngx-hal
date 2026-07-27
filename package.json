@@ -82,7 +82,9 @@
 	},
 	"pnpm": {
 		"overrides": {
-			"hono": "4.12.25",
+			"hono": ">=4.12.27 <5",
+			"@hono/node-server": ">=2.0.5 <3",
+			"brace-expansion": ">=5.0.8 <6",
 			"vite": ">=7.3.5 <8",
 			"piscina": ">=5.2.0 <6",
 			"esbuild": ">=0.28.1 <0.29",

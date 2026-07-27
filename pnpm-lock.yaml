@@ -5,7 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  hono: 4.12.25
+  hono: '>=4.12.27 <5'
+  '@hono/node-server': '>=2.0.5 <3'
+  brace-expansion: '>=5.0.8 <6'
   vite: '>=7.3.5 <8'
   piscina: '>=5.2.0 <6'
   esbuild: '>=0.28.1 <0.29'
@@ -975,14 +977,14 @@ packages:
         integrity: sha512-sSAYhQca3rDWtQUHSAPeO7axFIUJOI6hn1gjRC5APVE1a90tuyT8f5WIgRsFhhWA7htNkju2veB9eWL6YHi/Lw==,
       }
 
-  '@hono/node-server@1.19.17':
+  '@hono/node-server@2.0.12':
     resolution:
       {
-        integrity: sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ==,
+        integrity: sha512-eWpQYr67tqJLeaSUl0Q+TquuYfUdTibpOJlUMV2FfUP7+KqCC5TufnwnlXL6mobZBJbGAYRd7ZvEBDCbLInjhg==,
       }
-    engines: { node: '>=18.14.1' }
+    engines: { node: '>=20' }
     peerDependencies:
-      hono: 4.12.25
+      hono: '>=4.12.27 <5'
 
   '@humanfs/core@0.19.2':
     resolution:
@@ -2486,12 +2488,6 @@ packages:
       }
     engines: { node: '>= 0.4' }
 
-  balanced-match@1.0.2:
-    resolution:
-      {
-        integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==,
-      }
-
   balanced-match@4.0.4:
     resolution:
       {
@@ -2546,12 +2542,6 @@ packages:
     resolution:
       {
         integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==,
-      }
-
-  brace-expansion@1.1.16:
-    resolution:
-      {
-        integrity: sha512-IDw48K2/2kRkg9LdJxurvq3lV3aBgq0REY89duEqFRthjlPdXHKMj7EnQOXVckxzgisinf3nHfrcE2FufFLXMw==,
       }
 
   brace-expansion@5.0.8:
@@ -2749,12 +2739,6 @@ packages:
     resolution:
       {
         integrity: sha512-QE33hToZseCH3jS0qN96O/bSh3kaw/h+Tq7ngyY9eWDUnTlTNUyqfqvCXioLe5Na5jFsL78ra/wuBU4iuEgd4w==,
-      }
-
-  concat-map@0.0.1:
-    resolution:
-      {
-        integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==,
       }
 
   connect@3.7.0:
@@ -3559,10 +3543,10 @@ packages:
       }
     engines: { node: '>= 0.4' }
 
-  hono@4.12.25:
+  hono@4.12.32:
     resolution:
       {
-        integrity: sha512-2NFaIyNVgJmBs/ecmtGzlmluTFs5cHEWGTdu0t1HBwYzoGXOL5nUQBRMXsXWla5i4KkG//QMzVP88m1+I3fdAQ==,
+        integrity: sha512-XcuyW9qE2kJn07PkecMOBd5Vq/hMy7mmGw+idz1yblbg9N17ijJODrvPkn7/dwL3Kulj8LcRJ69DLOWf91dRUg==,
       }
     engines: { node: '>=16.9.0' }
 
@@ -6335,9 +6319,9 @@ snapshots:
   '@harperfast/extended-iterable@1.0.3':
     optional: true
 
-  '@hono/node-server@1.19.17(hono@4.12.25)':
+  '@hono/node-server@2.0.12(hono@4.12.32)':
     dependencies:
-      hono: 4.12.25
+      hono: 4.12.32
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -6536,7 +6520,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.26.0(zod@4.3.6)':
     dependencies:
-      '@hono/node-server': 1.19.17(hono@4.12.25)
+      '@hono/node-server': 2.0.12(hono@4.12.32)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -6546,7 +6530,7 @@ snapshots:
       eventsource-parser: 3.1.0
       express: 5.2.1
       express-rate-limit: 8.6.1(express@5.2.1)
-      hono: 4.12.25
+      hono: 4.12.32
       jose: 6.2.4
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -7173,8 +7157,6 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  balanced-match@1.0.2: {}
-
   balanced-match@4.0.4: {}
 
   base64id@2.0.0: {}
@@ -7227,11 +7209,6 @@ snapshots:
       - supports-color
 
   boolbase@1.0.0: {}
-
-  brace-expansion@1.1.16:
-    dependencies:
-      balanced-match: 1.0.2
-      concat-map: 0.0.1
 
   brace-expansion@5.0.8:
     dependencies:
@@ -7349,8 +7326,6 @@ snapshots:
   commander@14.0.3: {}
 
   common-path-prefix@3.0.0: {}
-
-  concat-map@0.0.1: {}
 
   connect@3.7.0:
     dependencies:
@@ -7851,7 +7826,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.12.25: {}
+  hono@4.12.32: {}
 
   hosted-git-info@9.0.3:
     dependencies:
@@ -8283,7 +8258,7 @@ snapshots:
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 1.1.16
+      brace-expansion: 5.0.8
 
   minimist@1.2.8: {}
 
