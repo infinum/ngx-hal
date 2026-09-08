@@ -13,6 +13,7 @@ overrides:
   esbuild: '>=0.28.1 <0.29'
   '@babel/core': '>=7.29.6 <8'
   undici@>=7.0.0 <7.29.0: '>=7.29.0 <8'
+  qs: '>=6.16.0 <7'
 
 importers:
   .:
@@ -4851,13 +4852,6 @@ packages:
       }
     engines: { node: '>=0.9' }
 
-  qs@6.15.3:
-    resolution:
-      {
-        integrity: sha512-O9gl3zCl5h5blw1KGUzQKhA5oUXSl8rwUIM5o0S3nCXMliSvy5Dzx7/DJcI+SwgICv+IneSZwhBh1oSyEHA71A==,
-      }
-    engines: { node: '>=0.6' }
-
   qs@6.16.0:
     resolution:
       {
@@ -7230,7 +7224,7 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.4.24
       on-finished: 2.4.1
-      qs: 6.15.3
+      qs: 6.16.0
       raw-body: 2.5.3
       type-is: 1.6.18
       unpipe: 1.0.0
@@ -8694,11 +8688,6 @@ snapshots:
   punycode@2.3.1: {}
 
   qjobs@1.2.0: {}
-
-  qs@6.15.3:
-    dependencies:
-      es-define-property: 1.0.1
-      side-channel: 1.1.1
 
   qs@6.16.0:
     dependencies:
